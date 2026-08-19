@@ -1,0 +1,8 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Backend and frontend each have their own .gitignore for
+# venv/, node_modules/, .env, build output, etc.

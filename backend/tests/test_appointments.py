@@ -1,0 +1,218 @@
+from datetime import date, datetime, timedelta
+
+import pytest
+
+
+def _next_weekday(weekday):
+    """Next future date (not today) falling on the given Python weekday
+    (0=Monday..6=Sunday) — deterministic across whenever the suite runs,
+    without hardcoding a date that will eventually be in the past."""
+    today = date.today()
+    days_ahead = (weekday - today.weekday()) % 7
+    days_ahead = days_ahead or 7
+    return today + timedelta(days=days_ahead)
+
+
+MONDAY = _next_weekday(0)
+
+
+@pytest.fixture()
+def doctor_with_monday_availability(client, staff_headers):
+    dept_id = client.post(
+        "/api/departments", headers=staff_headers, json={"name": "Cardiology"}
+    ).get_json()["department"]["id"]
+    doctor_id = client.post(
+        "/api/doctors",
+        headers=staff_headers,
+        json={"fullName": "Dr. Jane Smith", "departmentId": dept_id, "specialty": "Cardiology"},
+    ).get_json()["doctor"]["id"]
+    client.post(
+        f"/api/doctors/{doctor_id}/availability",
+        headers=staff_headers,
+        json={"weekday": 0, "startTime": "09:00", "endTime": "13:00"},
+    )
+    return doctor_id
+
+
+def _book(client, headers, doctor_id, start, duration_minutes=30, reason="Checkup"):
+    return client.post(
+        "/api/appointments",
+        headers=headers,
+        json={
+            "doctorId": doctor_id,
+            "scheduledStart": start.isoformat(),
+            "durationMinutes": duration_minutes,
+            "reason": reason,
+        },
+    )
+
+
+def test_patient_can_book_appointment_for_self(client, auth_headers, doctor_with_monday_availability):
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=30)
+    resp = _book(client, auth_headers, doctor_with_monday_availability, start)
+    assert resp.status_code == 201
+    data = resp.get_json()["appointment"]
+    assert data["status"] == "scheduled"
+    assert data["doctorId"] == doctor_with_monday_availability
+    assert data["reason"] == "Checkup"
+
+
+def test_booking_rejects_outside_availability_window(client, auth_headers, doctor_with_monday_availability):
+    # Doctor is only available 9-13; 14:00 is outside that window entirely.
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=14, minute=0)
+    resp = _book(client, auth_headers, doctor_with_monday_availability, start)
+    assert resp.status_code == 422
+
+
+def test_booking_rejects_window_partially_outside_availability(client, auth_headers, doctor_with_monday_availability):
+    # Starts inside the 9-13 window but a 60-minute appointment would run
+    # past 13:00 — must fit entirely inside a single availability row.
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=12, minute=45)
+    resp = _book(client, auth_headers, doctor_with_monday_availability, start, duration_minutes=30)
+    assert resp.status_code == 422
+
+
+def test_booking_rejects_exact_duplicate_slot(client, auth_headers, doctor_with_monday_availability):
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    first = _book(client, auth_headers, doctor_with_monday_availability, start)
+    assert first.status_code == 201
+
+    second = _book(client, auth_headers, doctor_with_monday_availability, start)
+    assert second.status_code == 409
+
+
+def test_booking_rejects_partial_overlap(client, auth_headers, doctor_with_monday_availability):
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    _book(client, auth_headers, doctor_with_monday_availability, start, duration_minutes=30)  # 9:00-9:30
+
+    # Starts 15 minutes into the first appointment — a genuine partial overlap.
+    overlapping_start = start + timedelta(minutes=15)
+    resp = _book(client, auth_headers, doctor_with_monday_availability, overlapping_start, duration_minutes=30)
+    assert resp.status_code == 409
+
+
+def test_booking_allows_back_to_back_appointments(client, auth_headers, doctor_with_monday_availability):
+    """The boundary condition that's easiest to get backwards: one
+    appointment ending exactly when the next starts must be ALLOWED
+    (strict `<` in the overlap check, not `<=`)."""
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    first = _book(client, auth_headers, doctor_with_monday_availability, start, duration_minutes=30)  # 9:00-9:30
+    assert first.status_code == 201
+
+    second_start = start + timedelta(minutes=30)  # starts exactly when the first ends
+    second = _book(client, auth_headers, doctor_with_monday_availability, second_start, duration_minutes=30)
+    assert second.status_code == 201
+
+
+def test_cancelled_appointment_frees_its_slot_for_rebooking(client, auth_headers, doctor_with_monday_availability):
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    first = _book(client, auth_headers, doctor_with_monday_availability, start)
+    appointment_id = first.get_json()["appointment"]["id"]
+
+    cancel_resp = client.patch(f"/api/appointments/{appointment_id}/cancel", headers=auth_headers, json={})
+    assert cancel_resp.status_code == 200
+    assert cancel_resp.get_json()["appointment"]["status"] == "cancelled"
+
+    rebook = _book(client, auth_headers, doctor_with_monday_availability, start)
+    assert rebook.status_code == 201
+
+
+def test_booking_requires_valid_doctor(client, auth_headers):
+    resp = _book(client, auth_headers, doctor_id=999999, start=datetime.combine(MONDAY, datetime.min.time()))
+    assert resp.status_code == 400
+
+
+def test_staff_can_book_on_behalf_of_a_patient(client, staff_headers, auth_headers, doctor_with_monday_availability):
+    patient_id = client.get("/api/patients/me", headers=auth_headers).get_json()["patient"]["id"]
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+
+    resp = client.post(
+        "/api/appointments",
+        headers=staff_headers,
+        json={
+            "doctorId": doctor_with_monday_availability,
+            "patientId": patient_id,
+            "scheduledStart": start.isoformat(),
+            "durationMinutes": 30,
+        },
+    )
+    assert resp.status_code == 201
+    assert resp.get_json()["appointment"]["patientId"] == patient_id
+
+
+def test_list_appointments_scoped_to_patient(client, register_user, doctor_with_monday_availability):
+    headers_a, _ = register_user(email="a@example.com")
+    headers_b, _ = register_user(email="b@example.com")
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    _book(client, headers_a, doctor_with_monday_availability, start)
+
+    resp_a = client.get("/api/appointments", headers=headers_a)
+    resp_b = client.get("/api/appointments", headers=headers_b)
+    assert len(resp_a.get_json()["appointments"]) == 1
+    assert len(resp_b.get_json()["appointments"]) == 0
+
+
+def test_list_appointments_unfiltered_for_staff(client, staff_headers, auth_headers, doctor_with_monday_availability):
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    _book(client, auth_headers, doctor_with_monday_availability, start)
+
+    resp = client.get("/api/appointments", headers=staff_headers)
+    assert len(resp.get_json()["appointments"]) == 1
+
+
+def test_patient_cannot_view_another_patients_appointment(client, register_user, doctor_with_monday_availability):
+    headers_a, _ = register_user(email="a@example.com")
+    headers_b, _ = register_user(email="b@example.com")
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    appointment_id = _book(client, headers_a, doctor_with_monday_availability, start).get_json()["appointment"]["id"]
+
+    resp = client.get(f"/api/appointments/{appointment_id}", headers=headers_b)
+    assert resp.status_code == 404
+
+
+def test_staff_can_view_any_appointment(client, staff_headers, auth_headers, doctor_with_monday_availability):
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    appointment_id = _book(client, auth_headers, doctor_with_monday_availability, start).get_json()["appointment"][
+        "id"
+    ]
+
+    resp = client.get(f"/api/appointments/{appointment_id}", headers=staff_headers)
+    assert resp.status_code == 200
+
+
+def test_cancelling_already_cancelled_appointment_is_rejected(
+    client, auth_headers, doctor_with_monday_availability
+):
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    appointment_id = _book(client, auth_headers, doctor_with_monday_availability, start).get_json()["appointment"][
+        "id"
+    ]
+    client.patch(f"/api/appointments/{appointment_id}/cancel", headers=auth_headers, json={})
+
+    resp = client.patch(f"/api/appointments/{appointment_id}/cancel", headers=auth_headers, json={})
+    assert resp.status_code == 400
+
+
+def test_get_availability_returns_open_slots(client, auth_headers, doctor_with_monday_availability):
+    resp = client.get(
+        f"/api/appointments/availability?doctorId={doctor_with_monday_availability}&date={MONDAY.isoformat()}",
+        headers=auth_headers,
+    )
+    assert resp.status_code == 200
+    slots = resp.get_json()["slots"]
+    # 9:00-13:00 in 30-minute steps = 8 slots.
+    assert len(slots) == 8
+    assert slots[0] == datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0).isoformat()
+
+
+def test_get_availability_excludes_booked_slots(client, auth_headers, doctor_with_monday_availability):
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    _book(client, auth_headers, doctor_with_monday_availability, start)
+
+    resp = client.get(
+        f"/api/appointments/availability?doctorId={doctor_with_monday_availability}&date={MONDAY.isoformat()}",
+        headers=auth_headers,
+    )
+    slots = resp.get_json()["slots"]
+    assert start.isoformat() not in slots
+    assert len(slots) == 7

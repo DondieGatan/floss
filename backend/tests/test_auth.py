@@ -1,0 +1,119 @@
+def test_register_creates_user_and_returns_tokens(client):
+    resp = client.post(
+        "/api/auth/register",
+        json={"fullName": "Alex Kim", "email": "alex@example.com", "password": "password123"},
+    )
+    assert resp.status_code == 201
+    data = resp.get_json()
+    assert "accessToken" in data and "refreshToken" in data
+    assert data["user"]["email"] == "alex@example.com"
+    assert data["user"]["fullName"] == "Alex Kim"
+
+
+def test_register_rejects_duplicate_email(client, register_user):
+    register_user(email="dupe@example.com")
+    resp = client.post(
+        "/api/auth/register",
+        json={"fullName": "Someone Else", "email": "dupe@example.com", "password": "password123"},
+    )
+    assert resp.status_code == 400
+
+
+def test_register_rejects_invalid_email(client):
+    resp = client.post(
+        "/api/auth/register",
+        json={"fullName": "Alex Kim", "email": "not-an-email", "password": "password123"},
+    )
+    assert resp.status_code == 400
+
+
+def test_register_rejects_short_password(client):
+    resp = client.post(
+        "/api/auth/register",
+        json={"fullName": "Alex Kim", "email": "alex@example.com", "password": "short"},
+    )
+    assert resp.status_code == 400
+
+
+def test_login_success(client, register_user):
+    register_user(email="alex@example.com", password="password123")
+    resp = client.post("/api/auth/login", json={"email": "alex@example.com", "password": "password123"})
+    assert resp.status_code == 200
+    assert "accessToken" in resp.get_json()
+
+
+def test_login_wrong_password(client, register_user):
+    register_user(email="alex@example.com", password="password123")
+    resp = client.post("/api/auth/login", json={"email": "alex@example.com", "password": "wrong"})
+    assert resp.status_code == 401
+
+
+def test_me_requires_auth(client):
+    resp = client.get("/api/auth/me")
+    assert resp.status_code == 401
+
+
+def test_me_returns_current_user(client, register_user):
+    headers, user_id = register_user(email="alex@example.com")
+    resp = client.get("/api/auth/me", headers=headers)
+    assert resp.status_code == 200
+    assert resp.get_json()["user"]["id"] == user_id
+
+
+def test_logout_revokes_access_token(client, register_user):
+    headers, _user_id = register_user()
+    resp = client.post("/api/auth/logout", headers=headers)
+    assert resp.status_code == 204
+
+    resp = client.get("/api/auth/me", headers=headers)
+    assert resp.status_code == 401
+
+
+def test_refresh_issues_new_access_token(client):
+    resp = client.post(
+        "/api/auth/register",
+        json={"fullName": "Alex Kim", "email": "alex@example.com", "password": "password123"},
+    )
+    refresh_token = resp.get_json()["refreshToken"]
+
+    resp = client.post("/api/auth/refresh", headers={"Authorization": f"Bearer {refresh_token}"})
+    assert resp.status_code == 200
+    assert "accessToken" in resp.get_json()
+
+
+def test_register_defaults_to_patient_role(client):
+    resp = client.post(
+        "/api/auth/register",
+        json={"fullName": "Alex Kim", "email": "alex@example.com", "password": "password123"},
+    )
+    assert resp.get_json()["user"]["role"] == "patient"
+
+
+def test_me_reflects_role(client, register_user):
+    headers, _user_id = register_user()
+    resp = client.get("/api/auth/me", headers=headers)
+    assert resp.get_json()["user"]["role"] == "patient"
+
+
+def test_refresh_reflects_updated_role(client, register_user, app):
+    # Simulates a promotion to staff between token issuance and refresh —
+    # the refresh route must re-derive the role from the DB, not copy it
+    # off the old refresh token, or a promotion would never take effect.
+    from app.extensions import db
+    from app.models import User
+
+    headers, user_id = register_user(email="alex@example.com")
+    resp = client.post(
+        "/api/auth/login", json={"email": "alex@example.com", "password": "password123"}
+    )
+    refresh_token = resp.get_json()["refreshToken"]
+
+    user = db.session.get(User, user_id)
+    user.role = "staff"
+    db.session.commit()
+
+    resp = client.post("/api/auth/refresh", headers={"Authorization": f"Bearer {refresh_token}"})
+    new_access_token = resp.get_json()["accessToken"]
+
+    me_resp = client.get("/api/auth/me", headers={"Authorization": f"Bearer {new_access_token}"})
+    assert me_resp.get_json()["user"]["role"] == "staff"
