@@ -11,36 +11,6 @@ const SERVICES = [
 
 const TICKER_ITEMS = ['General Dentistry', 'Orthodontics', 'Endodontics', 'Periodontics', 'Oral Surgery', 'Pediatric Dentistry'];
 
-const TECH_FACTS = [
-  {
-    tag: 'appointments/conflicts.py',
-    title: 'Conflict-safe booking',
-    text: "A half-open interval overlap check (start < requestedEnd AND requestedStart < end) plus a SQLite partial unique index — the database itself refuses a double-booked slot, not just the app layer.",
-  },
-  {
-    tag: 'chat/generation.py',
-    title: 'Grounded, cited answers',
-    text: 'Retrieval runs behind a cosine-similarity confidence threshold. Below it, the assistant says so instead of guessing — every claim traces back to a source chunk.',
-  },
-  {
-    tag: 'auth/decorators.py',
-    title: 'Role-based, not bolted on',
-    text: 'Roles ride in the JWT as a signed claim. A documented convention splits 403 (wrong role) from 404 (not your resource) across every route.',
-  },
-  {
-    tag: 'pytest -q',
-    title: '112 passing tests',
-    text: 'Booking boundary conditions, RBAC edges, and the auto-regenerating directory digest are all covered — not just the happy path.',
-  },
-];
-
-const CODE_SNIPPET = `db.Index(
-    "uq_appointments_doctor_start_active",
-    "doctor_id", "scheduled_start",
-    unique=True,
-    sqlite_where=db.text("status != 'cancelled'"),
-)`;
-
 function TickerStrip() {
   const items = [...TICKER_ITEMS, ...TICKER_ITEMS];
   return (
@@ -110,7 +80,6 @@ export default function LandingPage() {
   const scrolled = useScrolled();
   const [aboutRef, aboutVisible] = useReveal();
   const [servicesRef, servicesVisible] = useReveal();
-  const [techRef, techVisible] = useReveal();
   const [benefitsRef, benefitsVisible] = useReveal();
 
   return (
@@ -231,35 +200,6 @@ export default function LandingPage() {
                 </div>
               </div>
             ))}
-          </div>
-        </section>
-
-        <TickerStrip />
-
-        <section ref={techRef} className={`landing-section tech-section reveal${techVisible ? ' reveal-visible' : ''}`} aria-labelledby="tech-heading">
-          <div className="tech-head">
-            <p className="eyebrow eyebrow-light">Under the Hood</p>
-            <h2 className="section-heading section-heading-light" id="tech-heading">
-              Built for the People Who Read the Code
-            </h2>
-            <p className="tech-sub">
-              Floss isn't a template with a database bolted on. A few of the decisions that back it:
-            </p>
-          </div>
-          <div className="tech-grid">
-            {TECH_FACTS.map((f) => (
-              <div className="tech-card" key={f.title}>
-                <span className="tech-tag">{f.tag}</span>
-                <h3>{f.title}</h3>
-                <p>{f.text}</p>
-              </div>
-            ))}
-          </div>
-          <div className="tech-code">
-            <div className="tech-code-head">app/models.py — the constraint that makes double-booking impossible</div>
-            <pre>
-              <code>{CODE_SNIPPET}</code>
-            </pre>
           </div>
         </section>
 
