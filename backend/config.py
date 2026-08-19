@@ -1,6 +1,10 @@
 import os
 from datetime import timedelta
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 def _build_cors_origins():
     raw = os.environ.get("CORS_ORIGINS")
