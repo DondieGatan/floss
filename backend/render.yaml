@@ -3,6 +3,7 @@ services:
     name: floss-backend
     runtime: python
     plan: free
+    rootDir: backend
     buildCommand: "pip install -r requirements.txt && flask db upgrade"
     startCommand: "gunicorn run:app"
     healthCheckPath: /api/health
