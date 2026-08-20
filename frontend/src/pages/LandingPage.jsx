@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/landing.css';
 import { useReveal } from '../hooks/useReveal';
 import heroPhoto from '../assets/Top_Page.jpg';
+import aboutPhoto from '../assets/Third_Page.jpg';
 
 const SERVICES = [
   { icon: '🦷', title: 'General Dentistry', text: 'Cleanings, fillings, and preventive care to keep your smile healthy year-round.' },
@@ -143,7 +144,9 @@ export default function LandingPage() {
           <div className="about-art" aria-hidden="true">
             <div className="about-sparkle about-sparkle-1">✨</div>
             <div className="about-sparkle about-sparkle-2">✨</div>
-            <div className="about-circle about-circle-1">😁</div>
+            <div className="about-circle about-circle-1">
+              <img src={aboutPhoto} alt="" className="about-circle-img" />
+            </div>
             <div className="about-circle about-circle-2">🦷</div>
             <div className="about-badge">✓</div>
           </div>
