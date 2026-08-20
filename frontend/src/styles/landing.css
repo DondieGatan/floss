@@ -100,15 +100,21 @@
 /* Nav */
 
 .landing-nav {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 50;
-  background: linear-gradient(120deg, #0f1f47, #16295c);
-  transition: box-shadow 0.25s ease;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  background: rgba(15, 25, 55, 0.22);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  transition: background 0.25s ease, box-shadow 0.25s ease;
 }
 
 .landing-nav.scrolled {
-  box-shadow: 0 4px 24px rgba(9, 18, 41, 0.35);
+  background: rgba(15, 25, 55, 0.62);
+  box-shadow: 0 4px 24px rgba(9, 18, 41, 0.28);
 }
 
 .landing-nav-inner {
@@ -233,7 +239,7 @@
 /* Hero */
 
 .landing-hero {
-  padding-top: 24px;
+  padding-top: 0;
   padding-bottom: 52px;
 }
 
@@ -261,7 +267,7 @@
 .hero-content {
   position: relative;
   z-index: 1;
-  padding: 56px 56px 64px;
+  padding: 128px 56px 64px;
   max-width: 620px;
 }
 
@@ -368,7 +374,7 @@
 .hero-chips {
   position: absolute;
   z-index: 1;
-  top: 40px;
+  top: 104px;
   right: 48px;
   display: flex;
   flex-direction: column;
@@ -907,7 +913,7 @@
   }
 
   .hero-content {
-    padding: 32px 24px 96px;
+    padding: 108px 24px 96px;
     max-width: 100%;
   }
 
