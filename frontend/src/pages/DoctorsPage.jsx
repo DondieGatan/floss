@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import AppLayout from '../components/AppLayout';
+import { getDoctorPhoto } from '../data/doctorPhotos';
 
 function initials(name) {
   return (name || '')
@@ -61,9 +62,15 @@ export default function DoctorsPage() {
           </div>
         ) : (
           <div className="grid grid-3 stagger-in">
-            {doctors.map((doc) => (
+            {doctors.map((doc) => {
+              const photo = getDoctorPhoto(doc.fullName);
+              return (
               <div key={doc.id} className="doctor-card card-hover">
-                <div className="doctor-avatar">{initials(doc.fullName)}</div>
+                {photo ? (
+                  <img src={photo} alt="" className="doctor-avatar doctor-avatar-photo" />
+                ) : (
+                  <div className="doctor-avatar">{initials(doc.fullName)}</div>
+                )}
                 <p className="doctor-name">{doc.fullName}</p>
                 <p className="doctor-specialty">{doc.specialty}</p>
                 <p className="doctor-dept">{doc.departmentName}</p>
@@ -72,7 +79,8 @@ export default function DoctorsPage() {
                   Book appointment
                 </Link>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

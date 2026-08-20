@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api, ApiError } from '../api/client';
 import AppLayout from '../components/AppLayout';
+import { getDoctorPhoto } from '../data/doctorPhotos';
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -91,10 +92,15 @@ export default function BookAppointmentPage() {
         <Link to="/doctors" className="back-link">
           ← Dentists
         </Link>
-        <h1 className="page-title" style={{ marginTop: 12 }}>
-          Book with {doctor ? doctor.fullName : '…'}
-        </h1>
-        <p className="page-subtitle">{doctor?.specialty}</p>
+        <div className="book-doctor-header" style={{ marginTop: 12 }}>
+          {doctor && getDoctorPhoto(doctor.fullName) && (
+            <img src={getDoctorPhoto(doctor.fullName)} alt="" className="doctor-avatar doctor-avatar-photo doctor-avatar-large" />
+          )}
+          <div>
+            <h1 className="page-title">Book with {doctor ? doctor.fullName : '…'}</h1>
+            <p className="page-subtitle">{doctor?.specialty}</p>
+          </div>
+        </div>
 
         {error && (
           <div className="form-error" role="alert">

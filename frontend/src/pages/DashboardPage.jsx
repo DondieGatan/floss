@@ -22,7 +22,7 @@ function PatientDashboard() {
     .sort((a, b) => new Date(a.scheduledStart) - new Date(b.scheduledStart));
 
   return (
-    <div className="page-body">
+    <div className="page-body dashboard-page">
       <div className="hero-card">
         <p className="hero-eyebrow" aria-hidden="true">
           🦷 Patient Portal
@@ -105,7 +105,7 @@ function StaffDashboard() {
   }, []);
 
   return (
-    <div className="page-body">
+    <div className="page-body dashboard-page">
       <div className="hero-card">
         <p className="hero-eyebrow" aria-hidden="true">
           🏥 Staff Portal

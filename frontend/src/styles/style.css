@@ -9,6 +9,9 @@
   --accent: #0f9d92;
   --accent-strong: #0b7f76;
   --accent-soft: rgba(15, 157, 146, 0.12);
+  --clinical-blue: #2f6fed;
+  --clinical-blue-strong: #2354bd;
+  --clinical-blue-soft: rgba(47, 111, 237, 0.12);
   --danger: #d6534a;
   --danger-soft: rgba(214, 83, 74, 0.1);
   --success: #2f9e5c;
@@ -652,10 +655,29 @@ textarea {
 
 /* Dashboard */
 
+.dashboard-page {
+  position: relative;
+}
+
+.dashboard-page::before {
+  content: '';
+  position: absolute;
+  top: -24px;
+  left: -24px;
+  right: -24px;
+  bottom: -24px;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 8% 0%, var(--clinical-blue-soft), transparent 42%),
+    radial-gradient(circle at 92% 15%, var(--accent-soft), transparent 45%),
+    radial-gradient(circle at 50% 100%, var(--clinical-blue-soft), transparent 40%);
+  pointer-events: none;
+}
+
 .hero-card {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+  background: linear-gradient(135deg, var(--clinical-blue), var(--accent-strong) 65%, var(--accent));
   color: #fff;
   border-radius: 20px;
   padding: 28px 32px;
@@ -673,6 +695,16 @@ textarea {
   opacity: 0.12;
   transform: rotate(-12deg);
   pointer-events: none;
+  animation: hero-tooth-breathe 6s ease-in-out infinite;
+}
+
+@keyframes hero-tooth-breathe {
+  0%, 100% {
+    transform: rotate(-12deg) scale(1);
+  }
+  50% {
+    transform: rotate(-12deg) scale(1.06);
+  }
 }
 
 .hero-eyebrow {
@@ -711,6 +743,8 @@ textarea {
 }
 
 .quick-action-btn {
+  position: relative;
+  overflow: hidden;
   background: #fff;
   color: var(--accent-strong);
   border: none;
@@ -720,13 +754,30 @@ textarea {
   font-weight: 700;
   cursor: pointer;
   text-decoration: none;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
   box-shadow: 0 2px 6px rgba(11, 30, 33, 0.16);
 }
 
+.quick-action-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(47, 111, 237, 0.16), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
 .quick-action-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(11, 30, 33, 0.22);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 18px rgba(11, 30, 33, 0.24);
+}
+
+.quick-action-btn:hover::before {
+  opacity: 1;
+}
+
+.quick-action-btn:active {
+  transform: translateY(-1px) scale(0.98);
 }
 
 .stat-row {
@@ -737,18 +788,21 @@ textarea {
 }
 
 .stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 16px;
   padding: 16px 18px;
   display: flex;
   align-items: center;
   gap: 14px;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .stat-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.82);
   box-shadow: var(--shadow-hover);
 }
 
@@ -761,7 +815,12 @@ textarea {
   align-items: center;
   justify-content: center;
   font-size: 19px;
-  background: var(--accent-soft);
+  background: var(--clinical-blue-soft);
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover .stat-icon {
+  transform: scale(1.08) rotate(-4deg);
 }
 
 .stat-icon-success {
@@ -866,8 +925,8 @@ textarea {
 }
 
 .doctor-avatar {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: var(--accent-soft);
   color: var(--accent-strong);
@@ -877,6 +936,26 @@ textarea {
   font-weight: 800;
   font-size: 16px;
   margin-bottom: 4px;
+}
+
+.doctor-avatar-photo {
+  object-fit: cover;
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.book-doctor-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.doctor-avatar-large {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 0;
+  flex-shrink: 0;
 }
 
 .doctor-name {
@@ -1119,6 +1198,23 @@ textarea {
 
 .empty-state .btn {
   margin-top: 14px;
+}
+
+.dashboard-page .empty-state .btn {
+  animation: empty-cta-pulse 2.4s ease-in-out infinite;
+}
+
+.dashboard-page .empty-state .btn:hover {
+  animation: none;
+}
+
+@keyframes empty-cta-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 var(--accent-soft);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(15, 157, 146, 0);
+  }
 }
 
 /* Skeletons */
