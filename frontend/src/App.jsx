@@ -29,9 +29,6 @@ function RedirectIfAuthed({ children }) {
 }
 
 function Home() {
-  const { user, loading } = useAuth();
-  if (loading) return <div className="page-loading">Loading…</div>;
-  if (user) return <Navigate to="/dashboard" replace />;
   return <LandingPage />;
 }
 

@@ -2,6 +2,7 @@ import { render, screen, fireEvent, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi } from 'vitest';
 import LandingPage from './LandingPage';
+import { AuthProvider } from '../context/AuthContext';
 
 const navigateMock = vi.fn();
 vi.mock('react-router-dom', async () => {
@@ -12,7 +13,9 @@ vi.mock('react-router-dom', async () => {
 function renderLanding() {
   return render(
     <MemoryRouter>
-      <LandingPage />
+      <AuthProvider>
+        <LandingPage />
+      </AuthProvider>
     </MemoryRouter>
   );
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/landing.css';
 import { useReveal } from '../hooks/useReveal';
+import { useAuth } from '../context/AuthContext';
 import heroPhoto from '../assets/Top_Page.jpg';
 import aboutPhoto from '../assets/Third_Page.jpg';
 
@@ -83,6 +84,11 @@ export default function LandingPage() {
   const [aboutRef, aboutVisible] = useReveal();
   const [servicesRef, servicesVisible] = useReveal();
   const [benefitsRef, benefitsVisible] = useReveal();
+  const { user, logout } = useAuth();
+
+  function handleLogout() {
+    logout();
+  }
 
   return (
     <div className="landing">
@@ -96,12 +102,25 @@ export default function LandingPage() {
           Floss Clinic
         </span>
         <div className="landing-nav-actions">
-          <a className="l-btn l-btn-ghost l-btn-small" href="/login">
-            Sign In
-          </a>
-          <a className="l-btn l-btn-primary l-btn-small" href="/register">
-            Get Started
-          </a>
+          {user ? (
+            <>
+              <a className="l-btn l-btn-ghost l-btn-small" href="/dashboard">
+                Dashboard
+              </a>
+              <button className="l-btn l-btn-primary l-btn-small" type="button" onClick={handleLogout}>
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <a className="l-btn l-btn-ghost l-btn-small" href="/login">
+                Sign In
+              </a>
+              <a className="l-btn l-btn-primary l-btn-small" href="/register">
+                Get Started
+              </a>
+            </>
+          )}
         </div>
       </nav>
 
@@ -117,8 +136,8 @@ export default function LandingPage() {
               assistant. All in one place.
             </p>
             <div className="hero-actions">
-              <a className="l-btn l-btn-primary" href="/register">
-                Get Started Free
+              <a className="l-btn l-btn-primary" href={user ? '/dashboard' : '/register'}>
+                {user ? 'Go to Dashboard' : 'Get Started Free'}
               </a>
               <a className="l-link" href="#services">
                 <span className="l-link-play" aria-hidden="true">→</span>
@@ -272,8 +291,14 @@ export default function LandingPage() {
               <div className="footer-col">
                 <h4>Product</h4>
                 <a href="#services">Services</a>
-                <a href="/register">Get Started</a>
-                <a href="/login">Sign In</a>
+                {user ? (
+                  <a href="/dashboard">Dashboard</a>
+                ) : (
+                  <>
+                    <a href="/register">Get Started</a>
+                    <a href="/login">Sign In</a>
+                  </>
+                )}
               </div>
               <div className="footer-col">
                 <h4>Care</h4>
