@@ -225,12 +225,13 @@
 .hero-photo {
   position: relative;
   isolation: isolate;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
   min-height: 600px;
-  border-radius: 32px;
+  border-radius: 0;
   overflow: hidden;
   background-size: cover;
   background-position: center 25%;
-  box-shadow: var(--l-shadow-soft);
   animation: l-fade-up 0.6s ease both;
 }
 
