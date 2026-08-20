@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, ApiError } from '../context/AuthContext';
+import heroPhoto from '../assets/Top_Page.jpg';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -25,33 +26,43 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="auth-page">
-      <form className="auth-card" onSubmit={handleSubmit}>
-        <h1 className="brand">
-          <span className="brand-mark">🦷</span>
-          Floss Clinic
-        </h1>
-        <p className="brand-sub">Your dental clinic, one place — appointments, records, and a cited assistant.</p>
+    <div className="auth-split">
+      <div className="auth-form-col">
+        <form className="auth-card" onSubmit={handleSubmit}>
+          <h1 className="brand">
+            <span className="brand-mark">🦷</span>
+            Floss Clinic
+          </h1>
+          <p className="brand-sub">Your dental clinic, one place — appointments, records, and a cited assistant.</p>
 
-        {error && <div className="form-error">{error}</div>}
+          {error && <div className="form-error">{error}</div>}
 
-        <label className="field">
-          <span>Email</span>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </label>
-        <label className="field">
-          <span>Password</span>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-        </label>
+          <label className="field">
+            <span>Email</span>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          </label>
+          <label className="field">
+            <span>Password</span>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          </label>
 
-        <button className="btn btn-primary" type="submit" disabled={submitting}>
-          {submitting ? 'Signing in…' : 'Sign In'}
-        </button>
+          <button className="btn btn-primary" type="submit" disabled={submitting}>
+            {submitting ? 'Signing in…' : 'Sign In'}
+          </button>
 
-        <p className="auth-switch">
-          Don&apos;t have an account? <Link to="/register">Sign up free</Link>
-        </p>
-      </form>
+          <p className="auth-switch">
+            Don&apos;t have an account? <Link to="/register">Sign up free</Link>
+          </p>
+        </form>
+      </div>
+
+      <div className="auth-visual-col" aria-hidden="true">
+        <div className="auth-blob">
+          <img src={heroPhoto} alt="" className="auth-blob-img" />
+        </div>
+        <div className="auth-float auth-float-1">😁 Healthy Smiles</div>
+        <div className="auth-float auth-float-2">💬 Cited Answers</div>
+      </div>
     </div>
   );
 }
