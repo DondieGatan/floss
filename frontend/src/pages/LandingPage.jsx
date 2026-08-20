@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/landing.css';
 import { useReveal } from '../hooks/useReveal';
+import heroPhoto from '../assets/Top_Page.jpg';
 
 const SERVICES = [
   { icon: '🦷', title: 'General Dentistry', text: 'Cleanings, fillings, and preventive care to keep your smile healthy year-round.' },
@@ -91,7 +92,7 @@ export default function LandingPage() {
       <nav className={`landing-nav${scrolled ? ' scrolled' : ''}`} aria-label="Primary">
         <span className="landing-brand">
           <span className="landing-brand-mark" aria-hidden="true">🦷</span>
-          Floss
+          Floss Clinic
         </span>
         <div className="landing-nav-actions">
           <a className="l-btn l-btn-ghost l-btn-small" href="/login">
@@ -111,7 +112,7 @@ export default function LandingPage() {
               Your <span className="accent">Best Dental</span> Experience Awaits
             </h1>
             <p className="hero-sub">
-              Book appointments, meet our dentists, and get instant, cited answers from Floss — your clinic's own
+              Book appointments, meet our dentists, and get instant, cited answers from Floss Clinic — your clinic's own
               assistant. All in one place.
             </p>
             <div className="hero-actions">
@@ -126,7 +127,9 @@ export default function LandingPage() {
           </div>
 
           <div className="hero-art" aria-hidden="true">
-            <div className="hero-blob">🦷</div>
+            <div className="hero-blob">
+              <img src={heroPhoto} alt="" className="hero-blob-img" />
+            </div>
             <div className="hero-float hero-float-1">😁 Healthy Smiles</div>
             <div className="hero-float hero-float-2">💬 Cited Answers</div>
           </div>
@@ -150,7 +153,7 @@ export default function LandingPage() {
               One Platform for <br /> Your Whole Smile
             </h2>
             <p>
-              Floss brings your dental clinic's directory, scheduling, and patient records into a single place —
+              Floss Clinic brings your dental clinic's directory, scheduling, and patient records into a single place —
               with a built-in assistant that only ever answers from your clinic's own information.
             </p>
             <ul className="check-list">
@@ -216,7 +219,7 @@ export default function LandingPage() {
             </div>
             <div>
               <p style={{ color: 'var(--l-text-muted)', fontSize: 15, lineHeight: 1.7, maxWidth: 480 }}>
-                From the moment you book to the moment you leave, Floss keeps your care team connected and your
+                From the moment you book to the moment you leave, Floss Clinic keeps your care team connected and your
                 questions answered.
               </p>
               <div className="stat-grid">
@@ -258,7 +261,7 @@ export default function LandingPage() {
             <div>
               <span className="landing-brand">
                 <span className="landing-brand-mark" aria-hidden="true">🦷</span>
-                Floss
+                Floss Clinic
               </span>
               <p className="footer-brand-sub">Your dental clinic, one place — appointments, records, and a cited assistant.</p>
             </div>
@@ -277,7 +280,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="footer-bottom">
-            <span>© {new Date().getFullYear()} Floss Dental Clinic.</span>
+            <span>© {new Date().getFullYear()} Floss Clinic.</span>
             <span>Built with Rounds' architecture, reskinned for dental care.</span>
           </div>
         </div>

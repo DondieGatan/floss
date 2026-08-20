@@ -38,10 +38,10 @@ export default function DocumentsPage() {
   return (
     <AppLayout>
       <div className="page-body">
-        <h1 className="page-title">Ask Floss</h1>
+        <h1 className="page-title">Ask Floss Clinic</h1>
         <p className="page-subtitle">
           Chat with the clinic's knowledge base — policies, hours, and the dentist directory. Every answer is
-          cited, and Floss will never offer dental or medical advice.
+          cited, and Floss Clinic will never offer dental or medical advice.
         </p>
 
         <div className="documents-toolbar">

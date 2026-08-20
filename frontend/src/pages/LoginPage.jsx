@@ -29,7 +29,7 @@ export default function LoginPage() {
       <form className="auth-card" onSubmit={handleSubmit}>
         <h1 className="brand">
           <span className="brand-mark">🦷</span>
-          Floss
+          Floss Clinic
         </h1>
         <p className="brand-sub">Your dental clinic, one place — appointments, records, and a cited assistant.</p>
 

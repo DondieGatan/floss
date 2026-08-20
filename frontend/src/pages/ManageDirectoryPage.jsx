@@ -195,7 +195,7 @@ export default function ManageDirectoryPage() {
     <AppLayout>
       <div className="page-body page-body-wide">
         <h1 className="page-title">Manage Directory</h1>
-        <p className="page-subtitle">Departments and dentists — this feeds Floss' assistant automatically.</p>
+        <p className="page-subtitle">Departments and dentists — this feeds Floss Clinic's assistant automatically.</p>
 
         <div className="section">
           <div className="section-header">

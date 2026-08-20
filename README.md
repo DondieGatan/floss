@@ -1,4 +1,4 @@
-# Floss — Dental Clinic Management Platform
+# Floss Clinic — Dental Clinic Management Platform
 
 Appointment booking with real conflict detection, a staff-managed doctor directory, patient records, and a
 RAG chatbot that only ever answers from your clinic's own cited sources. Built as a full-stack portfolio
@@ -11,7 +11,7 @@ all with password `password123`.
 
 ## Why this project exists
 
-Floss started as [Footnote](#), a document-upload RAG chatbot, then evolved into a full hospital
+Floss Clinic started as [Footnote](#), a document-upload RAG chatbot, then evolved into a full hospital
 management system ("Rounds"), then a dental clinic. The chatbot — retrieval-augmented generation with
 citation grounding — is the part that doesn't come for free with a CRUD tutorial; everything else
 (appointments, directory, records, RBAC) exists to give that assistant something real to answer questions
@@ -69,7 +69,7 @@ infrastructure). Retrieval sits behind a **similarity-confidence threshold**: if
 it, the assistant says it doesn't know instead of guessing. Every answer streams token-by-token over SSE and
 carries `[1]`, `[2]`-style citations back to the exact source chunk.
 
-The system prompt also draws an explicit line: Floss is an *operational* assistant (appointments, hours,
+The system prompt also draws an explicit line: Floss Clinic is an *operational* assistant (appointments, hours,
 policies, directory) and is instructed to refuse anything that reads as a diagnostic or treatment question,
 directing the user to book an appointment instead. That instruction is guarded by a test
 (`test_system_prompt_refuses_medical_advice`) so it can't silently regress.

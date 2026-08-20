@@ -1,4 +1,4 @@
-"""Populate a fresh dev database with demo data for Floss: a staff and an
+"""Populate a fresh dev database with demo data for Floss Clinic: a staff and an
 admin account, a handful of specialty areas/dentists with weekly
 availability, a couple of treatment rooms with chairs, and one sample
 patient with an upcoming appointment. Safe to re-run — skips anything that

@@ -5,7 +5,7 @@ const PATIENT_LINKS = [
   { to: '/dashboard', icon: '🏠', label: 'Dashboard' },
   { to: '/doctors', icon: '🦷', label: 'Dentists' },
   { to: '/appointments', icon: '📅', label: 'My Appointments' },
-  { to: '/knowledge-base', icon: '💬', label: 'Ask Floss' },
+  { to: '/knowledge-base', icon: '💬', label: 'Ask Floss Clinic' },
 ];
 
 const STAFF_LINKS = [
@@ -25,7 +25,7 @@ export default function AppLayout({ children }) {
         <div className="app-sidebar-brand">
           <span className="brand">
             <span className="brand-mark">🦷</span>
-            Floss
+            Floss Clinic
           </span>
         </div>
 

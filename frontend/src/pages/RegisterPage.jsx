@@ -30,7 +30,7 @@ export default function RegisterPage() {
       <form className="auth-card" onSubmit={handleSubmit}>
         <h1 className="brand">
           <span className="brand-mark">🦷</span>
-          Floss
+          Floss Clinic
         </h1>
         <p className="brand-sub">Create a patient account to book appointments and chat with the assistant.</p>
 

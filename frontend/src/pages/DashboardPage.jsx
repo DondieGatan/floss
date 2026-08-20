@@ -31,7 +31,7 @@ function PatientDashboard() {
             + Book an appointment
           </Link>
           <Link className="quick-action-btn" to="/knowledge-base">
-            💬 Ask Floss a question
+            💬 Ask Floss Clinic a question
           </Link>
         </div>
       </div>

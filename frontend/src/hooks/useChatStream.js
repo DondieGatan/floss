@@ -4,7 +4,7 @@ import { API_BASE, getAccessToken } from '../api/client';
 /**
  * Drives one conversation's message list, streaming the assistant's reply
  * token-by-token via fetch + ReadableStream (not EventSource — EventSource
- * can't attach a JWT Authorization header, which every Floss API call
+ * can't attach a JWT Authorization header, which every Floss Clinic API call
  * needs).
  */
 export function useChatStream(conversationId, initialMessages = []) {
