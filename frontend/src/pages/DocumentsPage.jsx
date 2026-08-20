@@ -58,10 +58,11 @@ export default function DocumentsPage() {
         </div>
 
         {loading ? (
-          <>
+          <div role="status" aria-live="polite">
+            <span className="sr-only">Loading…</span>
             <div className="skeleton skeleton-card" />
             <div className="skeleton skeleton-card" />
-          </>
+          </div>
         ) : documents.length === 0 ? (
           <div className="empty-state">
             <p>

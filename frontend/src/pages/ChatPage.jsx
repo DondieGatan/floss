@@ -26,7 +26,9 @@ export default function ChatPage() {
 
         <div className="page-body page-body-chat">
           {messages === null ? (
-            <p className="page-loading">Loading…</p>
+            <p className="page-loading" role="status" aria-live="polite">
+              Loading…
+            </p>
           ) : (
             <ChatWindow conversationId={conversationId} initialMessages={messages} />
           )}

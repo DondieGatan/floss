@@ -21,7 +21,7 @@ export default function ChatWindow({ conversationId, initialMessages }) {
 
   return (
     <div className="chat-window">
-      <div className="chat-messages">
+      <div className="chat-messages" aria-live="polite">
         {messages.length === 0 && (
           <div className="empty-state">
             <p>Ask a question about this document to get started.</p>
@@ -33,10 +33,18 @@ export default function ChatWindow({ conversationId, initialMessages }) {
         <div ref={bottomRef} />
       </div>
 
-      {error && <div className="form-error chat-error">{error}</div>}
+      {error && (
+        <div className="form-error chat-error" role="alert">
+          {error}
+        </div>
+      )}
 
       <form className="chat-input-row" onSubmit={handleSubmit}>
+        <label className="sr-only" htmlFor="chat-message-input">
+          Ask a question
+        </label>
         <input
+          id="chat-message-input"
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}

@@ -57,10 +57,11 @@ function PatientDashboard() {
           </Link>
         </div>
         {appointments === null ? (
-          <>
+          <div role="status" aria-live="polite">
+            <span className="sr-only">Loading…</span>
             <div className="skeleton skeleton-card" />
             <div className="skeleton skeleton-card" />
-          </>
+          </div>
         ) : upcoming.length === 0 ? (
           <div className="empty-state">
             <p>No upcoming appointments. Ready to book one?</p>
@@ -128,10 +129,11 @@ function StaffDashboard() {
           </Link>
         </div>
         {today === null ? (
-          <>
+          <div role="status" aria-live="polite">
+            <span className="sr-only">Loading…</span>
             <div className="skeleton skeleton-card" />
             <div className="skeleton skeleton-card" />
-          </>
+          </div>
         ) : today.length === 0 ? (
           <div className="empty-state">
             <p>No appointments scheduled for today.</p>

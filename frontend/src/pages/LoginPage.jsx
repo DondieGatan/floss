@@ -37,7 +37,11 @@ export default function LoginPage() {
           </h1>
           <p className="brand-sub">Your dental clinic, one place — appointments, records, and a cited assistant.</p>
 
-          {error && <div className="form-error">{error}</div>}
+          {error && (
+            <div className="form-error" role="alert">
+              {error}
+            </div>
+          )}
 
           <label className="field">
             <span>Email</span>

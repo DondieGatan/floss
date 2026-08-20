@@ -39,7 +39,11 @@ export default function DocumentUploadForm({ onUploaded }) {
         />
       </label>
       <p className="upload-hint">PDF or TXT, up to 20MB.</p>
-      {error && <div className="form-error">{error}</div>}
+      {error && (
+        <div className="form-error" role="alert">
+          {error}
+        </div>
+      )}
     </div>
   );
 }

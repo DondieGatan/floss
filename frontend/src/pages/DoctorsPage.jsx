@@ -35,7 +35,10 @@ export default function DoctorsPage() {
         <p className="page-subtitle">Browse our care teams and book an appointment.</p>
 
         <div className="filter-row">
-          <select value={departmentId} onChange={(e) => setDepartmentId(e.target.value)}>
+          <label className="sr-only" htmlFor="department-filter">
+            Department
+          </label>
+          <select id="department-filter" value={departmentId} onChange={(e) => setDepartmentId(e.target.value)}>
             <option value="">All departments</option>
             {departments.map((d) => (
               <option key={d.id} value={d.id}>
@@ -46,7 +49,8 @@ export default function DoctorsPage() {
         </div>
 
         {doctors === null ? (
-          <div className="grid grid-3">
+          <div className="grid grid-3" role="status" aria-live="polite">
+            <span className="sr-only">Loading…</span>
             <div className="skeleton skeleton-card" />
             <div className="skeleton skeleton-card" />
             <div className="skeleton skeleton-card" />

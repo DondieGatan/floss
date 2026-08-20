@@ -96,7 +96,11 @@ export default function BookAppointmentPage() {
         </h1>
         <p className="page-subtitle">{doctor?.specialty}</p>
 
-        {error && <div className="form-error">{error}</div>}
+        {error && (
+          <div className="form-error" role="alert">
+            {error}
+          </div>
+        )}
 
         <div className="card">
           <label className="field" style={{ maxWidth: 220 }}>
@@ -105,7 +109,9 @@ export default function BookAppointmentPage() {
           </label>
 
           {slots === null ? (
-            <div className="skeleton skeleton-card" />
+            <div className="skeleton skeleton-card" role="status" aria-live="polite">
+              <span className="sr-only">Loading…</span>
+            </div>
           ) : slots.length === 0 ? (
             <div className="empty-state">
               <p>No open slots on this date. Try another day.</p>

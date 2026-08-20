@@ -26,10 +26,11 @@ export default function MyAppointmentsPage() {
         <p className="page-subtitle">Upcoming and past visits.</p>
 
         {appointments === null ? (
-          <>
+          <div role="status" aria-live="polite">
+            <span className="sr-only">Loading…</span>
             <div className="skeleton skeleton-card" />
             <div className="skeleton skeleton-card" />
-          </>
+          </div>
         ) : appointments.length === 0 ? (
           <div className="empty-state">
             <p>You don't have any appointments yet.</p>

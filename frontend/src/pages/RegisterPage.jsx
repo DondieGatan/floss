@@ -36,7 +36,11 @@ export default function RegisterPage() {
         </h1>
         <p className="brand-sub">Create a patient account to book appointments and chat with the assistant.</p>
 
-        {error && <div className="form-error">{error}</div>}
+        {error && (
+          <div className="form-error" role="alert">
+            {error}
+          </div>
+        )}
 
         <label className="field">
           <span>Full name</span>

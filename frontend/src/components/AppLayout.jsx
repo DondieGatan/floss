@@ -21,15 +21,19 @@ export default function AppLayout({ children }) {
 
   return (
     <div className="app-shell">
-      <aside className="app-sidebar">
+      <a className="skip-link" href="#app-main-content">
+        Skip to content
+      </a>
+
+      <aside className="app-sidebar" aria-label="Sidebar">
         <div className="app-sidebar-brand">
           <span className="brand">
-            <span className="brand-mark">🦷</span>
+            <span className="brand-mark" aria-hidden="true">🦷</span>
             Floss Clinic
           </span>
         </div>
 
-        <nav className="app-nav">
+        <nav className="app-nav" aria-label="Primary">
           <div className="app-nav-section">{isStaff ? 'Staff' : 'Patient'}</div>
           {(isStaff ? STAFF_LINKS : PATIENT_LINKS).map((link) => (
             <NavLink
@@ -37,7 +41,7 @@ export default function AppLayout({ children }) {
               to={link.to}
               className={({ isActive }) => `app-nav-link${isActive ? ' active' : ''}`}
             >
-              <span className="app-nav-icon">{link.icon}</span>
+              <span className="app-nav-icon" aria-hidden="true">{link.icon}</span>
               {link.label}
             </NavLink>
           ))}
@@ -49,13 +53,15 @@ export default function AppLayout({ children }) {
             <br />
             <span className="role-badge">{user?.role}</span>
           </div>
-          <button className="btn btn-ghost btn-small btn-block" onClick={logout}>
+          <button className="btn btn-ghost btn-small btn-block" type="button" onClick={logout}>
             Logout
           </button>
         </div>
       </aside>
 
-      <div className="app-main">{children}</div>
+      <main className="app-main" id="app-main-content" tabIndex={-1}>
+        {children}
+      </main>
     </div>
   );
 }

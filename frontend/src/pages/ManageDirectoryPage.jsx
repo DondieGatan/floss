@@ -28,7 +28,11 @@ function DepartmentForm({ onCreated }) {
 
   return (
     <form className="card" onSubmit={handleSubmit} style={{ marginBottom: 16 }}>
-      {error && <div className="form-error">{error}</div>}
+      {error && (
+        <div className="form-error" role="alert">
+          {error}
+        </div>
+      )}
       <div className="filter-row" style={{ marginBottom: 0, alignItems: 'flex-end' }}>
         <label className="field" style={{ marginBottom: 0, flex: 1 }}>
           <span>Department name</span>
@@ -70,26 +74,46 @@ function AvailabilityEditor({ doctor, onChange }) {
 
   return (
     <div style={{ marginTop: 12, borderTop: '1px solid var(--border)', paddingTop: 12 }}>
-      {error && <div className="form-error">{error}</div>}
+      {error && (
+        <div className="form-error" role="alert">
+          {error}
+        </div>
+      )}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
         {(doctor.availability || []).length === 0 && <span className="page-subtitle" style={{ margin: 0 }}>No availability set.</span>}
         {(doctor.availability || []).map((a) => (
-          <span key={a.id} className="status-badge status-badge-available" style={{ cursor: 'pointer' }} onClick={() => handleRemove(a.id)} title="Click to remove">
+          <button
+            key={a.id}
+            type="button"
+            className="status-badge status-badge-available"
+            style={{ cursor: 'pointer', border: 'none' }}
+            onClick={() => handleRemove(a.id)}
+            aria-label={`Remove ${WEEKDAYS[a.weekday]} ${a.startTime}-${a.endTime} availability`}
+          >
             {WEEKDAYS[a.weekday]} {a.startTime}-{a.endTime} ✕
-          </span>
+          </button>
         ))}
       </div>
       <form onSubmit={handleAdd} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-        <select value={weekday} onChange={(e) => setWeekday(e.target.value)}>
+        <label className="sr-only" htmlFor={`weekday-${doctor.id}`}>
+          Weekday
+        </label>
+        <select id={`weekday-${doctor.id}`} value={weekday} onChange={(e) => setWeekday(e.target.value)}>
           {WEEKDAYS.map((w, i) => (
             <option key={w} value={i}>
               {w}
             </option>
           ))}
         </select>
-        <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
-        <span>–</span>
-        <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+        <label className="sr-only" htmlFor={`start-${doctor.id}`}>
+          Start time
+        </label>
+        <input id={`start-${doctor.id}`} type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+        <span aria-hidden="true">–</span>
+        <label className="sr-only" htmlFor={`end-${doctor.id}`}>
+          End time
+        </label>
+        <input id={`end-${doctor.id}`} type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
         <button className="btn btn-small btn-secondary" type="submit">
           + Add window
         </button>
@@ -133,7 +157,11 @@ function DoctorForm({ departments, onCreated }) {
       <h3 className="section-title" style={{ marginBottom: 12 }}>
         Add a dentist
       </h3>
-      {error && <div className="form-error">{error}</div>}
+      {error && (
+        <div className="form-error" role="alert">
+          {error}
+        </div>
+      )}
       <div className="grid grid-2">
         <label className="field">
           <span>Full name</span>
@@ -219,7 +247,9 @@ export default function ManageDirectoryPage() {
           <DoctorForm departments={departments} onCreated={() => loadDoctors()} />
 
           {doctors === null ? (
-            <div className="skeleton skeleton-card" />
+            <div className="skeleton skeleton-card" role="status" aria-live="polite">
+              <span className="sr-only">Loading…</span>
+            </div>
           ) : (
             <div className="list-col">
               {doctors.map((doc) => (

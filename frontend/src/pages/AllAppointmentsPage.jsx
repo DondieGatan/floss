@@ -38,8 +38,14 @@ export default function AllAppointmentsPage() {
         <p className="page-subtitle">Clinic-wide appointment schedule.</p>
 
         <div className="filter-row">
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-          <select value={doctorId} onChange={(e) => setDoctorId(e.target.value)}>
+          <label className="sr-only" htmlFor="appointments-date-filter">
+            Date
+          </label>
+          <input id="appointments-date-filter" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <label className="sr-only" htmlFor="appointments-doctor-filter">
+            Dentist
+          </label>
+          <select id="appointments-doctor-filter" value={doctorId} onChange={(e) => setDoctorId(e.target.value)}>
             <option value="">All dentists</option>
             {doctors.map((d) => (
               <option key={d.id} value={d.id}>
@@ -50,10 +56,11 @@ export default function AllAppointmentsPage() {
         </div>
 
         {appointments === null ? (
-          <>
+          <div role="status" aria-live="polite">
+            <span className="sr-only">Loading…</span>
             <div className="skeleton skeleton-card" />
             <div className="skeleton skeleton-card" />
-          </>
+          </div>
         ) : appointments.length === 0 ? (
           <div className="empty-state">
             <p>No appointments match this filter.</p>

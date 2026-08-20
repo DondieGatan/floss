@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api, ApiError } from '../api/client';
 import AppLayout from '../components/AppLayout';
 
@@ -24,7 +24,11 @@ function WardForm({ onCreated }) {
 
   return (
     <form className="card" onSubmit={handleSubmit} style={{ marginBottom: 16 }}>
-      {error && <div className="form-error">{error}</div>}
+      {error && (
+        <div className="form-error" role="alert">
+          {error}
+        </div>
+      )}
       <div className="filter-row" style={{ marginBottom: 0, alignItems: 'flex-end' }}>
         <label className="field" style={{ marginBottom: 0 }}>
           <span>Room name</span>
@@ -64,10 +68,15 @@ function AddBedInline({ wardId, onAdded }) {
 
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 6, marginTop: 10 }}>
-      {error && <span className="form-error" style={{ marginBottom: 0 }}>{error}</span>}
+      {error && (
+        <span className="form-error" role="alert" style={{ marginBottom: 0 }}>
+          {error}
+        </span>
+      )}
       <input
         style={{ maxWidth: 110, padding: '7px 10px', borderRadius: 8, border: '1px solid var(--border)' }}
         placeholder="Chair #"
+        aria-label="Chair number"
         value={bedNumber}
         onChange={(e) => setBedNumber(e.target.value)}
         required
@@ -85,6 +94,16 @@ function AdmitModal({ bed, patients, doctors, onClose, onAdmitted }) {
   const [reason, setReason] = useState('');
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const firstFieldRef = useRef(null);
+
+  useEffect(() => {
+    firstFieldRef.current?.focus();
+    function onKeyDown(e) {
+      if (e.key === 'Escape') onClose();
+    }
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -107,12 +126,25 @@ function AdmitModal({ bed, patients, doctors, onClose, onAdmitted }) {
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <form className="modal-card" onClick={(e) => e.stopPropagation()} onSubmit={handleSubmit}>
-        <h3 className="section-title">Seat in {bed.wardName} · Chair {bed.bedNumber}</h3>
-        {error && <div className="form-error">{error}</div>}
+      <form
+        className="modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="admit-modal-title"
+        onClick={(e) => e.stopPropagation()}
+        onSubmit={handleSubmit}
+      >
+        <h3 className="section-title" id="admit-modal-title">
+          Seat in {bed.wardName} · Chair {bed.bedNumber}
+        </h3>
+        {error && (
+          <div className="form-error" role="alert">
+            {error}
+          </div>
+        )}
         <label className="field">
           <span>Patient</span>
-          <select value={patientId} onChange={(e) => setPatientId(e.target.value)} required>
+          <select ref={firstFieldRef} value={patientId} onChange={(e) => setPatientId(e.target.value)} required>
             <option value="" disabled>
               Select a patient
             </option>
@@ -199,7 +231,9 @@ export default function AdmissionsPage() {
         <WardForm onCreated={loadAll} />
 
         {wards === null ? (
-          <div className="skeleton skeleton-card" />
+          <div className="skeleton skeleton-card" role="status" aria-live="polite">
+            <span className="sr-only">Loading…</span>
+          </div>
         ) : wards.length === 0 ? (
           <div className="empty-state">
             <p>No treatment rooms yet. Add one above to start tracking chairs.</p>
@@ -214,14 +248,15 @@ export default function AdmissionsPage() {
               </div>
               <div className="bed-grid">
                 {(beds[ward.id] || []).map((bed) => (
-                  <div
+                  <button
                     key={bed.id}
+                    type="button"
                     className={`bed-tile bed-tile-${bed.status}`}
                     onClick={() => handleBedClick(bed)}
-                    title={bed.status}
+                    aria-label={`Chair ${bed.bedNumber} — ${bed.status}`}
                   >
                     {bed.bedNumber}
-                  </div>
+                  </button>
                 ))}
               </div>
               <AddBedInline wardId={ward.id} onAdded={loadAll} />
