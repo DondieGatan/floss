@@ -158,8 +158,10 @@ cd frontend && npm test                  # Vitest + React Testing Library
 
 Backend coverage includes appointment boundary conditions (exact-duplicate rejection, partial-overlap
 rejection, back-to-back acceptance, cancelled-slot rebooking), RBAC edges (403 vs 404), and the
-directory-digest regeneration lifecycle. Frontend coverage focuses on the booking flow end-to-end (slot
-selection → confirm → success, and the 409-conflict error path) and the public landing page.
+directory-digest regeneration lifecycle. Frontend coverage spans the booking flow end-to-end (slot
+selection → confirm → success, and the 409-conflict error path), the public landing page, sign-in
+(success, server-rejected credentials, pending state), and the patient/staff dashboards (empty states,
+stat calculations, role-specific quick actions).
 
 ## What's not done yet
 
