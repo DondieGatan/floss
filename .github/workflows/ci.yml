@@ -39,7 +39,11 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          # jsdom 30's bundled undici needs a Node webidl internal
+          # (markAsUncloneable) that doesn't exist on Node 20 — it crashes
+          # every test file on startup with no indication it's a Node
+          # version issue. Pinned to what's actually been run locally.
+          node-version: '24'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
