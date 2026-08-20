@@ -24,6 +24,9 @@ function PatientDashboard() {
   return (
     <div className="page-body">
       <div className="hero-card">
+        <p className="hero-eyebrow" aria-hidden="true">
+          🦷 Patient Portal
+        </p>
         <p className="hero-greeting">Welcome back, {firstName(user?.fullName)}</p>
         <p className="hero-sub">Here's what's coming up with your care.</p>
         <div className="quick-actions">
@@ -38,14 +41,20 @@ function PatientDashboard() {
 
       <div className="stat-row">
         <div className="stat-card">
-          <p className="stat-value">{appointments === null ? '–' : upcoming.length}</p>
-          <p className="stat-label">Upcoming appointments</p>
+          <div className="stat-icon" aria-hidden="true">📅</div>
+          <div className="stat-body">
+            <p className="stat-value">{appointments === null ? '–' : upcoming.length}</p>
+            <p className="stat-label">Upcoming appointments</p>
+          </div>
         </div>
         <div className="stat-card">
-          <p className="stat-value">
-            {appointments === null ? '–' : appointments.filter((a) => a.status === 'completed').length}
-          </p>
-          <p className="stat-label">Past visits</p>
+          <div className="stat-icon stat-icon-success" aria-hidden="true">✅</div>
+          <div className="stat-body">
+            <p className="stat-value">
+              {appointments === null ? '–' : appointments.filter((a) => a.status === 'completed').length}
+            </p>
+            <p className="stat-label">Past visits</p>
+          </div>
         </div>
       </div>
 
@@ -64,7 +73,11 @@ function PatientDashboard() {
           </div>
         ) : upcoming.length === 0 ? (
           <div className="empty-state">
+            <div className="empty-state-icon" aria-hidden="true">🗓️</div>
             <p>No upcoming appointments. Ready to book one?</p>
+            <Link className="btn btn-primary btn-small" to="/doctors">
+              + Book an appointment
+            </Link>
           </div>
         ) : (
           <div className="list-col stagger-in">
@@ -94,6 +107,9 @@ function StaffDashboard() {
   return (
     <div className="page-body">
       <div className="hero-card">
+        <p className="hero-eyebrow" aria-hidden="true">
+          🏥 Staff Portal
+        </p>
         <p className="hero-greeting">Welcome back, {firstName(user?.fullName)}</p>
         <p className="hero-sub">Here's today's snapshot across the clinic.</p>
         <div className="quick-actions">
@@ -108,16 +124,25 @@ function StaffDashboard() {
 
       <div className="stat-row">
         <div className="stat-card">
-          <p className="stat-value">{today === null ? '–' : today.length}</p>
-          <p className="stat-label">Appointments today</p>
+          <div className="stat-icon" aria-hidden="true">📋</div>
+          <div className="stat-body">
+            <p className="stat-value">{today === null ? '–' : today.length}</p>
+            <p className="stat-label">Appointments today</p>
+          </div>
         </div>
         <div className="stat-card">
-          <p className="stat-value">{admissions === null ? '–' : admissions.length}</p>
-          <p className="stat-label">Chairs in use</p>
+          <div className="stat-icon stat-icon-warning" aria-hidden="true">🪑</div>
+          <div className="stat-body">
+            <p className="stat-value">{admissions === null ? '–' : admissions.length}</p>
+            <p className="stat-label">Chairs in use</p>
+          </div>
         </div>
         <div className="stat-card">
-          <p className="stat-value">{availableBeds === null ? '–' : availableBeds.length}</p>
-          <p className="stat-label">Chairs available</p>
+          <div className="stat-icon stat-icon-success" aria-hidden="true">✅</div>
+          <div className="stat-body">
+            <p className="stat-value">{availableBeds === null ? '–' : availableBeds.length}</p>
+            <p className="stat-label">Chairs available</p>
+          </div>
         </div>
       </div>
 
@@ -136,6 +161,7 @@ function StaffDashboard() {
           </div>
         ) : today.length === 0 ? (
           <div className="empty-state">
+            <div className="empty-state-icon" aria-hidden="true">🗓️</div>
             <p>No appointments scheduled for today.</p>
           </div>
         ) : (
