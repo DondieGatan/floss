@@ -4,8 +4,8 @@ services:
     runtime: python
     plan: free
     rootDir: backend
-    buildCommand: "pip install -r requirements.txt && flask db upgrade"
-    startCommand: "gunicorn run:app"
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "flask db upgrade && python seed.py && gunicorn run:app"
     healthCheckPath: /api/health
     envVars:
       - key: PYTHON_VERSION
