@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, ApiError } from '../context/AuthContext';
+import { useSlowRequestNotice } from '../hooks/useSlowRequestNotice';
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -10,6 +11,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const waking = useSlowRequestNotice(submitting);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -58,6 +60,11 @@ export default function RegisterPage() {
         <button className="btn btn-primary" type="submit" disabled={submitting}>
           {submitting ? 'Creating account…' : 'Create Account'}
         </button>
+        {waking && (
+          <p className="form-notice" role="status">
+            Waking up the server — this can take up to a minute on the first request after a while.
+          </p>
+        )}
 
         <p className="auth-switch">
           Already have an account? <Link to="/login">Sign in</Link>

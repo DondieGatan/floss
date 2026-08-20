@@ -4,8 +4,15 @@ Appointment booking with real conflict detection, a staff-managed doctor directo
 RAG chatbot that only ever answers from your clinic's own cited sources. Built as a full-stack portfolio
 project: Flask + SQLAlchemy backend, React + Vite frontend.
 
+**Live**: [floss-beta.vercel.app](https://floss-beta.vercel.app) (frontend, Vercel) ·
+[floss-backend.onrender.com](https://floss-backend.onrender.com) (API, Render free tier)
+
 **Demo logins** (seeded via `backend/seed.py`): `patient@floss.demo` / `staff@floss.demo` / `admin@floss.demo`,
 all with password `password123`.
+
+> The backend is on Render's free tier, which spins down after inactivity — the first request after a while
+> can take up to ~50s to wake it back up. The frontend surfaces a "waking up the server" notice on sign-in/
+> sign-up if that first request runs long, rather than leaving it looking hung.
 
 ---
 
@@ -158,15 +165,15 @@ cd frontend && npm test                  # Vitest + React Testing Library
 
 Backend coverage includes appointment boundary conditions (exact-duplicate rejection, partial-overlap
 rejection, back-to-back acceptance, cancelled-slot rebooking), RBAC edges (403 vs 404), and the
-directory-digest regeneration lifecycle. Frontend coverage spans the booking flow end-to-end (slot
-selection → confirm → success, and the 409-conflict error path), the public landing page, sign-in
+directory-digest regeneration lifecycle. Frontend coverage (22 tests) spans the booking flow end-to-end
+(slot selection → confirm → success, and the 409-conflict error path), the public landing page, sign-in
 (success, server-rejected credentials, pending state), and the patient/staff dashboards (empty states,
 stat calculations, role-specific quick actions).
 
 ## What's not done yet
 
-- **Deployment** — runs locally only right now; Render (backend) + Vercel (frontend) is the intended target
-- **Frontend test coverage** — currently covers the booking flow and landing page, not the full app
+- **Frontend test coverage** — booking, landing page, sign-in, and both dashboards are covered; the
+  doctors directory, chat, registration, and staff-only management pages aren't yet
 - **Accessibility** — the public landing page has a real a11y pass (skip link, landmarks, focus states,
   `prefers-reduced-motion`); the authenticated app screens haven't had the same treatment yet
 

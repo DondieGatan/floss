@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, ApiError } from '../context/AuthContext';
+import { useSlowRequestNotice } from '../hooks/useSlowRequestNotice';
 import heroPhoto from '../assets/Top_Page.jpg';
 
 export default function LoginPage() {
@@ -10,6 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const waking = useSlowRequestNotice(submitting);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -49,6 +51,11 @@ export default function LoginPage() {
           <button className="btn btn-primary" type="submit" disabled={submitting}>
             {submitting ? 'Signing in…' : 'Sign In'}
           </button>
+          {waking && (
+            <p className="form-notice" role="status">
+              Waking up the server — this can take up to a minute on the first request after a while.
+            </p>
+          )}
 
           <p className="auth-switch">
             Don&apos;t have an account? <Link to="/register">Sign up free</Link>

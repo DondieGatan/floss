@@ -442,6 +442,15 @@ textarea {
   margin-bottom: 16px;
 }
 
+.form-notice {
+  background: var(--accent-soft);
+  color: var(--text-muted);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-top: 12px;
+}
+
 .form-success {
   background: var(--success-soft);
   border: 1px solid rgba(47, 158, 92, 0.3);
