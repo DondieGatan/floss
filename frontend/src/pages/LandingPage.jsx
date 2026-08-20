@@ -101,30 +101,32 @@ export default function LandingPage() {
       </a>
 
       <nav className={`landing-nav${scrolled ? ' scrolled' : ''}`} aria-label="Primary">
-        <span className="landing-brand">
-          <span className="landing-brand-mark" aria-hidden="true">🦷</span>
-          Floss Clinic
-        </span>
-        <div className="landing-nav-actions">
-          {user ? (
-            <>
-              <a className="l-btn l-btn-ghost l-btn-small" href="/dashboard">
-                Dashboard
-              </a>
-              <button className="l-btn l-btn-primary l-btn-small" type="button" onClick={handleLogout}>
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <a className="l-btn l-btn-ghost l-btn-small" href="/login">
-                Sign In
-              </a>
-              <a className="l-btn l-btn-primary l-btn-small" href="/register">
-                Get Started
-              </a>
-            </>
-          )}
+        <div className="landing-nav-inner">
+          <span className="landing-brand">
+            <span className="landing-brand-mark" aria-hidden="true">🦷</span>
+            Floss Clinic
+          </span>
+          <div className="landing-nav-actions">
+            {user ? (
+              <>
+                <a className="l-btn l-btn-ghost l-btn-small" href="/dashboard">
+                  Dashboard
+                </a>
+                <button className="l-btn l-btn-primary l-btn-small" type="button" onClick={handleLogout}>
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <a className="l-btn l-btn-ghost l-btn-small" href="/login">
+                  Sign In
+                </a>
+                <a className="l-btn l-btn-primary l-btn-small" href="/register">
+                  Get Started
+                </a>
+              </>
+            )}
+          </div>
         </div>
       </nav>
 
