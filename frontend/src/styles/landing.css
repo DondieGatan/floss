@@ -1,9 +1,10 @@
 .landing {
   color-scheme: light;
   --l-bg: #ffffff;
-  --l-bg-soft: #eef4f5;
-  --l-blue: #0f9d92;
-  --l-blue-dark: #0b7f76;
+  --l-bg-soft: #eaf1f7;
+  --l-blue: #2f6fed;
+  --l-blue-dark: #2354bd;
+  --l-blue-2: #0f9d92;
   --l-navy: #1c2b2e;
   --l-text: #1c2b2e;
   --l-text-muted: #647275;
@@ -12,7 +13,10 @@
   --l-shadow-soft: 0 4px 10px rgba(15, 40, 45, 0.06), 0 16px 32px rgba(15, 40, 45, 0.1);
   --l-ease: cubic-bezier(0.16, 1, 0.3, 1);
 
-  background: var(--l-bg);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(47, 111, 237, 0.06), transparent 40%),
+    radial-gradient(circle at 90% 10%, rgba(15, 157, 146, 0.06), transparent 42%),
+    var(--l-bg);
   color: var(--l-text);
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   overflow-x: clip;
@@ -374,7 +378,9 @@
 /* Quick-book bar */
 
 .quickbook-bar {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--l-border);
   border-radius: 20px;
   box-shadow: var(--l-shadow);
@@ -469,7 +475,7 @@
   height: 260px;
   top: 0;
   right: 20px;
-  background: linear-gradient(150deg, #e4f2f0, #cfe6e2);
+  background: linear-gradient(150deg, #e8f0fe, #d3e2fb);
   font-size: 96px;
 }
 
@@ -618,7 +624,9 @@
 }
 
 .service-card {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--l-border);
   border-radius: 20px;
   overflow: hidden;
@@ -637,7 +645,7 @@
 
 .service-card-art {
   height: 150px;
-  background: linear-gradient(150deg, var(--l-bg-soft), #d9ece9);
+  background: linear-gradient(150deg, var(--l-bg-soft), #d6e4fb);
   display: flex;
   align-items: center;
   justify-content: center;

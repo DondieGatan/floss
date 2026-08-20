@@ -1,17 +1,19 @@
 :root {
   color-scheme: light;
-  --bg: #f4f8f9;
-  --surface: #ffffff;
-  --surface-2: #eef4f5;
-  --border: #dbe6e8;
+  --bg: #f4f8fb;
+  --surface: rgba(255, 255, 255, 0.7);
+  --surface-solid: #ffffff;
+  --surface-2: #eaf1f7;
+  --border: #dbe4ee;
   --text: #1c2b2e;
   --text-muted: #647275;
-  --accent: #0f9d92;
-  --accent-strong: #0b7f76;
-  --accent-soft: rgba(15, 157, 146, 0.12);
-  --clinical-blue: #2f6fed;
-  --clinical-blue-strong: #2354bd;
-  --clinical-blue-soft: rgba(47, 111, 237, 0.12);
+  --accent: #2f6fed;
+  --accent-strong: #2354bd;
+  --accent-soft: rgba(47, 111, 237, 0.12);
+  --accent-2: #0f9d92;
+  --accent-2-strong: #0b7f76;
+  --accent-2-soft: rgba(15, 157, 146, 0.12);
+  --glass-blur: blur(16px);
   --danger: #d6534a;
   --danger-soft: rgba(214, 83, 74, 0.1);
   --success: #2f9e5c;
@@ -29,7 +31,12 @@
 
 body {
   margin: 0;
-  background: var(--bg);
+  background:
+    radial-gradient(circle at 8% 0%, var(--accent-soft), transparent 40%),
+    radial-gradient(circle at 92% 15%, var(--accent-2-soft), transparent 42%),
+    radial-gradient(circle at 25% 100%, var(--accent-soft), transparent 38%),
+    var(--bg);
+  background-attachment: fixed;
   color: var(--text);
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -49,6 +56,23 @@ textarea {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+/* Glass surfaces — translucent panels over the page wash above */
+
+.page-header,
+.app-sidebar,
+.app-topbar,
+.auth-card,
+.auth-float,
+.card,
+.appointment-card,
+.doctor-card,
+.document-card,
+.empty-state,
+.message-bubble-assistant {
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 /* Page shells */
@@ -668,16 +692,16 @@ textarea {
   bottom: -24px;
   z-index: -1;
   background:
-    radial-gradient(circle at 8% 0%, var(--clinical-blue-soft), transparent 42%),
-    radial-gradient(circle at 92% 15%, var(--accent-soft), transparent 45%),
-    radial-gradient(circle at 50% 100%, var(--clinical-blue-soft), transparent 40%);
+    radial-gradient(circle at 8% 0%, var(--accent-soft), transparent 42%),
+    radial-gradient(circle at 92% 15%, var(--accent-2-soft), transparent 45%),
+    radial-gradient(circle at 50% 100%, var(--accent-soft), transparent 40%);
   pointer-events: none;
 }
 
 .hero-card {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--clinical-blue), var(--accent-strong) 65%, var(--accent));
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #fff;
   border-radius: 20px;
   padding: 28px 32px;
@@ -815,7 +839,7 @@ textarea {
   align-items: center;
   justify-content: center;
   font-size: 19px;
-  background: var(--clinical-blue-soft);
+  background: var(--accent-soft);
   transition: transform 0.2s ease;
 }
 
@@ -996,7 +1020,7 @@ textarea {
   padding: 9px 12px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--surface-solid);
   color: var(--text);
   font-size: 13px;
 }
@@ -1014,7 +1038,7 @@ textarea {
   padding: 9px 6px;
   border-radius: 8px;
   border: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--surface-solid);
   color: var(--text);
   font-size: 13px;
   cursor: pointer;
@@ -1213,7 +1237,7 @@ textarea {
     box-shadow: 0 0 0 0 var(--accent-soft);
   }
   50% {
-    box-shadow: 0 0 0 8px rgba(15, 157, 146, 0);
+    box-shadow: 0 0 0 8px rgba(47, 111, 237, 0);
   }
 }
 
@@ -1328,7 +1352,7 @@ textarea {
   gap: 10px;
   padding: 16px 24px;
   border-top: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--surface-solid);
 }
 
 .chat-input-row input {
@@ -1447,7 +1471,7 @@ textarea {
   overflow-x: auto;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: var(--surface);
+  background: var(--surface-solid);
 }
 
 table.simple-table {
@@ -1491,7 +1515,7 @@ table.simple-table {
 }
 
 .modal-card {
-  background: var(--surface);
+  background: var(--surface-solid);
   border-radius: 16px;
   padding: 24px;
   width: 100%;
