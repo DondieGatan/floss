@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 .landing {
+  color-scheme: light;
   --l-bg: #ffffff;
   --l-bg-soft: #f4f6ff;
   --l-blue: #2f5fe0;
