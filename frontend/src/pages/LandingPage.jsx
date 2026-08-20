@@ -130,32 +130,41 @@ export default function LandingPage() {
 
       <main id="main-content">
         <header className="landing-section landing-hero">
-          <div>
-            <span className="hero-badge">🦷 Top-Notch Dental Care, Just for You</span>
-            <h1 className="hero-title">
-              Your <span className="accent">Best Dental</span> Experience Awaits
-            </h1>
-            <p className="hero-sub">
-              Book appointments, meet our dentists, and get instant, cited answers from Floss Clinic — your clinic's own
-              assistant. All in one place.
-            </p>
-            <div className="hero-actions">
-              <a className="l-btn l-btn-primary" href={user ? '/dashboard' : '/register'}>
-                {user ? 'Go to Dashboard' : 'Get Started Free'}
-              </a>
-              <a className="l-link" href="#services">
-                <span className="l-link-play" aria-hidden="true">→</span>
-                See Our Services
-              </a>
+          <div className="hero-photo" style={{ backgroundImage: `url(${heroPhoto})` }}>
+            <div className="hero-content">
+              <span className="hero-badge">🦷 Top-Notch Dental Care, Just for You</span>
+              <h1 className="hero-title">
+                Your <span className="accent">Best Dental</span> Experience Awaits
+              </h1>
+              <p className="hero-sub">
+                Book appointments, meet our dentists, and get instant, cited answers from Floss Clinic — your
+                clinic's own assistant. All in one place.
+              </p>
+              <div className="hero-actions">
+                <a className="hero-cta" href={user ? '/dashboard' : '/register'}>
+                  {user ? 'Go to Dashboard' : 'Get Started Free'}
+                  <span className="hero-cta-arrow" aria-hidden="true">→</span>
+                </a>
+                <a className="l-link hero-link-onphoto" href="#services">
+                  <span className="l-link-play" aria-hidden="true">→</span>
+                  See Our Services
+                </a>
+              </div>
             </div>
-          </div>
 
-          <div className="hero-art" aria-hidden="true">
-            <div className="hero-blob">
-              <img src={heroPhoto} alt="" className="hero-blob-img" />
+            <div className="hero-chips" aria-hidden="true">
+              <span className="hero-chip hero-chip-1">🦷 General Dentistry</span>
+              <span className="hero-chip hero-chip-2">😁 Orthodontics</span>
+              <span className="hero-chip hero-chip-3">👶 Pediatric Care</span>
             </div>
-            <div className="hero-float hero-float-1">😁 Healthy Smiles</div>
-            <div className="hero-float hero-float-2">💬 Cited Answers</div>
+
+            <div className="hero-trust-card">
+              <img src={aboutPhoto} alt="" className="hero-trust-photo" />
+              <div>
+                <p className="hero-trust-title">Real care, real people</p>
+                <p className="hero-trust-sub">Meet the team behind every visit</p>
+              </div>
+            </div>
           </div>
         </header>
 
