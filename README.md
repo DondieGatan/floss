@@ -165,17 +165,21 @@ cd frontend && npm test                  # Vitest + React Testing Library
 
 Backend coverage includes appointment boundary conditions (exact-duplicate rejection, partial-overlap
 rejection, back-to-back acceptance, cancelled-slot rebooking), RBAC edges (403 vs 404), and the
-directory-digest regeneration lifecycle. Frontend coverage (22 tests) spans the booking flow end-to-end
+directory-digest regeneration lifecycle. Frontend coverage (34 tests) spans the booking flow end-to-end
 (slot selection → confirm → success, and the 409-conflict error path), the public landing page, sign-in
-(success, server-rejected credentials, pending state), and the patient/staff dashboards (empty states,
-stat calculations, role-specific quick actions).
+and registration (success, server-rejected input, pending state), the patient/staff dashboards (empty
+states, stat calculations, role-specific quick actions), the doctors directory (list, filter, empty
+state), and the chat window (message history, citations, streaming state, error display).
+
+Both the public landing page and the authenticated app have a real accessibility pass: skip links,
+semantic landmarks, `prefers-reduced-motion` support, keyboard-operable controls (no click-only `<div>`s),
+a labeled/focus-managed modal, labeled form inputs, and `aria-live` regions on loading and error states.
 
 ## What's not done yet
 
-- **Frontend test coverage** — booking, landing page, sign-in, and both dashboards are covered; the
-  doctors directory, chat, registration, and staff-only management pages aren't yet
-- **Accessibility** — the public landing page has a real a11y pass (skip link, landmarks, focus states,
-  `prefers-reduced-motion`); the authenticated app screens haven't had the same treatment yet
+- **Frontend test coverage** — booking, landing page, sign-in/registration, both dashboards, the doctors
+  directory, and the chat window are covered; staff-only management pages (directory editing, treatment
+  rooms) aren't yet
 
 ## CI
 
