@@ -50,7 +50,7 @@ def get_availability():
 
 @appointments_bp.route("", methods=["POST"])
 @jwt_required()
-@limiter.limit("20 per hour")
+@limiter.limit("60 per hour")
 def create_appointment():
     data = request.get_json(silent=True) or {}
     doctor_id = data.get("doctorId")

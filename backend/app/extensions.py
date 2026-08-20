@@ -9,7 +9,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
 cors = CORS()
-limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "50 per hour"])
+limiter = Limiter(key_func=get_remote_address, default_limits=["2000 per day", "300 per hour"])
 
 # A global "always BEGIN IMMEDIATE" hook (via pysqlite's connect/begin
 # events) was tried here to close the appointment-booking race window

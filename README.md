@@ -164,7 +164,11 @@ selection → confirm → success, and the 409-conflict error path) and the publ
 ## What's not done yet
 
 - **Deployment** — runs locally only right now; Render (backend) + Vercel (frontend) is the intended target
-- **CI** — no GitHub Actions workflow running the test suites on push yet
 - **Frontend test coverage** — currently covers the booking flow and landing page, not the full app
 - **Accessibility** — the public landing page has a real a11y pass (skip link, landmarks, focus states,
   `prefers-reduced-motion`); the authenticated app screens haven't had the same treatment yet
+
+## CI
+
+GitHub Actions runs the backend (`pytest`) and frontend (`Vitest` + a production build) test suites on
+every push and pull request against `main`. See `.github/workflows/ci.yml`.
