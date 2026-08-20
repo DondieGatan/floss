@@ -5,11 +5,15 @@ import { useReveal } from '../hooks/useReveal';
 import { useAuth } from '../context/AuthContext';
 import heroPhoto from '../assets/Top_Page.jpg';
 import aboutPhoto from '../assets/Third_Page.jpg';
+import generalPhoto from '../assets/General_Dentistry.jpg';
+import orthoPhoto from '../assets/Orthodontics.jpg';
+import pediatricPhoto from '../assets/Pediatric_Dentistry.jpg';
+import benefitsPhoto from '../assets/Second_Page.jpg';
 
 const SERVICES = [
-  { icon: '🦷', title: 'General Dentistry', text: 'Cleanings, fillings, and preventive care to keep your smile healthy year-round.' },
-  { icon: '😁', title: 'Orthodontics', text: 'Braces and aligners for bite correction, for teens and adults alike.' },
-  { icon: '👶', title: 'Pediatric Dentistry', text: 'Gentle, friendly dental care built around kids of every age.' },
+  { photo: generalPhoto, title: 'General Dentistry', text: 'Cleanings, fillings, and preventive care to keep your smile healthy year-round.' },
+  { photo: orthoPhoto, title: 'Orthodontics', text: 'Braces and aligners for bite correction, for teens and adults alike.' },
+  { photo: pediatricPhoto, title: 'Pediatric Dentistry', text: 'Gentle, friendly dental care built around kids of every age.' },
 ];
 
 const TICKER_ITEMS = ['General Dentistry', 'Orthodontics', 'Endodontics', 'Periodontics', 'Oral Surgery', 'Pediatric Dentistry'];
@@ -213,7 +217,7 @@ export default function LandingPage() {
             {SERVICES.map((s) => (
               <div className="service-card" key={s.title}>
                 <div className="service-card-art" aria-hidden="true">
-                  {s.icon}
+                  <img src={s.photo} alt="" className="service-card-img" />
                   <span className="service-card-badge">🦷</span>
                 </div>
                 <div className="service-card-body">
@@ -237,7 +241,9 @@ export default function LandingPage() {
           </div>
           <div className={`benefits-grid reveal${benefitsVisible ? ' reveal-visible' : ''}`}>
             <div className="benefits-art" aria-hidden="true">
-              <div className="benefits-circle">😁</div>
+              <div className="benefits-circle">
+                <img src={benefitsPhoto} alt="" className="benefits-circle-img" />
+              </div>
             </div>
             <div>
               <p style={{ color: 'var(--l-text-muted)', fontSize: 15, lineHeight: 1.7, maxWidth: 480 }}>
