@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/landing.css';
 import { useReveal } from '../hooks/useReveal';
 import { useAuth } from '../context/AuthContext';
+import logoIcon from '../assets/logo-icon.png';
 import heroPhoto from '../assets/Top_Page.jpg';
 import aboutPhoto from '../assets/Third_Page.jpg';
 import generalPhoto from '../assets/General_Dentistry.jpg';
@@ -71,20 +72,7 @@ function QuickBookBar() {
   );
 }
 
-function useScrolled(threshold = 12) {
-  const [scrolled, setScrolled] = useState(false);
-  useEffect(() => {
-    function onScroll() {
-      setScrolled(window.scrollY > threshold);
-    }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [threshold]);
-  return scrolled;
-}
-
 export default function LandingPage() {
-  const scrolled = useScrolled();
   const [aboutRef, aboutVisible] = useReveal();
   const [servicesRef, servicesVisible] = useReveal();
   const [benefitsRef, benefitsVisible] = useReveal();
@@ -100,10 +88,10 @@ export default function LandingPage() {
         Skip to content
       </a>
 
-      <nav className={`landing-nav${scrolled ? ' scrolled' : ''}`} aria-label="Primary">
+      <nav className="landing-nav" aria-label="Primary">
         <div className="landing-nav-inner">
           <span className="landing-brand">
-            <span className="landing-brand-mark" aria-hidden="true">🦷</span>
+            <img src={logoIcon} alt="" className="landing-brand-mark" />
             Floss Clinic
           </span>
           <div className="landing-nav-actions">
@@ -132,9 +120,11 @@ export default function LandingPage() {
 
       <main id="main-content">
         <header className="landing-section landing-hero">
-          <div className="hero-photo" style={{ backgroundImage: `url(${heroPhoto})` }}>
+          <div
+            className="hero-photo"
+            style={{ backgroundImage: `url(${heroPhoto})` }}
+          >
             <div className="hero-content">
-              <span className="hero-badge">🦷 Top-Notch Dental Care, Just for You</span>
               <h1 className="hero-title">
                 Your <span className="accent">Best Dental</span> Experience Awaits
               </h1>
@@ -143,21 +133,11 @@ export default function LandingPage() {
                 clinic's own assistant. All in one place.
               </p>
               <div className="hero-actions">
-                <a className="hero-cta" href={user ? '/dashboard' : '/register'}>
-                  {user ? 'Go to Dashboard' : 'Get Started Free'}
+                <a className="hero-cta" href="#services">
+                  See Our Services
                   <span className="hero-cta-arrow" aria-hidden="true">→</span>
                 </a>
-                <a className="l-link hero-link-onphoto" href="#services">
-                  <span className="l-link-play" aria-hidden="true">→</span>
-                  See Our Services
-                </a>
               </div>
-            </div>
-
-            <div className="hero-chips" aria-hidden="true">
-              <span className="hero-chip hero-chip-1">🦷 General Dentistry</span>
-              <span className="hero-chip hero-chip-2">😁 Orthodontics</span>
-              <span className="hero-chip hero-chip-3">👶 Pediatric Care</span>
             </div>
 
             <div className="hero-trust-card">
@@ -299,7 +279,7 @@ export default function LandingPage() {
           <div className="footer-top">
             <div>
               <span className="landing-brand">
-                <span className="landing-brand-mark" aria-hidden="true">🦷</span>
+                <img src={logoIcon} alt="" className="landing-brand-mark" />
                 Floss Clinic
               </span>
               <p className="footer-brand-sub">Your dental clinic, one place — appointments, records, and a cited assistant.</p>
