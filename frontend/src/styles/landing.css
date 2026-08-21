@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+
 .landing {
   color-scheme: light;
   --l-bg: #ffffff;
@@ -343,10 +345,37 @@
 
 .quickbook-band {
   position: relative;
+  overflow: hidden;
   width: 100vw;
   margin-left: calc(-50vw + 50%);
   padding: 56px 0;
   background: linear-gradient(120deg, #e3edff, #d6e6ff);
+}
+
+.quickbook-band::before,
+.quickbook-band::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.quickbook-band::before {
+  width: 380px;
+  height: 380px;
+  top: -140px;
+  left: 6%;
+  background: rgba(47, 111, 237, 0.35);
+}
+
+.quickbook-band::after {
+  width: 340px;
+  height: 340px;
+  bottom: -150px;
+  right: 8%;
+  background: rgba(15, 157, 146, 0.28);
 }
 
 .quickbook-section {
@@ -358,20 +387,25 @@
   z-index: 2;
 }
 
+.quickbook-intro {
+  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
 .quickbook-intro-sub {
   color: var(--l-text);
   opacity: 0.75;
   font-size: 17px;
+  font-weight: 400;
   line-height: 1.65;
   max-width: 400px;
   margin: 0;
 }
 
 .quickbook-bar {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid var(--l-border);
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 20px;
   box-shadow: var(--l-shadow-soft);
   padding: 32px;
@@ -411,6 +445,27 @@
 .quickbook-field input:focus {
   outline: none;
   border-bottom-color: var(--l-blue);
+}
+
+.quickbook-field input[type='date'],
+.quickbook-field input[type='time'] {
+  border: 1px solid var(--l-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+}
+
+.quickbook-field input[type='date']:focus,
+.quickbook-field input[type='time']:focus {
+  border-color: var(--l-blue);
+  box-shadow: 0 0 0 3px rgba(47, 111, 237, 0.15);
+}
+
+.quickbook-field input[type='date']::-webkit-calendar-picker-indicator,
+.quickbook-field input[type='time']::-webkit-calendar-picker-indicator {
+  filter: invert(38%) sepia(87%) saturate(1874%) hue-rotate(212deg) brightness(97%) contrast(96%);
+  cursor: pointer;
 }
 
 /* Section headers */
