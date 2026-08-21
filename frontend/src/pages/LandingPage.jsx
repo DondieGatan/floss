@@ -27,7 +27,7 @@ const TICKER_ITEMS = [
 ];
 
 function TickerStrip() {
-  const items = [...TICKER_ITEMS, ...TICKER_ITEMS];
+  const items = [...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS];
   return (
     <div className="ticker-strip" aria-hidden="true">
       <div className="ticker-track">
