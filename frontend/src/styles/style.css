@@ -751,7 +751,7 @@ textarea {
   margin: 0 0 6px;
 }
 
-.hero-sub {
+.hero-card .hero-sub {
   position: relative;
   opacity: 0.92;
   margin: 0;

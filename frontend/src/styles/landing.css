@@ -109,8 +109,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 32px;
-  max-width: 1180px;
+  padding: 18px 48px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
@@ -275,11 +275,13 @@
 }
 
 .hero-sub {
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 16px;
-  line-height: 1.6;
-  max-width: 440px;
-  margin: 0 0 30px;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.7;
+  max-width: 460px;
+  margin: 0 0 34px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
   animation: l-fade-up 0.5s ease 0.1s both;
 }
 
@@ -305,11 +307,12 @@
 .hero-cta {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 20px;
   background: #fff;
   color: var(--l-navy);
+  border: 1px solid transparent;
   border-radius: 999px;
-  padding: 8px 8px 8px 24px;
+  padding: 8px 8px 8px 26px;
   font-size: 14px;
   font-weight: 700;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
