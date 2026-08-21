@@ -155,6 +155,7 @@ export default function LandingPage() {
           </div>
         </div>
 
+        <div className="about-band">
         <section ref={aboutRef} className={`landing-section about-grid reveal${aboutVisible ? ' reveal-visible' : ''}`} aria-labelledby="about-heading">
           <div className="about-art" aria-hidden="true">
             <div className="about-circle-1">
@@ -188,6 +189,7 @@ export default function LandingPage() {
             </a>
           </div>
         </section>
+        </div>
 
         <TickerStrip />
 

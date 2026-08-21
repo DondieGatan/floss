@@ -489,6 +489,12 @@
 
 /* About */
 
+.about-band {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  background: linear-gradient(135deg, #c9def0, #eaf6fc);
+}
+
 .about-grid {
   display: grid;
   grid-template-columns: 0.9fr 1.1fr;
