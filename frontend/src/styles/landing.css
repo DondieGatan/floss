@@ -239,9 +239,9 @@
   border-radius: 0;
   overflow: hidden;
   background-color: #0f1f47;
-  background-size: contain;
+  background-size: cover;
   background-repeat: no-repeat;
-  background-position: center;
+  background-position: center 35%;
   animation: l-fade-up 0.6s ease both;
 }
 

@@ -4,7 +4,7 @@ import '../styles/landing.css';
 import { useReveal } from '../hooks/useReveal';
 import { useAuth } from '../context/AuthContext';
 import logoIcon from '../assets/logo-icon.png';
-import heroPhoto from '../assets/Top_Page.jpg';
+import heroPhoto from '../assets/Top_background.jpg';
 import aboutPhoto from '../assets/Third_Page.jpg';
 import generalPhoto from '../assets/General_Dentistry.jpg';
 import orthoPhoto from '../assets/Orthodontics.jpg';
