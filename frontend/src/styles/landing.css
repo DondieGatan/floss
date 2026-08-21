@@ -713,7 +713,22 @@
 
 /* Benefits */
 
+.benefits-band {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  background: linear-gradient(135deg, #0f1f47, #16295c);
+}
+
+.benefits-band .eyebrow {
+  color: #9cbdff;
+}
+
+.benefits-band .section-heading {
+  color: #fff;
+}
+
 .benefits-grid {
+  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
   display: grid;
   grid-template-columns: 0.85fr 1.15fr;
   gap: 56px;
@@ -725,27 +740,48 @@
   text-align: center;
   max-width: 640px;
   margin: 0 auto 50px;
+  padding-top: 32px;
+}
+
+.benefits-lead {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 17px;
+  line-height: 1.7;
+  max-width: 480px;
+  margin: 0;
 }
 
 .benefits-art {
   position: relative;
-  height: 320px;
+  height: 380px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.benefits-circle {
-  width: 280px;
-  height: 280px;
+.benefits-art::before {
+  content: '';
+  position: absolute;
+  width: 300px;
+  height: 300px;
   border-radius: 50%;
-  background: linear-gradient(150deg, var(--l-blue), var(--l-blue-dark));
+  background: radial-gradient(circle, rgba(47, 111, 237, 0.4), transparent 70%);
+  filter: blur(50px);
+  z-index: 0;
+}
+
+.benefits-circle {
+  position: relative;
+  z-index: 1;
+  width: 320px;
+  height: 380px;
+  border-radius: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 100px;
   overflow: hidden;
-  box-shadow: var(--l-shadow);
+  border: 4px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
 }
 
 .benefits-circle-img {
@@ -762,16 +798,20 @@
 }
 
 .stat-block .stat-num {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 800;
-  color: var(--l-blue-dark);
+  color: #fff;
   margin: 0;
 }
 
 .stat-block .stat-cap {
   font-size: 12px;
-  color: var(--l-text-muted);
+  color: rgba(255, 255, 255, 0.65);
   margin: 4px 0 0;
+}
+
+.benefits-grid .check-list li {
+  color: #fff;
 }
 
 /* Footer */
@@ -872,6 +912,15 @@
   .about-circle-1 {
     width: 260px;
     height: 260px;
+  }
+
+  .benefits-art {
+    height: 300px;
+  }
+
+  .benefits-circle {
+    width: 240px;
+    height: 300px;
   }
 
   .services-grid {

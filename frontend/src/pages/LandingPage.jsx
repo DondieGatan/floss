@@ -233,6 +233,7 @@ export default function LandingPage() {
         </section>
         </div>
 
+        <div className="benefits-band">
         <section ref={benefitsRef} className="landing-section">
           <div className="benefits-head">
             <p className="eyebrow">Why Choose Us</p>
@@ -247,7 +248,7 @@ export default function LandingPage() {
               </div>
             </div>
             <div>
-              <p style={{ color: 'var(--l-text-muted)', fontSize: 15, lineHeight: 1.7, maxWidth: 480 }}>
+              <p className="benefits-lead">
                 From the moment you book to the moment you leave, Floss Clinic keeps your care team connected and your
                 questions answered.
               </p>
@@ -276,12 +277,10 @@ export default function LandingPage() {
                   <span className="check-mark" aria-hidden="true">✓</span> An AI assistant that never guesses
                 </li>
               </ul>
-              <a className="l-btn l-btn-primary" href="/register">
-                Book an Appointment
-              </a>
             </div>
           </div>
         </section>
+        </div>
       </main>
 
       <footer className="landing-footer">
