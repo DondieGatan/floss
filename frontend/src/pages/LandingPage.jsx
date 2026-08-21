@@ -17,7 +17,14 @@ const SERVICES = [
   { photo: pediatricPhoto, title: 'Pediatric Dentistry', text: 'Gentle, friendly dental care built around kids of every age.' },
 ];
 
-const TICKER_ITEMS = ['General Dentistry', 'Orthodontics', 'Endodontics', 'Periodontics', 'Oral Surgery', 'Pediatric Dentistry'];
+const TICKER_ITEMS = [
+  { icon: '🪥', label: 'General Dentistry' },
+  { icon: '😁', label: 'Orthodontics' },
+  { icon: '🩺', label: 'Endodontics' },
+  { icon: '🦷', label: 'Periodontics' },
+  { icon: '⚕️', label: 'Oral Surgery' },
+  { icon: '👶', label: 'Pediatric Dentistry' },
+];
 
 function TickerStrip() {
   const items = [...TICKER_ITEMS, ...TICKER_ITEMS];
@@ -26,7 +33,8 @@ function TickerStrip() {
       <div className="ticker-track">
         {items.map((item, i) => (
           <span className="ticker-item" key={i}>
-            🦷 {item}
+            <span className="ticker-item-icon">{item.icon}</span>
+            {item.label}
           </span>
         ))}
       </div>
