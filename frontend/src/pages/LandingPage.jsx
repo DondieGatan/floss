@@ -201,6 +201,7 @@ export default function LandingPage() {
 
         <TickerStrip />
 
+        <div className="services-band">
         <section className="landing-section services-section" id="services" aria-labelledby="services-heading">
           <div className="services-head">
             <div>
@@ -218,7 +219,6 @@ export default function LandingPage() {
               <div className="service-card" key={s.title}>
                 <div className="service-card-art" aria-hidden="true">
                   <img src={s.photo} alt="" className="service-card-img" />
-                  <span className="service-card-badge">🦷</span>
                 </div>
                 <div className="service-card-body">
                   <h3>{s.title}</h3>
@@ -231,6 +231,7 @@ export default function LandingPage() {
             ))}
           </div>
         </section>
+        </div>
 
         <section ref={benefitsRef} className="landing-section">
           <div className="benefits-head">
