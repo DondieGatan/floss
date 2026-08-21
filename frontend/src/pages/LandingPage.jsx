@@ -166,7 +166,9 @@ export default function LandingPage() {
             </h2>
             <p>
               Floss Clinic brings your dental clinic's directory, scheduling, and patient records into a single place —
-              with a built-in assistant that only ever answers from your clinic's own information.
+              with a built-in assistant that only ever answers from your clinic's own information. No more juggling
+              spreadsheets, phone tag, or outdated patient files: everything your team and your patients need lives in
+              one connected, always-up-to-date platform.
             </p>
             <ul className="check-list">
               <li>
