@@ -139,14 +139,6 @@ export default function LandingPage() {
                 </a>
               </div>
             </div>
-
-            <div className="hero-trust-card">
-              <img src={aboutPhoto} alt="" className="hero-trust-photo" />
-              <div>
-                <p className="hero-trust-title">Real care, real people</p>
-                <p className="hero-trust-sub">Meet the team behind every visit</p>
-              </div>
-            </div>
           </div>
         </header>
 
