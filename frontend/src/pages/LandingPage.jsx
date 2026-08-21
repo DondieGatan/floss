@@ -142,15 +142,17 @@ export default function LandingPage() {
           </div>
         </header>
 
-        <div className="landing-section quickbook-section">
-          <div className="quickbook-intro">
-            <p className="eyebrow">Quick Booking</p>
-            <h2 className="section-heading">Request an Appointment in Under a Minute</h2>
-            <p className="quickbook-intro-sub">
-              Tell us who you are and when works best — our team will confirm your visit shortly after.
-            </p>
+        <div className="quickbook-band">
+          <div className="landing-section quickbook-section">
+            <div className="quickbook-intro">
+              <p className="eyebrow">Quick Booking</p>
+              <h2 className="section-heading">Request an Appointment in Under a Minute</h2>
+              <p className="quickbook-intro-sub">
+                Tell us who you are and when works best — our team will confirm your visit shortly after.
+              </p>
+            </div>
+            <QuickBookBar />
           </div>
-          <QuickBookBar />
         </div>
 
         <section ref={aboutRef} className={`landing-section about-grid reveal${aboutVisible ? ' reveal-visible' : ''}`} aria-labelledby="about-heading">

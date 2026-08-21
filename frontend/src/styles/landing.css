@@ -341,13 +341,19 @@
 
 /* Quick-book bar */
 
+.quickbook-band {
+  position: relative;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  padding: 96px 0;
+  background: linear-gradient(120deg, var(--l-bg-soft), #ffffff 65%);
+}
+
 .quickbook-section {
   display: grid;
   grid-template-columns: 0.85fr 1fr;
   gap: 56px;
   align-items: center;
-  margin-top: 96px;
-  margin-bottom: 96px;
   position: relative;
   z-index: 2;
 }
@@ -779,8 +785,11 @@
     max-width: 100%;
   }
 
+  .quickbook-band {
+    padding: 48px 0;
+  }
+
   .quickbook-section {
-    margin-top: 20px;
     gap: 28px;
   }
 
