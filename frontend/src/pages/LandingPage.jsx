@@ -142,19 +142,22 @@ export default function LandingPage() {
           </div>
         </header>
 
-        <div className="landing-section">
+        <div className="landing-section quickbook-section">
+          <div className="quickbook-intro">
+            <p className="eyebrow">Quick Booking</p>
+            <h2 className="section-heading">Request an Appointment in Under a Minute</h2>
+            <p className="quickbook-intro-sub">
+              Tell us who you are and when works best — our team will confirm your visit shortly after.
+            </p>
+          </div>
           <QuickBookBar />
         </div>
 
         <section ref={aboutRef} className={`landing-section about-grid reveal${aboutVisible ? ' reveal-visible' : ''}`} aria-labelledby="about-heading">
           <div className="about-art" aria-hidden="true">
-            <div className="about-sparkle about-sparkle-1">✨</div>
-            <div className="about-sparkle about-sparkle-2">✨</div>
-            <div className="about-circle about-circle-1">
+            <div className="about-circle-1">
               <img src={aboutPhoto} alt="" className="about-circle-img" />
             </div>
-            <div className="about-circle about-circle-2">🦷</div>
-            <div className="about-badge">✓</div>
           </div>
           <div className="about-copy">
             <p className="eyebrow">About Us</p>

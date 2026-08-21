@@ -338,34 +338,45 @@
   font-size: 15px;
 }
 
-@keyframes l-float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
 
 /* Quick-book bar */
 
+.quickbook-section {
+  display: grid;
+  grid-template-columns: 0.85fr 1fr;
+  gap: 56px;
+  align-items: center;
+  margin-top: -40px;
+  margin-bottom: 80px;
+  position: relative;
+  z-index: 2;
+}
+
+.quickbook-intro-sub {
+  color: var(--l-text-muted);
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 380px;
+  margin: 0;
+}
+
 .quickbook-bar {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--l-border);
   border-radius: 20px;
   box-shadow: var(--l-shadow);
-  padding: 20px 28px;
-  margin-top: -40px;
-  margin-bottom: 80px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr) auto;
-  gap: 20px;
-  align-items: end;
-  position: relative;
-  z-index: 2;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.quickbook-bar .l-btn-primary {
+  width: 100%;
+  margin-top: 6px;
+  padding: 13px 24px;
 }
 
 .quickbook-field label {
@@ -425,76 +436,28 @@
 .about-art {
   position: relative;
   height: 340px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.about-circle {
-  position: absolute;
+.about-circle-1 {
+  position: relative;
+  width: 300px;
+  height: 300px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  box-shadow: var(--l-shadow);
+  box-shadow: var(--l-shadow-soft);
+  background: linear-gradient(150deg, #e8f0fe, #d3e2fb);
 }
 
 .about-circle-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.about-circle-1 {
-  width: 260px;
-  height: 260px;
-  top: 0;
-  right: 20px;
-  background: linear-gradient(150deg, #e8f0fe, #d3e2fb);
-  font-size: 96px;
-}
-
-.about-circle-2 {
-  width: 160px;
-  height: 160px;
-  bottom: 0;
-  left: 0;
-  background: linear-gradient(150deg, var(--l-blue), var(--l-blue-dark));
-  font-size: 60px;
-  color: #fff;
-}
-
-.about-sparkle {
-  position: absolute;
-  font-size: 22px;
-  color: var(--l-blue);
-  animation: l-float 3.5s ease-in-out infinite;
-}
-
-.about-sparkle-1 {
-  top: 20px;
-  left: 10px;
-  animation-delay: 0.3s;
-}
-
-.about-sparkle-2 {
-  bottom: 30px;
-  right: 40px;
-  animation-delay: 1.6s;
-}
-
-.about-badge {
-  position: absolute;
-  bottom: 40px;
-  right: 0;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: var(--l-navy);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  box-shadow: var(--l-shadow);
 }
 
 .about-copy p {
@@ -800,7 +763,8 @@
 
 @media (max-width: 860px) {
   .about-grid,
-  .benefits-grid {
+  .benefits-grid,
+  .quickbook-section {
     grid-template-columns: 1fr;
   }
 
@@ -813,9 +777,13 @@
     max-width: 100%;
   }
 
-  .quickbook-bar {
-    grid-template-columns: 1fr 1fr;
+  .quickbook-section {
     margin-top: 20px;
+    gap: 28px;
+  }
+
+  .quickbook-intro-sub {
+    max-width: 100%;
   }
 
   .services-grid {
