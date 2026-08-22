@@ -454,9 +454,9 @@ textarea {
   align-items: flex-end;
   overflow: hidden;
   background-color: #0b1a3d;
-  background-size: contain;
+  background-size: cover;
   background-repeat: no-repeat;
-  background-position: center;
+  background-position: center bottom;
 }
 
 .auth-visual-col::before {
