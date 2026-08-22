@@ -22,7 +22,40 @@
   --warning-soft: rgba(185, 134, 31, 0.12);
   --shadow: 0 1px 2px rgba(15, 40, 45, 0.04), 0 8px 24px rgba(15, 40, 45, 0.06);
   --shadow-hover: 0 4px 10px rgba(15, 40, 45, 0.06), 0 16px 32px rgba(15, 40, 45, 0.1);
+  --skeleton-highlight: #e2ecec;
+  --glass-surface: rgba(255, 255, 255, 0.6);
+  --glass-surface-hover: rgba(255, 255, 255, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.6);
   --sidebar-w: 232px;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0f141f;
+  --surface: rgba(26, 33, 48, 0.7);
+  --surface-solid: #1a2130;
+  --surface-2: #232b3d;
+  --border: #313c52;
+  --text: #edf1f7;
+  --text-muted: #9aa6bb;
+  --accent: #6b93ff;
+  --accent-strong: #4c74e0;
+  --accent-soft: rgba(107, 147, 255, 0.18);
+  --accent-2: #2bbfb3;
+  --accent-2-strong: #1a9d92;
+  --accent-2-soft: rgba(43, 191, 179, 0.18);
+  --danger: #ff6b6b;
+  --danger-soft: rgba(255, 107, 107, 0.14);
+  --success: #4ade80;
+  --success-soft: rgba(74, 222, 128, 0.14);
+  --warning: #f0b93d;
+  --warning-soft: rgba(240, 185, 61, 0.16);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-hover: 0 4px 10px rgba(0, 0, 0, 0.35), 0 16px 32px rgba(0, 0, 0, 0.4);
+  --skeleton-highlight: #3a4560;
+  --glass-surface: rgba(35, 43, 61, 0.6);
+  --glass-surface-hover: rgba(35, 43, 61, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.1);
 }
 
 * {
@@ -280,6 +313,28 @@ textarea {
   border-top: 1px solid var(--border);
   padding-top: 12px;
   margin-top: 12px;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.theme-toggle:hover {
+  background: var(--surface);
+  border-color: var(--accent);
 }
 
 .app-main {
@@ -560,7 +615,7 @@ textarea {
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #e4edee;
+  background: var(--border);
 }
 
 .btn-ghost {
@@ -812,10 +867,10 @@ textarea {
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--glass-surface);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--glass-border);
   border-radius: 16px;
   padding: 16px 18px;
   display: flex;
@@ -826,7 +881,7 @@ textarea {
 
 .stat-card:hover {
   transform: translateY(-3px);
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--glass-surface-hover);
   box-shadow: var(--shadow-hover);
 }
 
@@ -1244,7 +1299,7 @@ textarea {
 /* Skeletons */
 
 .skeleton {
-  background: linear-gradient(90deg, var(--surface-2) 25%, #e2ecec 37%, var(--surface-2) 63%);
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--skeleton-highlight) 37%, var(--surface-2) 63%);
   background-size: 400% 100%;
   animation: skeleton-shimmer 1.4s ease infinite;
   border-radius: 10px;

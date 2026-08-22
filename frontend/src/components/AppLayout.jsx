@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const PATIENT_LINKS = [
   { to: '/dashboard', icon: '🏠', label: 'Dashboard' },
@@ -17,6 +18,7 @@ const STAFF_LINKS = [
 
 export default function AppLayout({ children }) {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const isStaff = user?.role === 'staff' || user?.role === 'admin';
 
   return (
@@ -48,6 +50,16 @@ export default function AppLayout({ children }) {
         </nav>
 
         <div className="app-sidebar-footer">
+          <button
+            className="theme-toggle"
+            type="button"
+            onClick={toggleTheme}
+            aria-pressed={theme === 'dark'}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            <span aria-hidden="true">{theme === 'dark' ? '☀️' : '🌙'}</span>
+            {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+          </button>
           <div className="header-user" style={{ marginBottom: 8 }}>
             {user?.fullName}
             <br />
