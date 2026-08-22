@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, ApiError } from '../context/AuthContext';
 import { useSlowRequestNotice } from '../hooks/useSlowRequestNotice';
-import heroPhoto from '../assets/Top_Page.jpg';
+import heroPhoto from '../assets/Top_background.jpg';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -29,13 +29,29 @@ export default function LoginPage() {
 
   return (
     <div className="auth-split">
+      <div className="auth-visual-col" aria-hidden="true" style={{ backgroundImage: `url(${heroPhoto})` }}>
+        <div className="auth-visual-content">
+          <p className="auth-visual-eyebrow">🦷 Floss Clinic</p>
+          <h2 className="auth-visual-heading">
+            Welcome
+            <br />
+            Back.
+          </h2>
+          <p className="auth-visual-sub">
+            Sign in to manage appointments, message your care team, and get instant, cited answers from your
+            clinic's assistant.
+          </p>
+        </div>
+      </div>
+
       <div className="auth-form-col">
         <form className="auth-card" onSubmit={handleSubmit}>
           <h1 className="brand">
             <span className="brand-mark">🦷</span>
             Floss Clinic
           </h1>
-          <p className="brand-sub">Your dental clinic, one place — appointments, records, and a cited assistant.</p>
+          <h2 className="auth-card-title">Sign In</h2>
+          <p className="brand-sub">Talk to your clinic, day or night — no matter where you are.</p>
 
           {error && (
             <div className="form-error" role="alert">
@@ -65,14 +81,6 @@ export default function LoginPage() {
             Don&apos;t have an account? <Link to="/register">Sign up free</Link>
           </p>
         </form>
-      </div>
-
-      <div className="auth-visual-col" aria-hidden="true">
-        <div className="auth-blob">
-          <img src={heroPhoto} alt="" className="auth-blob-img" />
-        </div>
-        <div className="auth-float auth-float-1">😁 Healthy Smiles</div>
-        <div className="auth-float auth-float-2">💬 Cited Answers</div>
       </div>
     </div>
   );
