@@ -454,14 +454,14 @@ textarea {
   align-items: flex-end;
   overflow: hidden;
   background-size: cover;
-  background-position: center 30%;
+  background-position: center;
 }
 
 .auth-visual-col::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(165deg, rgba(11, 30, 71, 0.82), rgba(15, 157, 146, 0.55));
+  background: linear-gradient(to top, rgba(6, 16, 40, 0.92) 0%, rgba(11, 30, 71, 0.55) 45%, rgba(15, 157, 146, 0.2) 100%);
 }
 
 .auth-visual-content {

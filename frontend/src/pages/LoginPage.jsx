@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, ApiError } from '../context/AuthContext';
 import { useSlowRequestNotice } from '../hooks/useSlowRequestNotice';
-import heroPhoto from '../assets/Top_background.jpg';
+import heroPhoto from '../assets/Login_Page_picture.jpg';
 
 export default function LoginPage() {
   const { login } = useAuth();
