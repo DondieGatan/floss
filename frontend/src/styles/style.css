@@ -202,6 +202,8 @@ textarea {
   font-weight: 800;
   margin: 0;
   letter-spacing: -0.01em;
+  color: var(--text);
+  text-decoration: none;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -257,6 +259,15 @@ textarea {
 
 .app-sidebar-brand {
   padding: 6px 10px 20px;
+}
+
+.app-sidebar-brand .brand {
+  border-radius: 8px;
+  transition: opacity 0.15s ease;
+}
+
+.app-sidebar-brand .brand:hover {
+  opacity: 0.75;
 }
 
 .app-nav {

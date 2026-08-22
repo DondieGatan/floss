@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -29,10 +29,10 @@ export default function AppLayout({ children }) {
 
       <aside className="app-sidebar" aria-label="Sidebar">
         <div className="app-sidebar-brand">
-          <span className="brand">
+          <Link to="/" className="brand" title="Back to the website">
             <span className="brand-mark" aria-hidden="true">🦷</span>
             Floss Clinic
-          </span>
+          </Link>
         </div>
 
         <nav className="app-nav" aria-label="Primary">
