@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, ApiError } from '../context/AuthContext';
 import { useSlowRequestNotice } from '../hooks/useSlowRequestNotice';
 import heroPhoto from '../assets/Login_Page_picture.jpg';
+import logoIcon from '../assets/logo-icon.png';
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -32,7 +33,6 @@ export default function RegisterPage() {
     <div className="auth-split">
       <div className="auth-visual-col" aria-hidden="true" style={{ backgroundImage: `url(${heroPhoto})` }}>
         <div className="auth-visual-content">
-          <p className="auth-visual-eyebrow">🦷 Floss Clinic</p>
           <h2 className="auth-visual-heading">
             Join
             <br />
@@ -48,7 +48,7 @@ export default function RegisterPage() {
       <div className="auth-form-col">
         <form className="auth-card" onSubmit={handleSubmit}>
           <h1 className="brand">
-            <span className="brand-mark">🦷</span>
+            <img src={logoIcon} alt="" className="brand-mark" />
             Floss Clinic
           </h1>
           <h2 className="auth-card-title">Create Account</h2>

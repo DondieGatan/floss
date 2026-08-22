@@ -1,6 +1,7 @@
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import logoIcon from '../assets/logo-icon.png';
 
 const PATIENT_LINKS = [
   { to: '/dashboard', icon: '🏠', label: 'Dashboard' },
@@ -30,7 +31,7 @@ export default function AppLayout({ children }) {
       <aside className="app-sidebar" aria-label="Sidebar">
         <div className="app-sidebar-brand">
           <Link to="/" className="brand" title="Back to the website">
-            <span className="brand-mark" aria-hidden="true">🦷</span>
+            <img src={logoIcon} alt="" className="brand-mark" />
             Floss Clinic
           </Link>
         </div>

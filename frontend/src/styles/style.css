@@ -210,15 +210,14 @@ textarea {
 }
 
 .brand-mark {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  background: #fff;
   border-radius: 8px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 14px;
+  padding: 3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
 }
 
 .brand-sub {
@@ -418,6 +417,12 @@ textarea {
   animation: card-rise 0.4s ease both;
 }
 
+.auth-card .btn-primary {
+  display: block;
+  width: fit-content;
+  margin: 6px auto 0;
+}
+
 @keyframes card-rise {
   from {
     opacity: 0;
@@ -470,20 +475,6 @@ textarea {
   position: relative;
   z-index: 1;
   padding: 64px;
-}
-
-.auth-visual-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: 999px;
-  padding: 6px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  margin: 0 0 24px;
 }
 
 .auth-visual-heading {
