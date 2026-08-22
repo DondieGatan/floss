@@ -453,7 +453,9 @@ textarea {
   display: flex;
   align-items: flex-end;
   overflow: hidden;
-  background-size: cover;
+  background-color: #0b1a3d;
+  background-size: contain;
+  background-repeat: no-repeat;
   background-position: center;
 }
 
