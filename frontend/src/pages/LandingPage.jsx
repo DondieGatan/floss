@@ -81,6 +81,7 @@ function QuickBookBar() {
 }
 
 export default function LandingPage() {
+  const [quickbookRef, quickbookVisible] = useReveal();
   const [aboutRef, aboutVisible] = useReveal();
   const [servicesRef, servicesVisible] = useReveal();
   const [benefitsRef, benefitsVisible] = useReveal();
@@ -143,7 +144,11 @@ export default function LandingPage() {
               <div className="hero-actions">
                 <a className="hero-cta" href="#services">
                   See Our Services
-                  <span className="hero-cta-arrow" aria-hidden="true">→</span>
+                  <span className="hero-cta-arrow" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5 12h13.5M13 6l6.5 6-6.5 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
                 </a>
               </div>
             </div>
@@ -151,7 +156,7 @@ export default function LandingPage() {
         </header>
 
         <div className="quickbook-band">
-          <div className="landing-section quickbook-section">
+          <div ref={quickbookRef} className={`landing-section quickbook-section reveal${quickbookVisible ? ' reveal-visible' : ''}`}>
             <div className="quickbook-intro">
               <p className="eyebrow">Quick Booking</p>
               <h2 className="section-heading">Request an Appointment in Under a Minute</h2>
