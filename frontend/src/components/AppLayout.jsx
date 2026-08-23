@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -20,7 +21,21 @@ const STAFF_LINKS = [
 export default function AppLayout({ children }) {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const isStaff = user?.role === 'staff' || user?.role === 'admin';
+
+  function closeMobileNav() {
+    setMobileNavOpen(false);
+  }
+
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    function onKeyDown(e) {
+      if (e.key === 'Escape') closeMobileNav();
+    }
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [mobileNavOpen]);
 
   return (
     <div className="app-shell">
@@ -28,12 +43,33 @@ export default function AppLayout({ children }) {
         Skip to content
       </a>
 
-      <aside className="app-sidebar" aria-label="Sidebar">
+      <div className="app-mobile-topbar">
+        <button
+          className="app-mobile-menu-btn"
+          type="button"
+          onClick={() => setMobileNavOpen(true)}
+          aria-label="Open menu"
+          aria-expanded={mobileNavOpen}
+        >
+          <span aria-hidden="true">☰</span>
+        </button>
+        <Link to="/" className="brand" title="Back to the website">
+          <img src={logoIcon} alt="" className="brand-mark" />
+          Floss Clinic
+        </Link>
+      </div>
+
+      {mobileNavOpen && <div className="app-sidebar-backdrop" onClick={closeMobileNav} aria-hidden="true" />}
+
+      <aside className={`app-sidebar${mobileNavOpen ? ' open' : ''}`} aria-label="Sidebar">
         <div className="app-sidebar-brand">
           <Link to="/" className="brand" title="Back to the website">
             <img src={logoIcon} alt="" className="brand-mark" />
             Floss Clinic
           </Link>
+          <button className="app-sidebar-close" type="button" onClick={closeMobileNav} aria-label="Close menu">
+            ✕
+          </button>
         </div>
 
         <nav className="app-nav" aria-label="Primary">
@@ -42,6 +78,7 @@ export default function AppLayout({ children }) {
             <NavLink
               key={link.to}
               to={link.to}
+              onClick={closeMobileNav}
               className={({ isActive }) => `app-nav-link${isActive ? ' active' : ''}`}
             >
               <span className="app-nav-icon" aria-hidden="true">{link.icon}</span>
