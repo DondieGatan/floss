@@ -4,18 +4,82 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import logoIcon from '../assets/logo-icon.png';
 
+function HouseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 11.5 12 4l9 7.5" />
+      <path d="M5.5 10v9a1 1 0 0 0 1 1H10v-5h4v5h3.5a1 1 0 0 0 1-1v-9" />
+    </svg>
+  );
+}
+
+function ToothIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 3c1.2 0 1.8.6 4 .6s2.8-.6 4-.6c2.2 0 3.5 2 3.5 5 0 4-1.2 8-2.5 10.5-.5 1-1.2 1.9-2 1.9s-1-1.6-1.3-3.3c-.3-1.7-.7-3.1-1.7-3.1s-1.4 1.4-1.7 3.1c-.3 1.7-.5 3.3-1.3 3.3s-1.5-.9-2-1.9C5.7 16 4.5 12 4.5 8c0-3 1.3-5 3.5-5z" />
+    </svg>
+  );
+}
+
+function CalendarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="4" y="5" width="16" height="16" rx="2" />
+      <path d="M4 10h16" />
+      <path d="M8 3v4" />
+      <path d="M16 3v4" />
+    </svg>
+  );
+}
+
+function ChatIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H10l-4.5 4v-4H5a1 1 0 0 1-1-1V5z" />
+    </svg>
+  );
+}
+
+function PeopleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="3.2" />
+      <path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6" />
+    </svg>
+  );
+}
+
+function ClipboardIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="5" y="4" width="14" height="17" rx="2" />
+      <path d="M9 3.5h6a1 1 0 0 1 1 1V6H8V4.5a1 1 0 0 1 1-1z" />
+      <path d="M8.5 11h7M8.5 15h7" />
+    </svg>
+  );
+}
+
+function DoorIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="6" y="3" width="12" height="18" rx="1" />
+      <circle cx="14.5" cy="12" r="0.9" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 const PATIENT_LINKS = [
-  { to: '/dashboard', icon: '🏠', label: 'Dashboard' },
-  { to: '/doctors', icon: '🦷', label: 'Dentists' },
-  { to: '/appointments', icon: '📅', label: 'My Appointments' },
-  { to: '/knowledge-base', icon: '💬', label: 'Ask Floss Clinic' },
+  { to: '/dashboard', icon: <HouseIcon />, label: 'Dashboard' },
+  { to: '/doctors', icon: <ToothIcon />, label: 'Dentists' },
+  { to: '/appointments', icon: <CalendarIcon />, label: 'My Appointments' },
+  { to: '/knowledge-base', icon: <ChatIcon />, label: 'Ask Floss Clinic' },
 ];
 
 const STAFF_LINKS = [
-  { to: '/manage/directory', icon: '🦷', label: 'Directory' },
-  { to: '/manage/appointments', icon: '📋', label: 'All Appointments' },
-  { to: '/manage/admissions', icon: '🪑', label: 'Treatment Rooms' },
-  { to: '/knowledge-base', icon: '💬', label: 'Knowledge Base' },
+  { to: '/manage/directory', icon: <PeopleIcon />, label: 'Directory' },
+  { to: '/manage/appointments', icon: <ClipboardIcon />, label: 'All Appointments' },
+  { to: '/manage/admissions', icon: <DoorIcon />, label: 'Treatment Rooms' },
+  { to: '/knowledge-base', icon: <ChatIcon />, label: 'Knowledge Base' },
 ];
 
 export default function AppLayout({ children }) {
@@ -23,6 +87,13 @@ export default function AppLayout({ children }) {
   const { theme, toggleTheme } = useTheme();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const isStaff = user?.role === 'staff' || user?.role === 'admin';
+  const initials = (user?.fullName || 'U')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase();
 
   function closeMobileNav() {
     setMobileNavOpen(false);
@@ -72,6 +143,14 @@ export default function AppLayout({ children }) {
           </button>
         </div>
 
+        <div className="app-sidebar-profile">
+          <div className="app-sidebar-avatar" aria-hidden="true">{initials}</div>
+          <div className="app-sidebar-profile-info">
+            <div className="app-sidebar-profile-name">{user?.fullName}</div>
+            <span className="role-badge">{user?.role}</span>
+          </div>
+        </div>
+
         <nav className="app-nav" aria-label="Primary">
           <div className="app-nav-section">{isStaff ? 'Staff' : 'Patient'}</div>
           {(isStaff ? STAFF_LINKS : PATIENT_LINKS).map((link) => (
@@ -98,11 +177,6 @@ export default function AppLayout({ children }) {
             <span aria-hidden="true">{theme === 'dark' ? '☀️' : '🌙'}</span>
             {theme === 'dark' ? 'Light mode' : 'Dark mode'}
           </button>
-          <div className="header-user" style={{ marginBottom: 8 }}>
-            {user?.fullName}
-            <br />
-            <span className="role-badge">{user?.role}</span>
-          </div>
           <button className="btn btn-ghost btn-small btn-block" type="button" onClick={logout}>
             Logout
           </button>
