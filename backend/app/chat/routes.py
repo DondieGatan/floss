@@ -10,6 +10,7 @@ from app.utils import current_user_id
 from app.ml import embed_query
 from app.chat.retrieval import retrieve, is_low_confidence
 from app.chat.generation import build_prompt, stream_answer
+from app.chat.account_context import build_account_context
 
 FALLBACK_MESSAGE = "I don't have enough information in the uploaded document(s) to answer that."
 
@@ -103,19 +104,25 @@ def post_message(conversation_id):
     query_vector = embed_query(query)
     results = retrieve(conversation.document_id, query_vector)
     low_confidence = is_low_confidence(results)
+    # Live per-user data (this user's own appointments) — see
+    # app/chat/account_context.py. None for staff/admin (no PatientProfile),
+    # so their behavior is unchanged.
+    account_context = build_account_context(current_user_id(), query)
+    doc_results = [] if low_confidence else results
+    has_context = bool(doc_results) or account_context is not None
     conversation_id_ = conversation.id  # captured for the generator, run after this request's own context
 
     def generate():
         answer_parts = []
 
-        if low_confidence:
+        if not has_context:
             answer_parts.append(FALLBACK_MESSAGE)
             yield _sse(None, FALLBACK_MESSAGE)
             cited_ids = []
         else:
-            cited_ids = [chunk.id for chunk, _score in results]
+            cited_ids = [chunk.id for chunk, _score in doc_results]
             try:
-                for token in stream_answer(build_prompt(query, results)):
+                for token in stream_answer(build_prompt(query, doc_results, account_context)):
                     answer_parts.append(token)
                     yield _sse(None, token)
             except Exception:
