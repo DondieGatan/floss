@@ -1,11 +1,14 @@
 import { useState, useCallback, useRef } from 'react';
-import { API_BASE, getAccessToken } from '../api/client';
+import { api } from '../api/client';
 
 /**
  * Drives one conversation's message list, streaming the assistant's reply
  * token-by-token via fetch + ReadableStream (not EventSource — EventSource
  * can't attach a JWT Authorization header, which every Floss Clinic API call
- * needs).
+ * needs). Goes through api.postStream() rather than a bare fetch() so an
+ * expired access token gets silently refreshed-and-retried the same way
+ * every other API call in the app already does — a raw fetch() here would
+ * skip that entirely and just fail once the 30-minute token expires.
  */
 export function useChatStream(conversationId, initialMessages = []) {
   const [messages, setMessages] = useState(initialMessages);
@@ -32,15 +35,7 @@ export function useChatStream(conversationId, initialMessages = []) {
     ]);
 
     try {
-      const token = getAccessToken();
-      const res = await fetch(`${API_BASE}/chat/conversations/${conversationId}/messages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ content }),
-      });
+      const res = await api.postStream(`/chat/conversations/${conversationId}/messages`, { content });
 
       if (!res.ok || !res.body) {
         let message = 'Failed to reach the assistant.';
