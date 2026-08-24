@@ -5,10 +5,9 @@ services:
     plan: free
     rootDir: backend
     buildCommand: "pip install -r requirements.txt && flask db upgrade && python seed.py && python seed_knowledge_base.py"
-    # Default gunicorn worker timeout (30s) isn't enough for the embedding
-    # model's first load on this tier's CPU — see app/ml.py:warm_embedding_model,
-    # which now loads it at boot instead of on a request. This is a safety
-    # net on top of that, not a substitute for it.
+    # Generous safety margin on top of gunicorn's 30s default — a slow Groq
+    # response or a cold Hugging Face Inference API call (see app/ml.py)
+    # shouldn't turn into a 500.
     startCommand: "gunicorn run:app --timeout 120"
     healthCheckPath: /api/health
     envVars:
@@ -19,6 +18,8 @@ services:
       - key: JWT_SECRET_KEY
         generateValue: true
       - key: GROQ_API_KEY
+        sync: false
+      - key: HF_TOKEN
         sync: false
       - key: DATABASE_URL
         sync: false

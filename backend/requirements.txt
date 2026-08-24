@@ -1,14 +1,3 @@
-# CPU-only PyTorch wheel index as primary, PyPI as fallback for everything
-# else — without this, sentence-transformers pulls in the full GPU build of
-# torch plus the entire NVIDIA CUDA toolkit as transitive dependencies (seen
-# on Render's build: nvidia-cublas, nvidia-cudnn, nvidia-cufft, nvidia-nccl,
-# etc.), which is pure dead weight on a CPU-only free-tier instance and
-# was almost certainly what pushed a worker over the 512MB RAM limit and
-# got it SIGKILLed mid-request ("Worker was sent SIGKILL! Perhaps out of
-# memory?" in the Render logs).
---index-url https://download.pytorch.org/whl/cpu
---extra-index-url https://pypi.org/simple
-
 Flask==3.0.3
 Flask-SQLAlchemy==3.1.1
 Flask-Migrate==4.0.7
@@ -19,10 +8,7 @@ Werkzeug==3.0.4
 python-dotenv==1.0.1
 psycopg2-binary==2.9.12
 PyMuPDF==1.24.11
-# Newer major versions than a "stable" pin would normally pick — required
-# for prebuilt wheels on this machine's Python 3.14; see requirements.txt
-# note in the repo README for the wheel-availability reasoning.
-sentence-transformers==6.0.0
+httpx==0.28.1
 numpy==2.5.2
 groq==1.6.0
 pytest==8.3.3

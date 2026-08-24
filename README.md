@@ -69,10 +69,12 @@ scale-appropriate limitation rather than silently missing.
 
 ### Grounded, cited chat — not a hallucination machine
 
-`sentence-transformers` (`all-MiniLM-L6-v2`) embeds every uploaded document into 384-dim vectors at ingest
-time; retrieval is a brute-force cosine similarity search (a matrix dot-product — no vector DB, because at
-portfolio scale a few thousand chunks fit in memory and an external index would be unjustified
-infrastructure). Retrieval sits behind a **similarity-confidence threshold**: if nothing retrieved clears
+`all-MiniLM-L6-v2` embeds every uploaded document into 384-dim vectors at ingest time, called remotely
+through Hugging Face's Inference API (`app/ml.py`) rather than run in-process — `torch` + `transformers`'
+baseline memory footprint alone doesn't fit alongside the rest of the app on a 512MB instance, confirmed the
+hard way via Render's own memory metrics. Retrieval is a brute-force cosine similarity search (a matrix
+dot-product — no vector DB, because at portfolio scale a few thousand chunks fit in memory and an external
+index would be unjustified infrastructure). Retrieval sits behind a **similarity-confidence threshold**: if nothing retrieved clears
 it, the assistant says it doesn't know instead of guessing. Every answer streams token-by-token over SSE and
 carries `[1]`, `[2]`-style citations back to the exact source chunk.
 
@@ -101,7 +103,7 @@ across the same route set on purpose.
 | | |
 |---|---|
 | **Backend** | Flask (app-factory + blueprints), SQLAlchemy, Alembic, Flask-JWT-Extended, Flask-Limiter, SQLite |
-| **RAG** | sentence-transformers (embeddings), Groq (`llama-3.1-8b-instant`, generation), brute-force cosine retrieval |
+| **RAG** | Hugging Face Inference API (`all-MiniLM-L6-v2` embeddings, called remotely), Groq (`llama-3.1-8b-instant`, generation), brute-force cosine retrieval |
 | **Frontend** | React 19, Vite, react-router-dom, fetch + ReadableStream SSE (not EventSource — it can't carry auth headers) |
 | **Testing** | pytest (112 tests, backend), Vitest + React Testing Library (frontend) |
 
@@ -153,7 +155,8 @@ npm run dev           # http://localhost:5173
 ```
 
 **Environment variables** (backend, `.env` or shell): `GROQ_API_KEY` (chat generation; without it, chat
-degrades gracefully to an "assistant temporarily unavailable" message rather than crashing),
+degrades gracefully to an "assistant temporarily unavailable" message rather than crashing), `HF_TOKEN`
+(embeddings via Hugging Face's Inference API — required for ingestion and retrieval to work at all),
 `JWT_SECRET_KEY`, `SECRET_KEY`, `DATABASE_URL` (defaults to a local SQLite file).
 
 ## Testing

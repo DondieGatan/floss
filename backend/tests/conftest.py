@@ -84,6 +84,34 @@ def _fake_vector(seed):
     return vector / np.linalg.norm(vector)
 
 
+@pytest.fixture(autouse=True)
+def _mock_embeddings(request, monkeypatch):
+    """Embedding calls hit a real network API (see app/ml.py), so mock them
+    by default — the suite shouldn't need HF_TOKEN or network access for
+    tests that don't care about actual semantic retrieval quality. Tests
+    that do (tests/test_retrieval.py) opt out via the `real_embeddings`
+    marker and hit the real API instead."""
+    if request.node.get_closest_marker("real_embeddings"):
+        return
+
+    import app.ml as ml
+    import app.chat.routes as chat_routes
+
+    def _fake_embed_texts(texts):
+        if not texts:
+            return np.empty((0,), dtype=np.float32)
+        return np.vstack([_fake_vector(seed=abs(hash(t)) % (2**32)) for t in texts])
+
+    def _fake_embed_query(text):
+        return _fake_vector(seed=abs(hash(text)) % (2**32))
+
+    monkeypatch.setattr(ml, "embed_texts", _fake_embed_texts)
+    monkeypatch.setattr(ml, "embed_query", _fake_embed_query)
+    # routes.py imports embed_query by name at module load time, so patching
+    # app.ml alone doesn't reach it — it needs its own binding patched too.
+    monkeypatch.setattr(chat_routes, "embed_query", _fake_embed_query)
+
+
 @pytest.fixture()
 def uploaded_document(app, register_user):
     """Creates a User + a ready Document with a couple of Chunk rows,

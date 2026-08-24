@@ -1,8 +1,12 @@
 """Retrieval-quality tests against a fixed fixture doc with known, distinct
 paragraphs (see tests/fixtures/sample.txt). These use the REAL embedding
-model (not mocked) since they're exercising actual semantic retrieval
+API (not mocked) since they're exercising actual semantic retrieval
 correctness — the one place in the suite where that real cost is worth
 paying. Also serves as the empirical validation for SIMILARITY_THRESHOLD.
+
+Requires HF_TOKEN (a real network call to Hugging Face's Inference API —
+see app/ml.py) and skips cleanly without it, rather than failing CI runs
+that don't have the secret configured.
 """
 import os
 
@@ -13,6 +17,11 @@ from app.models import Document
 from app.documents.ingestion import ingest_document
 from app.chat.retrieval import retrieve, is_low_confidence
 from app.ml import embed_query
+
+pytestmark = [
+    pytest.mark.real_embeddings,
+    pytest.mark.skipif(not os.environ.get("HF_TOKEN"), reason="needs HF_TOKEN for real embedding calls"),
+]
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), "fixtures", "sample.txt")
 
