@@ -89,8 +89,11 @@ export function useChatStream(conversationId, initialMessages = []) {
           }
         }
       }
-    } catch (err) {
-      setError(err.message || 'Something went wrong.');
+    } catch {
+      // Covers network failures (fetch() throwing "Failed to fetch" on a
+      // dropped/refused connection) and non-OK HTTP responses alike —
+      // neither is something a client should see verbatim.
+      setError('Sorry, can you repeat that again?');
       setMessages((prev) => prev.filter((m) => m.id !== assistantTempId));
     } finally {
       setSending(false);

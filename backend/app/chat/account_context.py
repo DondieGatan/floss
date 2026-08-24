@@ -24,8 +24,12 @@ MAX_APPOINTMENTS = 8
 # real classifier — it only needs to catch the obvious phrasings.
 _PERSONAL_KEYWORDS = (
     "my appointment", "my appointments", "my visit", "my visits", "my schedule",
-    "my booking", "my bookings", "my dentist", "reschedule", "cancel my",
-    "next appointment", "upcoming appointment", "when is my", "when's my", "do i have",
+    "my booking", "my bookings", "my dentist", "my timing", "my time",
+    "reschedule", "cancel my",
+    "next appointment", "upcoming appointment", "upcoming appointments",
+    "appointment today", "appointment for today", "today's appointment", "todays appointment",
+    "when is my", "when's my", "what time is my", "what date is my",
+    "do i have", "am i due",
 )
 
 

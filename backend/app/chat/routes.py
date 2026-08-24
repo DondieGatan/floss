@@ -11,6 +11,7 @@ from app.ml import embed_query
 from app.chat.retrieval import retrieve, is_low_confidence
 from app.chat.generation import build_prompt, stream_answer
 from app.chat.account_context import build_account_context
+from app.chat.greetings import is_pure_greeting, GREETING_RESPONSE
 
 FALLBACK_MESSAGE = "I don't have enough information in the uploaded document(s) to answer that."
 
@@ -101,21 +102,35 @@ def post_message(conversation_id):
     db.session.add(Message(conversation_id=conversation.id, role="user", content=query))
     db.session.commit()
 
-    query_vector = embed_query(query)
-    results = retrieve(conversation.document_id, query_vector)
-    low_confidence = is_low_confidence(results)
-    # Live per-user data (this user's own appointments) — see
-    # app/chat/account_context.py. None for staff/admin (no PatientProfile),
-    # so their behavior is unchanged.
-    account_context = build_account_context(current_user_id(), query)
-    doc_results = [] if low_confidence else results
-    has_context = bool(doc_results) or account_context is not None
+    greeting = is_pure_greeting(query)
+    # Skip embedding/retrieval/account-lookup entirely for a bare "hi" —
+    # none of that work is needed to answer it, and it'd otherwise fall
+    # through to the low-confidence fallback ("I don't have enough
+    # information"), which is a bad response to a greeting.
+    if greeting:
+        doc_results = []
+        account_context = None
+        has_context = True
+    else:
+        query_vector = embed_query(query)
+        results = retrieve(conversation.document_id, query_vector)
+        low_confidence = is_low_confidence(results)
+        # Live per-user data (this user's own appointments) — see
+        # app/chat/account_context.py. None for staff/admin (no PatientProfile),
+        # so their behavior is unchanged.
+        account_context = build_account_context(current_user_id(), query)
+        doc_results = [] if low_confidence else results
+        has_context = bool(doc_results) or account_context is not None
     conversation_id_ = conversation.id  # captured for the generator, run after this request's own context
 
     def generate():
         answer_parts = []
 
-        if not has_context:
+        if greeting:
+            answer_parts.append(GREETING_RESPONSE)
+            yield _sse(None, GREETING_RESPONSE)
+            cited_ids = []
+        elif not has_context:
             answer_parts.append(FALLBACK_MESSAGE)
             yield _sse(None, FALLBACK_MESSAGE)
             cited_ids = []

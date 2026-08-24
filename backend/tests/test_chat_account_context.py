@@ -44,8 +44,12 @@ def test_is_personal_query_matches_common_phrasings():
     assert is_personal_query("whats my next appointment?")
     assert is_personal_query("Can I reschedule?")
     assert is_personal_query("I need to cancel my visit")
+    assert is_personal_query("What's my appointment today?")
+    assert is_personal_query("Do I have any upcoming appointments?")
+    assert is_personal_query("What time is my appointment?")
     assert not is_personal_query("What are your hours?")
     assert not is_personal_query("Do you take insurance?")
+    assert not is_personal_query("Tell me about your dentists")
 
 
 def test_account_context_none_for_non_personal_query(app, register_user):
