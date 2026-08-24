@@ -43,8 +43,12 @@ class Config:
     # driver level and retries, instead of erroring immediately. See
     # app/appointments/routes.py for what this is — and isn't — a guarantee
     # against; the actual defense against double-booking is the partial
-    # unique index on Appointment in app/models.py.
-    SQLALCHEMY_ENGINE_OPTIONS = {"connect_args": {"timeout": 10}}
+    # unique index on Appointment in app/models.py. `timeout` is a SQLite-only
+    # DBAPI connect arg — psycopg2 rejects it outright, so it's only applied
+    # when we're actually running on SQLite.
+    SQLALCHEMY_ENGINE_OPTIONS = (
+        {"connect_args": {"timeout": 10}} if SQLALCHEMY_DATABASE_URI.startswith("sqlite") else {}
+    )
 
     # Ingestion tuning — kept here (not constants.py) since MAX_UPLOAD_MB in
     # particular is the kind of thing worth overriding per-environment.
