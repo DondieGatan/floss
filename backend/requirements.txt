@@ -1,3 +1,14 @@
+# CPU-only PyTorch wheel index as primary, PyPI as fallback for everything
+# else — without this, sentence-transformers pulls in the full GPU build of
+# torch plus the entire NVIDIA CUDA toolkit as transitive dependencies (seen
+# on Render's build: nvidia-cublas, nvidia-cudnn, nvidia-cufft, nvidia-nccl,
+# etc.), which is pure dead weight on a CPU-only free-tier instance and
+# was almost certainly what pushed a worker over the 512MB RAM limit and
+# got it SIGKILLed mid-request ("Worker was sent SIGKILL! Perhaps out of
+# memory?" in the Render logs).
+--index-url https://download.pytorch.org/whl/cpu
+--extra-index-url https://pypi.org/simple
+
 Flask==3.0.3
 Flask-SQLAlchemy==3.1.1
 Flask-Migrate==4.0.7
