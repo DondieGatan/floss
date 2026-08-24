@@ -6,6 +6,7 @@ Flask-Cors==4.0.1
 Flask-Limiter==3.9.2
 Werkzeug==3.0.4
 python-dotenv==1.0.1
+psycopg2-binary==2.9.12
 PyMuPDF==1.24.11
 # Newer major versions than a "stable" pin would normally pick — required
 # for prebuilt wheels on this machine's Python 3.14; see requirements.txt
