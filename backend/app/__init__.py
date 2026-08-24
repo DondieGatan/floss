@@ -67,11 +67,4 @@ def create_app(config_class=Config):
         jti = payload["jti"]
         return db.session.query(TokenBlocklist.id).filter_by(jti=jti).first() is not None
 
-    # Load the embedding model at boot, not on a request — see
-    # app/ml.py:warm_embedding_model for why. Skipped under tests so the
-    # suite keeps loading it lazily on whichever test hits it first.
-    if not app.config.get("TESTING"):
-        from app.ml import warm_embedding_model
-        warm_embedding_model()
-
     return app

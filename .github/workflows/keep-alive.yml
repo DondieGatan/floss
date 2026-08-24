@@ -2,8 +2,14 @@ name: Keep backend warm
 
 on:
   schedule:
-    # Every 10 minutes — Render's free tier sleeps after ~15 minutes idle.
-    - cron: '*/10 * * * *'
+    # 5 minutes is GitHub Actions' minimum scheduling granularity — asked
+    # for anything tighter than that and it silently coalesces to 5m
+    # anyway. Even at 5m, GitHub's actual firing cadence for scheduled
+    # workflows lags the requested interval under load (observed ~40
+    # minutes between runs against this exact schedule at */10), so this
+    # is picked to maximize the odds of landing inside Render's free-tier
+    # ~15-minute idle-sleep window, not a guarantee against it.
+    - cron: '*/5 * * * *'
   workflow_dispatch: {}
 
 jobs:

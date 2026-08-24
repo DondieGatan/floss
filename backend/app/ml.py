@@ -18,15 +18,6 @@ def _get_model():
     return _model
 
 
-def warm_embedding_model():
-    """Force the lazy model load at worker boot instead of on a request.
-    On Render's free-tier CPU the first real load can take longer than
-    gunicorn's request timeout, turning a user's first chat message into a
-    500 — call this once from create_app() so it happens before the worker
-    starts accepting traffic."""
-    _get_model()
-
-
 def embed_texts(texts):
     """Embed a list of chunk texts. Returns an (N, EMBEDDING_DIM) float32 array,
     L2-normalized so cosine similarity reduces to a plain dot product."""
