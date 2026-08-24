@@ -4,8 +4,12 @@ services:
     runtime: python
     plan: free
     rootDir: backend
-    buildCommand: "pip install -r requirements.txt && flask db upgrade && python seed.py"
-    startCommand: "gunicorn run:app"
+    buildCommand: "pip install -r requirements.txt && flask db upgrade && python seed.py && python seed_knowledge_base.py"
+    # Default gunicorn worker timeout (30s) isn't enough for the embedding
+    # model's first load on this tier's CPU — see app/ml.py:warm_embedding_model,
+    # which now loads it at boot instead of on a request. This is a safety
+    # net on top of that, not a substitute for it.
+    startCommand: "gunicorn run:app --timeout 120"
     healthCheckPath: /api/health
     envVars:
       - key: PYTHON_VERSION
