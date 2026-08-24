@@ -3,6 +3,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import logoIcon from '../assets/logo-icon.png';
+import FloatingChatWidget from './FloatingChatWidget';
 
 function HouseIcon() {
   return (
@@ -92,7 +93,6 @@ const PATIENT_LINKS = [
   { to: '/dashboard', icon: <HouseIcon />, label: 'Dashboard' },
   { to: '/doctors', icon: <ToothIcon />, label: 'Dentists' },
   { to: '/appointments', icon: <CalendarIcon />, label: 'My Appointments' },
-  { to: '/knowledge-base', icon: <ChatIcon />, label: 'Ask Floss Clinic' },
 ];
 
 const STAFF_LINKS = [
@@ -236,6 +236,8 @@ export default function AppLayout({ children }) {
       <main className="app-main" id="app-main-content" tabIndex={-1}>
         {children}
       </main>
+
+      {!isStaff && <FloatingChatWidget />}
     </div>
   );
 }

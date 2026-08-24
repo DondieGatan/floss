@@ -445,8 +445,9 @@ textarea {
   border-radius: 999px;
   color: var(--text-muted);
   text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
+  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
   transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 
@@ -521,6 +522,130 @@ textarea {
 
 .app-main:focus-visible {
   outline: none;
+}
+
+/* ---------- Floating chat widget ---------- */
+
+@keyframes floating-chat-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.floating-chat {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.floating-chat-fab {
+  width: 58px;
+  height: 58px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  box-shadow: var(--shadow-hover);
+  padding: 16px;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.15s ease;
+}
+
+.floating-chat-fab svg {
+  width: 100%;
+  height: 100%;
+}
+
+.floating-chat-fab:hover {
+  background: var(--accent-strong);
+  transform: scale(1.08);
+}
+
+.floating-chat-panel {
+  width: min(360px, calc(100vw - 32px));
+  height: min(520px, calc(100vh - 140px));
+  background: var(--surface-solid);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-hover);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: floating-chat-in 0.22s ease;
+}
+
+.floating-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.floating-chat-header button {
+  background: rgba(255, 255, 255, 0.18);
+  border: none;
+  color: #fff;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  padding: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.floating-chat-header button svg {
+  width: 100%;
+  height: 100%;
+}
+
+.floating-chat-header button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.08);
+}
+
+.floating-chat-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.floating-chat-body .chat-window {
+  height: 100%;
+}
+
+.floating-chat-body .page-loading {
+  margin: auto;
+  padding: 24px;
+  color: var(--text-muted);
+}
+
+@media (max-width: 480px) {
+  .floating-chat {
+    right: 16px;
+    bottom: 16px;
+  }
+
+  .floating-chat-panel {
+    height: min(70vh, 520px);
+  }
 }
 
 @media (max-width: 900px) {
