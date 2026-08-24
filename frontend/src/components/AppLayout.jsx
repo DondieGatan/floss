@@ -68,6 +68,26 @@ function DoorIcon() {
   );
 }
 
+function ChevronIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 5l-6.5 7L14 19" />
+    </svg>
+  );
+}
+
+function LogoutIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3" />
+      <path d="M10 16l4-4-4-4" />
+      <path d="M14 12H3" />
+    </svg>
+  );
+}
+
+const COLLAPSE_KEY = 'floss_sidebar_collapsed';
+
 const PATIENT_LINKS = [
   { to: '/dashboard', icon: <HouseIcon />, label: 'Dashboard' },
   { to: '/doctors', icon: <ToothIcon />, label: 'Dentists' },
@@ -86,6 +106,7 @@ export default function AppLayout({ children }) {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === 'true');
   const isStaff = user?.role === 'staff' || user?.role === 'admin';
   const initials = (user?.fullName || 'U')
     .split(' ')
@@ -97,6 +118,13 @@ export default function AppLayout({ children }) {
 
   function closeMobileNav() {
     setMobileNavOpen(false);
+  }
+
+  function toggleCollapsed() {
+    setCollapsed((c) => {
+      localStorage.setItem(COLLAPSE_KEY, String(!c));
+      return !c;
+    });
   }
 
   useEffect(() => {
@@ -132,11 +160,25 @@ export default function AppLayout({ children }) {
 
       {mobileNavOpen && <div className="app-sidebar-backdrop" onClick={closeMobileNav} aria-hidden="true" />}
 
-      <aside className={`app-sidebar${mobileNavOpen ? ' open' : ''}`} aria-label="Sidebar">
+      <aside
+        className={`app-sidebar${mobileNavOpen ? ' open' : ''}${collapsed ? ' collapsed' : ''}`}
+        aria-label="Sidebar"
+      >
+        <button
+          className="app-sidebar-collapse-toggle"
+          type="button"
+          onClick={toggleCollapsed}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-expanded={!collapsed}
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          <ChevronIcon />
+        </button>
+
         <div className="app-sidebar-brand">
           <Link to="/" className="brand" title="Back to the website">
             <img src={logoIcon} alt="" className="brand-mark" />
-            Floss Clinic
+            <span className="app-sidebar-fade">Floss Clinic</span>
           </Link>
           <button className="app-sidebar-close" type="button" onClick={closeMobileNav} aria-label="Close menu">
             ✕
@@ -145,23 +187,24 @@ export default function AppLayout({ children }) {
 
         <div className="app-sidebar-profile">
           <div className="app-sidebar-avatar" aria-hidden="true">{initials}</div>
-          <div className="app-sidebar-profile-info">
+          <div className="app-sidebar-profile-info app-sidebar-fade">
             <div className="app-sidebar-profile-name">{user?.fullName}</div>
             <span className="role-badge">{user?.role}</span>
           </div>
         </div>
 
         <nav className="app-nav" aria-label="Primary">
-          <div className="app-nav-section">{isStaff ? 'Staff' : 'Patient'}</div>
+          <div className="app-nav-section app-sidebar-fade">{isStaff ? 'Staff' : 'Patient'}</div>
           {(isStaff ? STAFF_LINKS : PATIENT_LINKS).map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
               onClick={closeMobileNav}
+              title={collapsed ? link.label : undefined}
               className={({ isActive }) => `app-nav-link${isActive ? ' active' : ''}`}
             >
               <span className="app-nav-icon" aria-hidden="true">{link.icon}</span>
-              {link.label}
+              <span className="app-sidebar-fade">{link.label}</span>
             </NavLink>
           ))}
         </nav>
@@ -173,12 +216,19 @@ export default function AppLayout({ children }) {
             onClick={toggleTheme}
             aria-pressed={theme === 'dark'}
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            title={collapsed ? (theme === 'dark' ? 'Light mode' : 'Dark mode') : undefined}
           >
             <span aria-hidden="true">{theme === 'dark' ? '☀️' : '🌙'}</span>
-            {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+            <span className="app-sidebar-fade">{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
           </button>
-          <button className="btn btn-ghost btn-small btn-block" type="button" onClick={logout}>
-            Logout
+          <button
+            className="btn btn-ghost btn-small btn-block app-sidebar-logout"
+            type="button"
+            onClick={logout}
+            title={collapsed ? 'Logout' : undefined}
+          >
+            <span className="app-nav-icon" aria-hidden="true"><LogoutIcon /></span>
+            <span className="app-sidebar-fade">Logout</span>
           </button>
         </div>
       </aside>
