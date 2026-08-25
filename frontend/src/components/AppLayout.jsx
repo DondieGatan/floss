@@ -104,13 +104,13 @@ const PATIENT_LINKS = [
   { to: '/appointments', icon: <CalendarIcon />, label: 'My Appointments' },
 ];
 
-const STAFF_LINKS = [
+const MANAGEMENT_LINKS = [
   { to: '/manage/directory', icon: <PeopleIcon />, label: 'Directory' },
   { to: '/manage/appointments', icon: <ClipboardIcon />, label: 'All Appointments' },
   { to: '/manage/admissions', icon: <DoorIcon />, label: 'Treatment Rooms' },
-  { to: '/knowledge-base', icon: <ChatIcon />, label: 'Knowledge Base' },
 ];
 
+const KNOWLEDGE_BASE_LINK = { to: '/knowledge-base', icon: <ChatIcon />, label: 'Knowledge Base' };
 const ADMIN_LINK = { to: '/manage/users', icon: <ShieldIcon />, label: 'Team & Roles' };
 
 export default function AppLayout({ children }) {
@@ -118,9 +118,16 @@ export default function AppLayout({ children }) {
   const { theme, toggleTheme } = useTheme();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === 'true');
-  const isStaff = user?.role === 'staff' || user?.role === 'admin' || user?.role === 'owner';
-  const isAdmin = user?.role === 'admin' || user?.role === 'owner';
-  const navLinks = isStaff ? (isAdmin ? [...STAFF_LINKS, ADMIN_LINK] : STAFF_LINKS) : PATIENT_LINKS;
+  const isOwner = user?.role === 'owner';
+  const isAdmin = user?.role === 'admin' || isOwner;
+  const isStaff = user?.role === 'staff' || isAdmin;
+  const navLinks = !isStaff
+    ? PATIENT_LINKS
+    : isOwner
+    ? [...MANAGEMENT_LINKS, ADMIN_LINK]
+    : isAdmin
+    ? [...MANAGEMENT_LINKS, KNOWLEDGE_BASE_LINK, ADMIN_LINK]
+    : [...MANAGEMENT_LINKS, KNOWLEDGE_BASE_LINK];
   const initials = (user?.fullName || 'U')
     .split(' ')
     .filter(Boolean)
