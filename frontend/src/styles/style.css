@@ -182,7 +182,8 @@ textarea {
 }
 
 .page-title {
-  font-size: 22px;
+  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 24px;
   font-weight: 700;
   margin: 0 0 4px;
 }
@@ -408,7 +409,8 @@ textarea {
 }
 
 .app-sidebar-profile-name {
-  font-size: 14px;
+  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 14.5px;
   font-weight: 700;
   color: var(--text);
   white-space: nowrap;
@@ -1214,7 +1216,8 @@ textarea {
 }
 
 .section-title {
-  font-size: 16px;
+  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 17px;
   font-weight: 700;
   margin: 0;
 }
@@ -1278,6 +1281,7 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -1286,9 +1290,15 @@ textarea {
   margin: 0 0 10px;
 }
 
+.hero-eyebrow svg {
+  width: 15px;
+  height: 15px;
+}
+
 .hero-greeting {
   position: relative;
-  font-size: 22px;
+  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 24px;
   font-weight: 800;
   margin: 0 0 6px;
 }
@@ -1310,18 +1320,28 @@ textarea {
 
 .quick-action-btn {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   overflow: hidden;
   background: #fff;
   color: var(--accent-strong);
   border: none;
   border-radius: 10px;
   padding: 10px 18px;
+  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   text-decoration: none;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
   box-shadow: 0 2px 6px rgba(11, 30, 33, 0.16);
+}
+
+.quick-action-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 
 .quick-action-btn::before {
@@ -1380,9 +1400,14 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 19px;
+  color: var(--accent-strong);
   background: var(--accent-soft);
   transition: transform 0.2s ease;
+}
+
+.stat-icon svg {
+  width: 21px;
+  height: 21px;
 }
 
 .stat-card:hover .stat-icon {
@@ -1390,10 +1415,12 @@ textarea {
 }
 
 .stat-icon-success {
+  color: var(--success);
   background: var(--success-soft);
 }
 
 .stat-icon-warning {
+  color: var(--warning);
   background: var(--warning-soft);
 }
 
@@ -1402,7 +1429,8 @@ textarea {
 }
 
 .stat-value {
-  font-size: 24px;
+  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 26px;
   font-weight: 800;
   margin: 0;
   line-height: 1.15;
@@ -1752,10 +1780,15 @@ textarea {
 }
 
 .empty-state-icon {
-  font-size: 36px;
-  line-height: 1;
+  display: inline-flex;
+  color: var(--text-muted);
   margin-bottom: 10px;
   opacity: 0.7;
+}
+
+.empty-state-icon svg {
+  width: 34px;
+  height: 34px;
 }
 
 .empty-state p {

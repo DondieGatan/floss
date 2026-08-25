@@ -4,97 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import logoIcon from '../assets/logo-icon.png';
 import FloatingChatWidget from './FloatingChatWidget';
-
-function HouseIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 11.5 12 4l9 7.5" />
-      <path d="M5.5 10v9a1 1 0 0 0 1 1H10v-5h4v5h3.5a1 1 0 0 0 1-1v-9" />
-    </svg>
-  );
-}
-
-function ToothIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M8 3c1.2 0 1.8.6 4 .6s2.8-.6 4-.6c2.2 0 3.5 2 3.5 5 0 4-1.2 8-2.5 10.5-.5 1-1.2 1.9-2 1.9s-1-1.6-1.3-3.3c-.3-1.7-.7-3.1-1.7-3.1s-1.4 1.4-1.7 3.1c-.3 1.7-.5 3.3-1.3 3.3s-1.5-.9-2-1.9C5.7 16 4.5 12 4.5 8c0-3 1.3-5 3.5-5z" />
-    </svg>
-  );
-}
-
-function CalendarIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="4" y="5" width="16" height="16" rx="2" />
-      <path d="M4 10h16" />
-      <path d="M8 3v4" />
-      <path d="M16 3v4" />
-    </svg>
-  );
-}
-
-function ChatIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H10l-4.5 4v-4H5a1 1 0 0 1-1-1V5z" />
-    </svg>
-  );
-}
-
-function PeopleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="8" r="3.2" />
-      <path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6" />
-    </svg>
-  );
-}
-
-function ClipboardIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="5" y="4" width="14" height="17" rx="2" />
-      <path d="M9 3.5h6a1 1 0 0 1 1 1V6H8V4.5a1 1 0 0 1 1-1z" />
-      <path d="M8.5 11h7M8.5 15h7" />
-    </svg>
-  );
-}
-
-function DoorIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="6" y="3" width="12" height="18" rx="1" />
-      <circle cx="14.5" cy="12" r="0.9" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
-function ShieldIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 3.5 5 6v6c0 4.5 3 7.5 7 8.5 4-1 7-4 7-8.5V6l-7-2.5z" />
-      <path d="M9.5 12 11 13.5 14.5 10" />
-    </svg>
-  );
-}
-
-function ChevronIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14 5l-6.5 7L14 19" />
-    </svg>
-  );
-}
-
-function LogoutIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3" />
-      <path d="M10 16l4-4-4-4" />
-      <path d="M14 12H3" />
-    </svg>
-  );
-}
+import {
+  HouseIcon, ToothIcon, CalendarIcon, ChatIcon, PeopleIcon, ClipboardIcon,
+  DoorIcon, ShieldIcon, ChevronIcon, LogoutIcon, SunIcon, MoonIcon,
+} from './icons';
 
 const COLLAPSE_KEY = 'floss_sidebar_collapsed';
 
@@ -239,7 +152,7 @@ export default function AppLayout({ children }) {
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             title={collapsed ? (theme === 'dark' ? 'Light mode' : 'Dark mode') : undefined}
           >
-            <span aria-hidden="true">{theme === 'dark' ? '☀️' : '🌙'}</span>
+            <span className="app-nav-icon" aria-hidden="true">{theme === 'dark' ? <SunIcon /> : <MoonIcon />}</span>
             <span className="app-sidebar-fade">{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
           </button>
           <button

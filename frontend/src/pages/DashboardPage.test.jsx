@@ -105,8 +105,8 @@ describe('DashboardPage', () => {
     it('shows the admin/staff quick actions, not the patient ones', () => {
       api.get.mockResolvedValue({ appointments: [], admissions: [], beds: [] });
       renderDashboard();
-      expect(screen.getByText('🦷 Manage directory')).toBeInTheDocument();
-      expect(screen.getByText('🪑 Treatment rooms')).toBeInTheDocument();
+      expect(screen.getByText('Manage directory')).toBeInTheDocument();
+      expect(screen.getByText('Treatment rooms')).toBeInTheDocument();
       expect(screen.queryByText('+ Book an appointment')).not.toBeInTheDocument();
     });
   });
