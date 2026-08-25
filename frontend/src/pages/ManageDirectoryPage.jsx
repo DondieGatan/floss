@@ -347,7 +347,12 @@ export default function ManageDirectoryPage() {
                       </span>
                     </div>
                     <div className="appointment-actions">
-                      <button className="btn btn-small btn-secondary" onClick={() => setExpandedId(expandedId === doc.id ? null : doc.id)}>
+                      <button
+                        className="btn btn-small btn-secondary"
+                        type="button"
+                        onClick={() => setExpandedId(expandedId === doc.id ? null : doc.id)}
+                        aria-expanded={expandedId === doc.id}
+                      >
                         {expandedId === doc.id ? 'Hide availability' : 'Manage availability'}
                       </button>
                       <button className="btn btn-small btn-danger" onClick={() => handleDeactivate(doc.id)}>

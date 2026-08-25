@@ -29,7 +29,7 @@ function PatientDashboard() {
         <p className="hero-eyebrow" aria-hidden="true">
           <ToothIcon /> Patient Portal
         </p>
-        <p className="hero-greeting">Welcome back, {firstName(user?.fullName)}</p>
+        <h1 className="hero-greeting">Welcome back, {firstName(user?.fullName)}</h1>
         <p className="hero-sub">Here's what's coming up with your care.</p>
         <div className="quick-actions">
           <Link className="quick-action-btn" to="/doctors">
@@ -114,7 +114,7 @@ function StaffDashboard() {
         <p className="hero-eyebrow" aria-hidden="true">
           <ClinicIcon /> Staff Portal
         </p>
-        <p className="hero-greeting">Welcome back, {firstName(user?.fullName)}</p>
+        <h1 className="hero-greeting">Welcome back, {firstName(user?.fullName)}</h1>
         <p className="hero-sub">Here's today's snapshot across the clinic.</p>
         <div className="quick-actions">
           <Link className="quick-action-btn" to="/manage/directory">

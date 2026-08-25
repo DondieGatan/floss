@@ -50,9 +50,12 @@ describe('BookAppointmentPage', () => {
   it('selecting a slot reveals the reason field and a confirm button', async () => {
     renderPage();
     const slotButtons = await screen.findAllByRole('button', { name: /AM|PM/ });
+    expect(slotButtons[0]).toHaveAttribute('aria-pressed', 'false');
     fireEvent.click(slotButtons[0]);
     expect(screen.getByPlaceholderText(/Annual check-up/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Confirm/ })).toBeInTheDocument();
+    expect(slotButtons[0]).toHaveAttribute('aria-pressed', 'true');
+    expect(slotButtons[1]).toHaveAttribute('aria-pressed', 'false');
   });
 
   it('confirms the booking, posts the right payload, and shows the success screen', async () => {

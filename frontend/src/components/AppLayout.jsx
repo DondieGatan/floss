@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -32,6 +32,10 @@ export default function AppLayout({ children }) {
   const { theme, toggleTheme } = useTheme();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === 'true');
+  const asideRef = useRef(null);
+  const menuBtnRef = useRef(null);
+  const closeBtnRef = useRef(null);
+  const previouslyFocusedRef = useRef(null);
   const isOwner = user?.role === 'owner';
   const isAdmin = user?.role === 'admin' || isOwner;
   const isStaff = user?.role === 'staff' || isAdmin;
@@ -61,10 +65,47 @@ export default function AppLayout({ children }) {
     });
   }
 
+  // The drawer behaves like a modal on narrow viewports (fixed position,
+  // full backdrop) — it needs the same focus discipline as any dialog:
+  // focus moves in on open, returns to the trigger on close, and Tab stays
+  // trapped inside while it's open rather than reaching the backdrop-
+  // covered page behind it.
+  useEffect(() => {
+    if (mobileNavOpen) {
+      previouslyFocusedRef.current = document.activeElement;
+      closeBtnRef.current?.focus();
+    } else if (previouslyFocusedRef.current) {
+      menuBtnRef.current?.focus();
+    }
+  }, [mobileNavOpen]);
+
   useEffect(() => {
     if (!mobileNavOpen) return;
     function onKeyDown(e) {
-      if (e.key === 'Escape') closeMobileNav();
+      if (e.key === 'Escape') {
+        closeMobileNav();
+        return;
+      }
+      if (e.key !== 'Tab' || !asideRef.current) return;
+      // Excludes the collapse-toggle: CSS hides it below 900px (it's
+      // desktop-only functionality, irrelevant to the mobile drawer this
+      // trap governs), but that's a display:none rule this querySelector
+      // can't see — a real display:none button is already untabbable in
+      // any actual browser, so excluding it here just makes the trap
+      // agree with what a real mobile viewport would already do.
+      const focusables = asideRef.current.querySelectorAll(
+        'a[href], button:not([disabled]):not(.app-sidebar-collapse-toggle)'
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
@@ -83,6 +124,7 @@ export default function AppLayout({ children }) {
           onClick={() => setMobileNavOpen(true)}
           aria-label="Open menu"
           aria-expanded={mobileNavOpen}
+          ref={menuBtnRef}
         >
           <span aria-hidden="true">☰</span>
         </button>
@@ -97,6 +139,7 @@ export default function AppLayout({ children }) {
       <aside
         className={`app-sidebar${mobileNavOpen ? ' open' : ''}${collapsed ? ' collapsed' : ''}`}
         aria-label="Sidebar"
+        ref={asideRef}
       >
         <button
           className="app-sidebar-collapse-toggle"
@@ -114,7 +157,13 @@ export default function AppLayout({ children }) {
             <img src={logoIcon} alt="" className="brand-mark" />
             <span className="app-sidebar-fade">Floss Clinic</span>
           </Link>
-          <button className="app-sidebar-close" type="button" onClick={closeMobileNav} aria-label="Close menu">
+          <button
+            className="app-sidebar-close"
+            type="button"
+            onClick={closeMobileNav}
+            aria-label="Close menu"
+            ref={closeBtnRef}
+          >
             ✕
           </button>
         </div>

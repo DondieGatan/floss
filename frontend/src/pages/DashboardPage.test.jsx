@@ -38,7 +38,7 @@ describe('DashboardPage', () => {
       api.get.mockResolvedValue({ appointments: [] });
       renderDashboard();
 
-      expect(screen.getByText('Welcome back, Jordan')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { level: 1, name: 'Welcome back, Jordan' })).toBeInTheDocument();
       expect(await screen.findByText('No upcoming appointments. Ready to book one?')).toBeInTheDocument();
       expect(api.get).toHaveBeenCalledWith('/appointments');
     });
@@ -95,7 +95,7 @@ describe('DashboardPage', () => {
       });
       renderDashboard();
 
-      expect(screen.getByText('Welcome back, Nora')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { level: 1, name: 'Welcome back, Nora' })).toBeInTheDocument();
       const apptStat = await screen.findByText('Appointments today');
       expect(apptStat.previousElementSibling).toHaveTextContent('1');
       const bedsStat = screen.getByText('Chairs available');

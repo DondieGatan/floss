@@ -523,7 +523,8 @@ textarea {
 }
 
 .app-main:focus-visible {
-  outline: none;
+  outline: 2px solid var(--accent-strong);
+  outline-offset: -2px;
 }
 
 /* ---------- Floating chat widget ---------- */
@@ -2170,6 +2171,10 @@ textarea {
   font-weight: 700;
   border: 1px solid var(--border);
   cursor: default;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
   transition: transform 0.12s ease;
 }
 
@@ -2192,6 +2197,18 @@ textarea {
 .bed-tile-maintenance {
   background: var(--warning-soft);
   color: var(--warning);
+}
+
+.bed-tile-number {
+  font-size: 13px;
+}
+
+.bed-tile-status {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.85;
 }
 
 /* Simple table */

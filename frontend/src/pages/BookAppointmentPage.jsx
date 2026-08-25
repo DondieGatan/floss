@@ -127,8 +127,10 @@ export default function BookAppointmentPage() {
               {slots.map((slot) => (
                 <button
                   key={slot}
+                  type="button"
                   className={`slot-btn${selectedSlot === slot ? ' selected' : ''}`}
                   onClick={() => setSelectedSlot(slot)}
+                  aria-pressed={selectedSlot === slot}
                 >
                   {formatSlotTime(slot)}
                 </button>

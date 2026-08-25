@@ -38,6 +38,11 @@ describe('ChatPage export/delete', () => {
     api.get.mockResolvedValue({ messages: [] });
   });
 
+  it('has an accessible page heading', async () => {
+    renderPage();
+    expect(await screen.findByRole('heading', { level: 1 })).toBeInTheDocument();
+  });
+
   it('exports the conversation via downloadFile', async () => {
     downloadFile.mockResolvedValue(undefined);
     renderPage();

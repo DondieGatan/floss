@@ -2,6 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { api, ApiError } from '../api/client';
 import AppLayout from '../components/AppLayout';
 
+// Chair status was color-only (available/occupied/maintenance backgrounds)
+// with no other visual cue — a color-blind sighted user had no way to
+// distinguish them at a glance, even though the aria-label already covered
+// screen readers.
+const BED_STATUS_LABEL = { available: 'Open', occupied: 'In use', maintenance: 'Maint.' };
+
 function WardForm({ onCreated }) {
   const [name, setName] = useState('');
   const [wardType, setWardType] = useState('');
@@ -95,11 +101,27 @@ function AdmitModal({ bed, patients, doctors, onClose, onAdmitted }) {
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const firstFieldRef = useRef(null);
+  const formRef = useRef(null);
 
   useEffect(() => {
     firstFieldRef.current?.focus();
     function onKeyDown(e) {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab' || !formRef.current) return;
+      const focusables = formRef.current.querySelectorAll('input, select, button:not([disabled])');
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
@@ -133,6 +155,7 @@ function AdmitModal({ bed, patients, doctors, onClose, onAdmitted }) {
         aria-labelledby="admit-modal-title"
         onClick={(e) => e.stopPropagation()}
         onSubmit={handleSubmit}
+        ref={formRef}
       >
         <h3 className="section-title" id="admit-modal-title">
           Seat in {bed.wardName} · Chair {bed.bedNumber}
@@ -190,6 +213,7 @@ export default function AdmissionsPage() {
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [admitBed, setAdmitBed] = useState(null);
+  const admitTriggerRef = useRef(null);
 
   useEffect(() => {
     loadAll();
@@ -220,9 +244,18 @@ export default function AdmissionsPage() {
     loadAll();
   }
 
-  function handleBedClick(bed) {
-    if (bed.status === 'available') setAdmitBed(bed);
-    else if (bed.status === 'occupied') handleDischarge(bed);
+  function handleBedClick(bed, triggerEl) {
+    if (bed.status === 'available') {
+      admitTriggerRef.current = triggerEl;
+      setAdmitBed(bed);
+    } else if (bed.status === 'occupied') {
+      handleDischarge(bed);
+    }
+  }
+
+  function closeAdmitModal() {
+    setAdmitBed(null);
+    admitTriggerRef.current?.focus();
   }
 
   return (
@@ -255,10 +288,13 @@ export default function AdmissionsPage() {
                     key={bed.id}
                     type="button"
                     className={`bed-tile bed-tile-${bed.status}`}
-                    onClick={() => handleBedClick(bed)}
+                    onClick={(e) => handleBedClick(bed, e.currentTarget)}
                     aria-label={`Chair ${bed.bedNumber} — ${bed.status}`}
                   >
-                    {bed.bedNumber}
+                    <span className="bed-tile-number">{bed.bedNumber}</span>
+                    <span className="bed-tile-status" aria-hidden="true">
+                      {BED_STATUS_LABEL[bed.status] || bed.status}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -272,9 +308,9 @@ export default function AdmissionsPage() {
             bed={admitBed}
             patients={patients}
             doctors={doctors}
-            onClose={() => setAdmitBed(null)}
+            onClose={closeAdmitModal}
             onAdmitted={() => {
-              setAdmitBed(null);
+              closeAdmitModal();
               loadAll();
             }}
           />

@@ -45,6 +45,7 @@ export default function ChatPage() {
     <AppLayout>
       <div className="page">
         <header className="page-header">
+          <h1 className="sr-only">Conversation with Floss Clinic</h1>
           <Link to="/knowledge-base" className="back-link">
             ← Knowledge Base
           </Link>
