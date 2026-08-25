@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required
 
 from app.departments import departments_bp
 from app.extensions import db
-from app.models import Department
+from app.models import Department, Doctor
 from app.utils import current_user_id
 from app.auth.decorators import staff_required
 from app.documents.digest import regenerate_directory_digest
@@ -73,6 +73,14 @@ def delete_department(department_id):
     department = db.session.get(Department, department_id)
     if department is None:
         return jsonify({"error": "Department not found."}), 404
+
+    # Doctor.department_id is a required foreign key (including inactive
+    # doctors, who still hold the row) — deleting a department under any of
+    # them would break referential integrity, so it's only allowed once it's
+    # actually empty. Reassigning/deactivating doctors out of it first is on
+    # the caller.
+    if Doctor.query.filter_by(department_id=department_id).first() is not None:
+        return jsonify({"error": "Reassign or remove its dentists before deleting a department."}), 400
 
     db.session.delete(department)
     db.session.commit()

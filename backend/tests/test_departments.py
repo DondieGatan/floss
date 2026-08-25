@@ -58,7 +58,7 @@ def test_update_department_requires_staff(client, staff_headers, auth_headers):
     assert resp.get_json()["department"]["name"] == "Renamed"
 
 
-def test_delete_department_requires_staff(client, staff_headers, auth_headers):
+def test_delete_empty_department_requires_staff(client, staff_headers, auth_headers):
     dept_id = client.post(
         "/api/departments", headers=staff_headers, json={"name": "Cardiology"}
     ).get_json()["department"]["id"]
@@ -68,3 +68,24 @@ def test_delete_department_requires_staff(client, staff_headers, auth_headers):
 
     resp = client.delete(f"/api/departments/{dept_id}", headers=staff_headers)
     assert resp.status_code == 204
+
+
+def test_cannot_delete_department_with_a_doctor_assigned(client, staff_headers):
+    dept_id = client.post(
+        "/api/departments", headers=staff_headers, json={"name": "Cardiology"}
+    ).get_json()["department"]["id"]
+    client.post(
+        "/api/doctors",
+        headers=staff_headers,
+        json={"fullName": "Dr. Jane Smith", "departmentId": dept_id, "specialty": "Cardiology"},
+    )
+
+    resp = client.delete(f"/api/departments/{dept_id}", headers=staff_headers)
+    assert resp.status_code == 400
+
+    # Deactivating the doctor doesn't free up the department — the row (and
+    # its department_id) still exists.
+    doctor_id = client.get("/api/doctors", headers=staff_headers).get_json()["doctors"][0]["id"]
+    client.delete(f"/api/doctors/{doctor_id}", headers=staff_headers)
+    resp = client.delete(f"/api/departments/{dept_id}", headers=staff_headers)
+    assert resp.status_code == 400

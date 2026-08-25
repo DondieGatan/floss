@@ -50,6 +50,94 @@ function DepartmentForm({ onCreated }) {
   );
 }
 
+function DepartmentCard({ department, onUpdated, onDeleted }) {
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState(department.name);
+  const [description, setDescription] = useState(department.description || '');
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  function cancelEdit() {
+    setEditing(false);
+    setError(null);
+    setName(department.name);
+    setDescription(department.description || '');
+  }
+
+  async function handleSave(e) {
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      await api.put(`/departments/${department.id}`, { name, description: description || undefined });
+      setEditing(false);
+      onUpdated();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Something went wrong.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleDelete() {
+    setError(null);
+    try {
+      await api.del(`/departments/${department.id}`);
+      onDeleted();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Something went wrong.');
+    }
+  }
+
+  if (editing) {
+    return (
+      <form className="card" onSubmit={handleSave}>
+        {error && (
+          <div className="form-error" role="alert">
+            {error}
+          </div>
+        )}
+        <label className="field" style={{ marginBottom: 8 }}>
+          <span>Department name</span>
+          <input value={name} onChange={(e) => setName(e.target.value)} required />
+        </label>
+        <label className="field" style={{ marginBottom: 8 }}>
+          <span>Description</span>
+          <input value={description} onChange={(e) => setDescription(e.target.value)} />
+        </label>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-small btn-primary" type="submit" disabled={submitting}>
+            {submitting ? 'Saving…' : 'Save'}
+          </button>
+          <button className="btn btn-small btn-secondary" type="button" onClick={cancelEdit}>
+            Cancel
+          </button>
+        </div>
+      </form>
+    );
+  }
+
+  return (
+    <div className="card">
+      <p style={{ fontWeight: 700, margin: 0 }}>{department.name}</p>
+      {department.description && <p className="page-subtitle" style={{ margin: '6px 0 0' }}>{department.description}</p>}
+      {error && (
+        <div className="form-error" role="alert" style={{ marginTop: 8 }}>
+          {error}
+        </div>
+      )}
+      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+        <button className="btn btn-small btn-secondary" type="button" onClick={() => setEditing(true)}>
+          Edit
+        </button>
+        <button className="btn btn-small btn-danger" type="button" onClick={handleDelete}>
+          Delete
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function AvailabilityEditor({ doctor, onChange }) {
   const [weekday, setWeekday] = useState(0);
   const [startTime, setStartTime] = useState('09:00');
@@ -232,10 +320,7 @@ export default function ManageDirectoryPage() {
           <DepartmentForm onCreated={() => loadDepartments()} />
           <div className="grid grid-3">
             {departments.map((d) => (
-              <div key={d.id} className="card">
-                <p style={{ fontWeight: 700, margin: 0 }}>{d.name}</p>
-                {d.description && <p className="page-subtitle" style={{ margin: '6px 0 0' }}>{d.description}</p>}
-              </div>
+              <DepartmentCard key={d.id} department={d} onUpdated={() => loadDepartments()} onDeleted={() => loadDepartments()} />
             ))}
           </div>
         </div>
