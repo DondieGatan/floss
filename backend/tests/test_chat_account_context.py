@@ -124,7 +124,7 @@ def test_post_message_uses_account_context_to_bypass_fallback(client, auth_heade
     # not just an empty source-passages block.
     sent_messages = mock_stream_answer.call_args[0][0]
     user_content = sent_messages[-1]["content"]
-    assert "Account context" in user_content
+    assert "<account_context>" in user_content
     assert "no appointments on file" in user_content.lower()
 
 

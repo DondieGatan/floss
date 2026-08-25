@@ -1,6 +1,6 @@
 import json
 
-from flask import request, jsonify, Response, stream_with_context
+from flask import request, jsonify, Response, stream_with_context, current_app
 from flask_jwt_extended import jwt_required
 
 from app.chat import chat_bp
@@ -12,6 +12,7 @@ from app.chat.retrieval import retrieve, is_low_confidence
 from app.chat.generation import build_prompt, stream_answer
 from app.chat.account_context import build_account_context
 from app.chat.greetings import is_pure_greeting, GREETING_RESPONSE
+from app.chat.injection_guard import log_if_suspicious
 
 FALLBACK_MESSAGE = "I don't have enough information in the uploaded document(s) to answer that."
 
@@ -98,6 +99,10 @@ def post_message(conversation_id):
     query = (data.get("content") or "").strip()
     if not query:
         return jsonify({"error": "A message is required."}), 400
+
+    # Visibility only, never blocking — see injection_guard's docstring for
+    # why this doesn't refuse the request.
+    log_if_suspicious(current_app.logger, current_user_id(), "chat_query", query)
 
     db.session.add(Message(conversation_id=conversation.id, role="user", content=query))
     db.session.commit()

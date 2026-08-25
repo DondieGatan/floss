@@ -1,6 +1,6 @@
 from datetime import datetime, date, timedelta, timezone
 
-from flask import request, jsonify
+from flask import request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt
 
 from app.appointments import appointments_bp
@@ -14,6 +14,7 @@ from app.appointments.conflicts import (
     AvailabilityError,
     ConflictError,
 )
+from app.chat.injection_guard import log_if_suspicious
 
 DEFAULT_DURATION_MINUTES = 30
 MAX_DURATION_MINUTES = 240
@@ -57,6 +58,11 @@ def create_appointment():
     scheduled_start_raw = data.get("scheduledStart")
     duration_minutes = data.get("durationMinutes", DEFAULT_DURATION_MINUTES)
     reason = (data.get("reason") or "").strip() or None
+    if reason:
+        # This field flows verbatim into the chat prompt's account-context
+        # block (see app/chat/account_context.py) — visibility only, never
+        # blocking, same as the chat query itself.
+        log_if_suspicious(current_app.logger, current_user_id(), "appointment_reason", reason)
 
     doctor = db.session.get(Doctor, doctor_id) if isinstance(doctor_id, int) else None
     if doctor is None or not doctor.is_active:
