@@ -90,3 +90,26 @@ export const api = {
   // Raw fetch Response — the caller reads the SSE stream itself.
   postStream: (path, body) => request(path, { method: 'POST', body: JSON.stringify(body) }, { raw: true }),
 };
+
+// Triggers a browser download for a file-returning endpoint (e.g. a
+// conversation export) — a plain <a href> can't carry the auth header, so
+// this fetches the file itself and hands the browser a blob URL instead.
+export async function downloadFile(path, fallbackFilename) {
+  const res = await request(path, {}, { raw: true });
+  if (!res.ok) {
+    throw new ApiError(`Could not download the file (${res.status}).`, res.status);
+  }
+  const disposition = res.headers.get('Content-Disposition') || '';
+  const match = disposition.match(/filename="?([^"]+)"?/);
+  const filename = match ? match[1] : fallbackFilename;
+
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}

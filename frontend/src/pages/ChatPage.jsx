@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { api } from '../api/client';
+import { api, downloadFile, ApiError } from '../api/client';
 import AppLayout from '../components/AppLayout';
 import ChatWindow from '../components/ChatWindow';
 
@@ -9,6 +9,8 @@ export default function ChatPage() {
   const navigate = useNavigate();
   const [messages, setMessages] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState(null);
 
   useEffect(() => {
     setMessages(null);
@@ -27,6 +29,18 @@ export default function ChatPage() {
     }
   }
 
+  async function handleExport() {
+    setExporting(true);
+    setExportError(null);
+    try {
+      await downloadFile(`/chat/conversations/${conversationId}/export`, `floss-conversation-${conversationId}.txt`);
+    } catch (err) {
+      setExportError(err instanceof ApiError ? err.message : 'Could not export this conversation.');
+    } finally {
+      setExporting(false);
+    }
+  }
+
   return (
     <AppLayout>
       <div className="page">
@@ -34,9 +48,19 @@ export default function ChatPage() {
           <Link to="/knowledge-base" className="back-link">
             ← Knowledge Base
           </Link>
-          <button className="btn btn-small btn-ghost" type="button" onClick={handleDelete} disabled={deleting}>
-            {deleting ? 'Deleting…' : 'Delete conversation'}
-          </button>
+          <div className="page-header-actions">
+            {exportError && (
+              <span className="form-error" role="alert" style={{ margin: 0 }}>
+                {exportError}
+              </span>
+            )}
+            <button className="btn btn-small btn-ghost" type="button" onClick={handleExport} disabled={exporting}>
+              {exporting ? 'Exporting…' : 'Export'}
+            </button>
+            <button className="btn btn-small btn-ghost" type="button" onClick={handleDelete} disabled={deleting}>
+              {deleting ? 'Deleting…' : 'Delete conversation'}
+            </button>
+          </div>
         </header>
 
         <div className="page-body page-body-chat">

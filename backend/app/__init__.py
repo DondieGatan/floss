@@ -63,7 +63,15 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
-    cors.init_app(app, resources={r"/api/*": {"origins": app.config["CORS_ORIGINS"]}})
+    # Content-Disposition isn't one of the handful of headers a browser
+    # exposes to cross-origin fetch() by default (frontend and backend are
+    # different origins in both dev and prod) — without this, the file
+    # export's filename-from-header parsing in the frontend's downloadFile()
+    # would silently always fall through to its fallback name instead.
+    cors.init_app(
+        app,
+        resources={r"/api/*": {"origins": app.config["CORS_ORIGINS"], "expose_headers": ["Content-Disposition"]}},
+    )
     limiter.init_app(app)
 
     from app.auth import auth_bp

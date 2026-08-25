@@ -82,6 +82,49 @@ def test_delete_missing_conversation_returns_404(client, auth_headers):
     assert resp.status_code == 404
 
 
+def test_export_conversation_returns_a_downloadable_transcript(client, auth_headers):
+    conv_id = client.post("/api/chat/conversations", headers=auth_headers, json={}).get_json()["conversation"]["id"]
+    post_resp = client.post(
+        f"/api/chat/conversations/{conv_id}/messages", headers=auth_headers, json={"content": "hello there"}
+    )
+    post_resp.get_data()  # force the streaming generator to run to completion (and persist both messages)
+
+    resp = client.get(f"/api/chat/conversations/{conv_id}/export", headers=auth_headers)
+    assert resp.status_code == 200
+    assert resp.mimetype == "text/plain"
+    assert f'filename="floss-conversation-{conv_id}.txt"' in resp.headers["Content-Disposition"]
+    text = resp.get_data(as_text=True)
+    assert "Floss Clinic — Conversation Export" in text
+    assert "You (" in text
+    assert "hello there" in text
+
+
+def test_export_conversation_cross_user_returns_404(client, register_user):
+    headers_a, _ = register_user(email="a@example.com")
+    headers_b, _ = register_user(email="b@example.com")
+    conv_id = client.post("/api/chat/conversations", headers=headers_a, json={}).get_json()["conversation"]["id"]
+
+    resp = client.get(f"/api/chat/conversations/{conv_id}/export", headers=headers_b)
+    assert resp.status_code == 404
+
+
+def test_export_missing_conversation_returns_404(client, auth_headers):
+    resp = client.get("/api/chat/conversations/999999/export", headers=auth_headers)
+    assert resp.status_code == 404
+
+
+def test_export_exposes_content_disposition_cross_origin(client, auth_headers):
+    """Content-Disposition isn't one of the handful of headers a browser
+    hands to cross-origin fetch() by default — this must be explicitly
+    opted into via CORS, or the frontend's filename-from-header parsing in
+    downloadFile() silently never sees it. See app/__init__.py."""
+    conv_id = client.post("/api/chat/conversations", headers=auth_headers, json={}).get_json()["conversation"]["id"]
+
+    headers = {**auth_headers, "Origin": "http://localhost:5173"}
+    resp = client.get(f"/api/chat/conversations/{conv_id}/export", headers=headers)
+    assert "Content-Disposition" in resp.headers.get("Access-Control-Expose-Headers", "")
+
+
 def test_post_message_low_confidence_skips_groq_entirely(client, uploaded_document, mock_stream_answer):
     # uploaded_document's chunks carry fake, independently-random unit
     # vectors, so any real query embedding should score well below

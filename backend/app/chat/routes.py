@@ -89,6 +89,32 @@ def delete_conversation(conversation_id):
     return "", 204
 
 
+@chat_bp.route("/conversations/<int:conversation_id>/export", methods=["GET"])
+@jwt_required()
+def export_conversation(conversation_id):
+    conversation = Conversation.query.filter_by(id=conversation_id, owner_id=current_user_id()).first()
+    if conversation is None:
+        return jsonify({"error": "Conversation not found."}), 404
+
+    lines = [
+        "Floss Clinic — Conversation Export",
+        f"Started: {conversation.created_at.strftime('%B %d, %Y at %I:%M %p')}",
+        "",
+    ]
+    for message in conversation.messages:
+        speaker = "You" if message.role == "user" else "Floss Assistant"
+        when = message.created_at.strftime("%b %d, %Y %I:%M %p")
+        lines.append(f"{speaker} ({when}):")
+        lines.append(message.content)
+        lines.append("")
+
+    return Response(
+        "\n".join(lines),
+        mimetype="text/plain",
+        headers={"Content-Disposition": f'attachment; filename="floss-conversation-{conversation.id}.txt"'},
+    )
+
+
 @chat_bp.route("/conversations/<int:conversation_id>/messages", methods=["GET"])
 @jwt_required()
 def list_messages(conversation_id):
