@@ -55,3 +55,49 @@ jobs:
 
       - name: Build (fails on any bundling/type error Vitest wouldn't catch)
         run: npm run build
+
+  backend-security:
+    name: Backend dependency audit (pip-audit)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Audit for known vulnerabilities
+        run: pip install pip-audit && pip-audit -r requirements.txt
+
+  frontend-security:
+    name: Frontend dependency audit (npm audit)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # High/critical only — low/moderate findings are frequently in
+      # dev-only tooling with no real exposure and no fix available yet;
+      # failing CI on those trains everyone to ignore red builds instead
+      # of actually catching the ones that matter.
+      - name: Audit for known vulnerabilities (high/critical only)
+        run: npm audit --audit-level=high
