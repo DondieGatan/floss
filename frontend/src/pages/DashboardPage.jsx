@@ -178,7 +178,7 @@ function StaffDashboard() {
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const isStaff = user?.role === 'staff' || user?.role === 'admin';
+  const isStaff = user?.role === 'staff' || user?.role === 'admin' || user?.role === 'owner';
 
   return <AppLayout>{isStaff ? <StaffDashboard /> : <PatientDashboard />}</AppLayout>;
 }

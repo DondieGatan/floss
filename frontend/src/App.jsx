@@ -13,6 +13,7 @@ import MyAppointmentsPage from './pages/MyAppointmentsPage';
 import ManageDirectoryPage from './pages/ManageDirectoryPage';
 import AllAppointmentsPage from './pages/AllAppointmentsPage';
 import AdmissionsPage from './pages/AdmissionsPage';
+import ManageUsersPage from './pages/ManageUsersPage';
 
 function RequireAuth({ children, roles }) {
   const { user, loading } = useAuth();
@@ -33,7 +34,8 @@ function Home() {
   return <LandingPage />;
 }
 
-const STAFF_ROLES = ['staff', 'admin'];
+const STAFF_ROLES = ['staff', 'admin', 'owner'];
+const ADMIN_ROLES = ['admin', 'owner'];
 
 export default function App() {
   return (
@@ -56,6 +58,7 @@ export default function App() {
           <Route path="/manage/directory" element={<RequireAuth roles={STAFF_ROLES}><ManageDirectoryPage /></RequireAuth>} />
           <Route path="/manage/appointments" element={<RequireAuth roles={STAFF_ROLES}><AllAppointmentsPage /></RequireAuth>} />
           <Route path="/manage/admissions" element={<RequireAuth roles={STAFF_ROLES}><AdmissionsPage /></RequireAuth>} />
+          <Route path="/manage/users" element={<RequireAuth roles={ADMIN_ROLES}><ManageUsersPage /></RequireAuth>} />
 
           {/* Legacy Footnote URL kept working for anyone with an old bookmark. */}
           <Route path="/documents" element={<Navigate to="/knowledge-base" replace />} />

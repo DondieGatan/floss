@@ -11,7 +11,7 @@ export default function DocumentsPage() {
   const navigate = useNavigate();
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const isStaff = user?.role === 'staff' || user?.role === 'admin';
+  const isStaff = user?.role === 'staff' || user?.role === 'admin' || user?.role === 'owner';
 
   useEffect(() => {
     api.get('/documents').then((data) => {

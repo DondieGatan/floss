@@ -20,5 +20,6 @@ def role_required(*roles):
     return decorator
 
 
-staff_required = role_required("staff", "admin")
-admin_required = role_required("admin")
+staff_required = role_required("staff", "admin", "owner")
+admin_required = role_required("admin", "owner")
+owner_required = role_required("owner")

@@ -69,6 +69,15 @@ function DoorIcon() {
   );
 }
 
+function ShieldIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3.5 5 6v6c0 4.5 3 7.5 7 8.5 4-1 7-4 7-8.5V6l-7-2.5z" />
+      <path d="M9.5 12 11 13.5 14.5 10" />
+    </svg>
+  );
+}
+
 function ChevronIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -102,12 +111,16 @@ const STAFF_LINKS = [
   { to: '/knowledge-base', icon: <ChatIcon />, label: 'Knowledge Base' },
 ];
 
+const ADMIN_LINK = { to: '/manage/users', icon: <ShieldIcon />, label: 'Team & Roles' };
+
 export default function AppLayout({ children }) {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === 'true');
-  const isStaff = user?.role === 'staff' || user?.role === 'admin';
+  const isStaff = user?.role === 'staff' || user?.role === 'admin' || user?.role === 'owner';
+  const isAdmin = user?.role === 'admin' || user?.role === 'owner';
+  const navLinks = isStaff ? (isAdmin ? [...STAFF_LINKS, ADMIN_LINK] : STAFF_LINKS) : PATIENT_LINKS;
   const initials = (user?.fullName || 'U')
     .split(' ')
     .filter(Boolean)
@@ -195,7 +208,7 @@ export default function AppLayout({ children }) {
 
         <nav className="app-nav" aria-label="Primary">
           <div className="app-nav-section app-sidebar-fade">{isStaff ? 'Staff' : 'Patient'}</div>
-          {(isStaff ? STAFF_LINKS : PATIENT_LINKS).map((link) => (
+          {navLinks.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}

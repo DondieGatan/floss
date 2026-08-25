@@ -12,9 +12,9 @@ class User(db.Model):
     full_name = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(255), nullable=False, unique=True, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
-    # patient | staff | admin — a flat column rather than a Role table: a
-    # fixed 3-value set doesn't need dynamic permission assignment, and
-    # every other model here is deliberately this minimal too.
+    # patient | staff | admin | owner — a flat column rather than a Role
+    # table: a fixed small set doesn't need dynamic permission assignment,
+    # and every other model here is deliberately this minimal too.
     role = db.Column(db.String(20), nullable=False, default="patient", server_default="patient")
     created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
