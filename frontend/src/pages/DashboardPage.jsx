@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
 import AppLayout from '../components/AppLayout';
 import AppointmentCard from '../components/AppointmentCard';
+import AppointmentReminderBanner from '../components/AppointmentReminderBanner';
 import { ToothIcon, ChatIcon, ClinicIcon, ChairIcon, ClipboardIcon, CalendarIcon, CheckCircleIcon } from '../components/icons';
 
 function firstName(fullName) {
@@ -39,6 +40,8 @@ function PatientDashboard() {
           </Link>
         </div>
       </div>
+
+      {appointments !== null && <AppointmentReminderBanner appointments={appointments} />}
 
       <div className="stat-row">
         <div className="stat-card">

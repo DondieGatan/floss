@@ -202,6 +202,10 @@ class Appointment(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     cancelled_at = db.Column(db.DateTime, nullable=True)
     cancellation_reason = db.Column(db.String(500), nullable=True)
+    # Set once a reminder has actually gone out (see app/appointments/
+    # reminders.py) — naive, like scheduled_start, so it can be compared
+    # against it directly without a tz-aware/naive mismatch.
+    reminder_sent_at = db.Column(db.DateTime, nullable=True)
 
     patient = db.relationship("PatientProfile")
     doctor = db.relationship("Doctor")

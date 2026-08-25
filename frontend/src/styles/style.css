@@ -1378,6 +1378,48 @@ textarea {
   font-size: 14px;
 }
 
+.reminder-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+}
+
+.reminder-banner-icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  color: var(--accent-strong);
+}
+
+.reminder-banner-text {
+  flex: 1;
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.reminder-banner-dismiss {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1;
+  padding: 4px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.reminder-banner-dismiss:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
 .quick-actions {
   position: relative;
   display: flex;
