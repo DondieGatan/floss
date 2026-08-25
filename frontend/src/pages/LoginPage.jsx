@@ -67,6 +67,9 @@ export default function LoginPage() {
             <span>Password</span>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </label>
+          <p className="auth-forgot">
+            <Link to="/forgot-password">Forgot password?</Link>
+          </p>
 
           <button className="btn btn-primary" type="submit" disabled={submitting}>
             {submitting ? 'Signing in…' : 'Sign In'}

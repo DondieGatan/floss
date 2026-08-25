@@ -95,6 +95,67 @@ def test_me_reflects_role(client, register_user):
     assert resp.get_json()["user"]["role"] == "patient"
 
 
+def test_forgot_password_generic_response_for_unknown_email(client):
+    resp = client.post("/api/auth/forgot-password", json={"email": "nobody@example.com"})
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert "resetToken" not in data
+
+
+def test_forgot_password_returns_token_for_known_email(client, register_user):
+    register_user(email="alex@example.com")
+    resp = client.post("/api/auth/forgot-password", json={"email": "alex@example.com"})
+    assert resp.status_code == 200
+    # TestConfig runs with TESTING=True, which is the same "not production"
+    # gate real debug mode uses — the token is only ever echoed back outside
+    # of production, same branch either way.
+    assert "resetToken" in resp.get_json()
+
+
+def test_reset_password_changes_password(client, register_user):
+    register_user(email="alex@example.com", password="original123")
+    token = client.post(
+        "/api/auth/forgot-password", json={"email": "alex@example.com"}
+    ).get_json()["resetToken"]
+
+    resp = client.post("/api/auth/reset-password", json={"token": token, "password": "brandnew123"})
+    assert resp.status_code == 200
+
+    resp = client.post("/api/auth/login", json={"email": "alex@example.com", "password": "original123"})
+    assert resp.status_code == 401
+
+    resp = client.post("/api/auth/login", json={"email": "alex@example.com", "password": "brandnew123"})
+    assert resp.status_code == 200
+
+
+def test_reset_password_token_is_single_use(client, register_user):
+    register_user(email="alex@example.com", password="original123")
+    token = client.post(
+        "/api/auth/forgot-password", json={"email": "alex@example.com"}
+    ).get_json()["resetToken"]
+
+    resp = client.post("/api/auth/reset-password", json={"token": token, "password": "brandnew123"})
+    assert resp.status_code == 200
+
+    resp = client.post("/api/auth/reset-password", json={"token": token, "password": "anothernew123"})
+    assert resp.status_code == 400
+
+
+def test_reset_password_rejects_garbage_token(client):
+    resp = client.post("/api/auth/reset-password", json={"token": "not-a-real-token", "password": "brandnew123"})
+    assert resp.status_code == 400
+
+
+def test_reset_password_rejects_short_password(client, register_user):
+    register_user(email="alex@example.com")
+    token = client.post(
+        "/api/auth/forgot-password", json={"email": "alex@example.com"}
+    ).get_json()["resetToken"]
+
+    resp = client.post("/api/auth/reset-password", json={"token": token, "password": "short"})
+    assert resp.status_code == 400
+
+
 def test_refresh_reflects_updated_role(client, register_user, app):
     # Simulates a promotion to staff between token issuance and refresh —
     # the refresh route must re-derive the role from the DB, not copy it
