@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { api } from '../api/client';
 import ChatWindow from './ChatWindow';
+import AssistantAvatar from './AssistantAvatar';
 
 function ChatBubbleIcon() {
   return (
@@ -48,7 +49,16 @@ export default function FloatingChatWidget() {
       {open && (
         <div className="floating-chat-panel" role="dialog" aria-label="Ask Floss Clinic">
           <div className="floating-chat-header">
-            <span>💬 Ask Floss Clinic</span>
+            <div className="floating-chat-identity">
+              <AssistantAvatar size="md" />
+              <div className="floating-chat-identity-text">
+                <span className="floating-chat-name">Floss Assistant</span>
+                <span className="floating-chat-status">
+                  <span className="floating-chat-status-dot" aria-hidden="true" />
+                  Here to help
+                </span>
+              </div>
+            </div>
             <button type="button" onClick={() => setOpen(false)} aria-label="Close chat">
               <CloseIcon />
             </button>

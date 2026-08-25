@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useChatStream } from '../hooks/useChatStream';
 import MessageBubble from './MessageBubble';
+import AssistantAvatar from './AssistantAvatar';
 
 export default function ChatWindow({ conversationId, initialMessages }) {
   const { messages, sending, error, sendMessage } = useChatStream(conversationId, initialMessages);
@@ -23,8 +24,12 @@ export default function ChatWindow({ conversationId, initialMessages }) {
     <div className="chat-window">
       <div className="chat-messages" aria-live="polite">
         {messages.length === 0 && (
-          <div className="empty-state">
-            <p>Ask a question about this document to get started.</p>
+          <div className="chat-empty-state">
+            <AssistantAvatar size="lg" />
+            <p className="chat-empty-title">Hi, I'm the Floss Assistant</p>
+            <p className="chat-empty-subtitle">
+              Ask me about appointments, dentists, hours, insurance, or clinic policies.
+            </p>
           </div>
         )}
         {messages.map((m) => (

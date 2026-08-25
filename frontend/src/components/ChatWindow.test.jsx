@@ -14,7 +14,7 @@ describe('ChatWindow', () => {
     useChatStream.mockReturnValue({ messages: [], sending: false, error: null, sendMessage: vi.fn() });
     render(<ChatWindow conversationId="1" initialMessages={[]} />);
 
-    expect(screen.getByText('Ask a question about this document to get started.')).toBeInTheDocument();
+    expect(screen.getByText("Hi, I'm the Floss Assistant")).toBeInTheDocument();
   });
 
   it('renders prior messages and their citation markers', () => {
