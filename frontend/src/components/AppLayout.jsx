@@ -6,7 +6,7 @@ import logoIcon from '../assets/logo-icon.png';
 import FloatingChatWidget from './FloatingChatWidget';
 import {
   HouseIcon, ToothIcon, CalendarIcon, ChatIcon, PeopleIcon, ClipboardIcon,
-  DoorIcon, ShieldIcon, ChevronIcon, LogoutIcon, SunIcon, MoonIcon,
+  DoorIcon, ShieldIcon, ChevronIcon, LogoutIcon, SunIcon, MoonIcon, LockIcon,
 } from './icons';
 
 const COLLAPSE_KEY = 'floss_sidebar_collapsed';
@@ -144,6 +144,15 @@ export default function AppLayout({ children }) {
         </nav>
 
         <div className="app-sidebar-footer">
+          <NavLink
+            to="/security"
+            onClick={closeMobileNav}
+            title={collapsed ? 'Security' : undefined}
+            className={({ isActive }) => `app-nav-link${isActive ? ' active' : ''}`}
+          >
+            <span className="app-nav-icon" aria-hidden="true"><LockIcon /></span>
+            <span className="app-sidebar-fade">Security</span>
+          </NavLink>
           <button
             className="theme-toggle"
             type="button"

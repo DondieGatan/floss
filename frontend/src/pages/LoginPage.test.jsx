@@ -83,4 +83,37 @@ describe('LoginPage', () => {
     resolveLogin({ accessToken: 'a', refreshToken: 'r', user: { id: 1, fullName: 'Jordan', role: 'patient' } });
     await waitFor(() => expect(navigateMock).toHaveBeenCalled());
   });
+
+  it('when the account has 2FA enabled, prompts for a code instead of navigating', async () => {
+    api.post.mockResolvedValue({ requiresTwoFactor: true, twoFactorToken: 'pending-token' });
+
+    renderLogin();
+    fillAndSubmit();
+
+    expect(await screen.findByText(/Two-factor verification/)).toBeInTheDocument();
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
+
+  it('submitting a valid 2FA code logs in and navigates to the homepage', async () => {
+    api.post
+      .mockResolvedValueOnce({ requiresTwoFactor: true, twoFactorToken: 'pending-token' })
+      .mockResolvedValueOnce({
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token',
+        user: { id: 1, fullName: 'Jordan Ellis', role: 'patient' },
+      });
+
+    renderLogin();
+    fillAndSubmit();
+    await screen.findByText(/Two-factor verification/);
+
+    fireEvent.change(screen.getByLabelText('Authentication code'), { target: { value: '123456' } });
+    fireEvent.click(screen.getByRole('button', { name: /Verify/ }));
+
+    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith('/'));
+    expect(api.post).toHaveBeenCalledWith('/auth/2fa/verify-login', {
+      twoFactorToken: 'pending-token',
+      code: '123456',
+    });
+  });
 });

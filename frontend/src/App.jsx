@@ -16,6 +16,7 @@ import ManageDirectoryPage from './pages/ManageDirectoryPage';
 import AllAppointmentsPage from './pages/AllAppointmentsPage';
 import AdmissionsPage from './pages/AdmissionsPage';
 import ManageUsersPage from './pages/ManageUsersPage';
+import SecurityPage from './pages/SecurityPage';
 
 function RequireAuth({ children, roles }) {
   const { user, loading } = useAuth();
@@ -52,6 +53,7 @@ export default function App() {
           <Route path="/reset-password" element={<RedirectIfAuthed><ResetPasswordPage /></RedirectIfAuthed>} />
 
           <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
+          <Route path="/security" element={<RequireAuth><SecurityPage /></RequireAuth>} />
           <Route path="/knowledge-base" element={<RequireAuth><DocumentsPage /></RequireAuth>} />
           <Route path="/chat/:conversationId" element={<RequireAuth><ChatPage /></RequireAuth>} />
 

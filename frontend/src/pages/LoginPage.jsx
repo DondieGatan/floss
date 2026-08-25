@@ -6,20 +6,40 @@ import heroPhoto from '../assets/Login_Page_picture.jpg';
 import logoIcon from '../assets/logo-icon.png';
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, completeTwoFactorLogin } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
+  const [twoFactorToken, setTwoFactorToken] = useState(null);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const waking = useSlowRequestNotice(submitting);
 
-  async function handleSubmit(e) {
+  async function handlePasswordSubmit(e) {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
     try {
-      await login(email, password);
+      const result = await login(email, password);
+      if (result.requiresTwoFactor) {
+        setTwoFactorToken(result.twoFactorToken);
+      } else {
+        navigate('/');
+      }
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Something went wrong.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleCodeSubmit(e) {
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      await completeTwoFactorLogin(twoFactorToken, code);
       navigate('/');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Something went wrong.');
@@ -45,45 +65,93 @@ export default function LoginPage() {
       </div>
 
       <div className="auth-form-col">
-        <form className="auth-card" onSubmit={handleSubmit}>
-          <h1 className="brand">
-            <img src={logoIcon} alt="" className="brand-mark" />
-            Floss Clinic
-          </h1>
-          <h2 className="auth-card-title">Sign In</h2>
-          <p className="brand-sub">Talk to your clinic, day or night — no matter where you are.</p>
+        {twoFactorToken ? (
+          <form className="auth-card" onSubmit={handleCodeSubmit}>
+            <h1 className="brand">
+              <img src={logoIcon} alt="" className="brand-mark" />
+              Floss Clinic
+            </h1>
+            <h2 className="auth-card-title">Two-factor verification</h2>
+            <p className="brand-sub">Enter the 6-digit code from your authenticator app, or one of your recovery codes.</p>
 
-          {error && (
-            <div className="form-error" role="alert">
-              {error}
-            </div>
-          )}
+            {error && (
+              <div className="form-error" role="alert">
+                {error}
+              </div>
+            )}
 
-          <label className="field">
-            <span>Email</span>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          </label>
-          <label className="field">
-            <span>Password</span>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-          </label>
-          <p className="auth-forgot">
-            <Link to="/forgot-password">Forgot password?</Link>
-          </p>
+            <label className="field">
+              <span>Authentication code</span>
+              <input
+                type="text"
+                inputMode="text"
+                autoComplete="one-time-code"
+                autoFocus
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                required
+              />
+            </label>
 
-          <button className="btn btn-primary" type="submit" disabled={submitting}>
-            {submitting ? 'Signing in…' : 'Sign In'}
-          </button>
-          {waking && (
-            <p className="form-notice" role="status">
-              Waking up the server — this can take up to a minute on the first request after a while.
+            <button className="btn btn-primary" type="submit" disabled={submitting}>
+              {submitting ? 'Verifying…' : 'Verify'}
+            </button>
+
+            <p className="auth-switch">
+              <button
+                type="button"
+                className="link-button"
+                onClick={() => {
+                  setTwoFactorToken(null);
+                  setCode('');
+                  setError(null);
+                }}
+              >
+                Back to sign in
+              </button>
             </p>
-          )}
+          </form>
+        ) : (
+          <form className="auth-card" onSubmit={handlePasswordSubmit}>
+            <h1 className="brand">
+              <img src={logoIcon} alt="" className="brand-mark" />
+              Floss Clinic
+            </h1>
+            <h2 className="auth-card-title">Sign In</h2>
+            <p className="brand-sub">Talk to your clinic, day or night — no matter where you are.</p>
 
-          <p className="auth-switch">
-            Don&apos;t have an account? <Link to="/register">Sign up free</Link>
-          </p>
-        </form>
+            {error && (
+              <div className="form-error" role="alert">
+                {error}
+              </div>
+            )}
+
+            <label className="field">
+              <span>Email</span>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            </label>
+            <label className="field">
+              <span>Password</span>
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            </label>
+            <p className="auth-forgot">
+              <Link to="/forgot-password">Forgot password?</Link>
+            </p>
+
+            <button className="btn btn-primary" type="submit" disabled={submitting}>
+              {submitting ? 'Signing in…' : 'Sign In'}
+            </button>
+            {waking && (
+              <p className="form-notice" role="status">
+                Waking up the server — this can take up to a minute on the first request after a while.
+              </p>
+            )}
+
+            <p className="auth-switch">
+              Don&apos;t have an account? <Link to="/register">Sign up free</Link>
+            </p>
+          </form>
+        )}
       </div>
     </div>
   );

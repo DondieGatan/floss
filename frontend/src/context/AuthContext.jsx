@@ -32,6 +32,19 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (email, password) => {
     const data = await api.post('/auth/login', { email, password });
+    if (data.requiresTwoFactor) {
+      // Password was correct but that's not enough on its own — hand back
+      // the pending token so the caller can prompt for a second factor
+      // instead of ending up "logged in" here.
+      return { requiresTwoFactor: true, twoFactorToken: data.twoFactorToken };
+    }
+    setTokens(data);
+    setUser(data.user);
+    return { requiresTwoFactor: false };
+  }, []);
+
+  const completeTwoFactorLogin = useCallback(async (twoFactorToken, code) => {
+    const data = await api.post('/auth/2fa/verify-login', { twoFactorToken, code });
     setTokens(data);
     setUser(data.user);
   }, []);
@@ -47,7 +60,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, register, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, register, login, completeTwoFactorLogin, logout }}>
       {children}
     </AuthContext.Provider>
   );

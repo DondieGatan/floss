@@ -17,6 +17,11 @@ class User(db.Model):
     # and every other model here is deliberately this minimal too.
     role = db.Column(db.String(20), nullable=False, default="patient", server_default="patient")
     created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    # Set as soon as 2FA setup starts, but totp_enabled stays False until the
+    # user proves they can actually generate a valid code with it — a secret
+    # alone (e.g. abandoned mid-setup) must never gate login.
+    totp_secret = db.Column(db.String(32), nullable=True)
+    totp_enabled = db.Column(db.Boolean, nullable=False, default=False, server_default="0")
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -25,7 +30,29 @@ class User(db.Model):
         return check_password_hash(self.password_hash, password)
 
     def to_dict(self):
-        return {"id": self.id, "fullName": self.full_name, "email": self.email, "role": self.role}
+        return {
+            "id": self.id,
+            "fullName": self.full_name,
+            "email": self.email,
+            "role": self.role,
+            "twoFactorEnabled": self.totp_enabled,
+        }
+
+
+class RecoveryCode(db.Model):
+    __tablename__ = "recovery_codes"
+
+    # Generated as a batch when 2FA is first enabled, shown to the user
+    # exactly once — only the hash is ever persisted, same as a password.
+    # Each is single-use (used_at set on redemption) so a code seen once
+    # (e.g. leaked via a screenshot) can't be replayed.
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    code_hash = db.Column(db.String(255), nullable=False)
+    used_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+
+    user = db.relationship("User")
 
 
 class TokenBlocklist(db.Model):
