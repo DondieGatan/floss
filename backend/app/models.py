@@ -36,6 +36,37 @@ class TokenBlocklist(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
 
+class AuditLog(db.Model):
+    __tablename__ = "audit_logs"
+
+    # A flat "action" string rather than a fixed enum of event types —
+    # matches every other model here: a small, evolving set of event kinds
+    # doesn't need a table of its own, and a new action never needs a
+    # migration. actor/target rows are never deleted (no user-delete
+    # feature exists), so plain FKs are fine — nothing to cascade.
+    id = db.Column(db.Integer, primary_key=True)
+    actor_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    action = db.Column(db.String(50), nullable=False)
+    target_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True, index=True)
+    details = db.Column(db.String(255), nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), index=True)
+
+    actor = db.relationship("User", foreign_keys=[actor_id])
+    target_user = db.relationship("User", foreign_keys=[target_user_id])
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "action": self.action,
+            "actorName": self.actor.full_name if self.actor else None,
+            "actorEmail": self.actor.email if self.actor else None,
+            "targetName": self.target_user.full_name if self.target_user else None,
+            "targetEmail": self.target_user.email if self.target_user else None,
+            "details": self.details,
+            "createdAt": self.created_at.isoformat(),
+        }
+
+
 class Department(db.Model):
     __tablename__ = "departments"
 

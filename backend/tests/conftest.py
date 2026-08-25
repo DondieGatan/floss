@@ -76,6 +76,12 @@ def admin_headers(register_staff):
     return headers
 
 
+@pytest.fixture()
+def owner_headers(register_staff):
+    headers, _user_id = register_staff(email="owner@example.com", role="owner")
+    return headers
+
+
 def _fake_vector(seed):
     """Deterministic pseudo-random unit vector, for tests that need a
     plausible-shaped embedding without loading the real model."""

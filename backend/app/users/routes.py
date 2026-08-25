@@ -3,7 +3,7 @@ from flask_jwt_extended import get_jwt
 
 from app.users import users_bp
 from app.extensions import db
-from app.models import User
+from app.models import User, AuditLog
 from app.utils import current_user_id
 from app.auth.decorators import admin_required
 
@@ -39,6 +39,20 @@ def update_role(user_id):
     if acting_role != "owner" and (target.role in SENSITIVE_ROLES or new_role in SENSITIVE_ROLES):
         return jsonify({"error": "Only an owner can manage admin accounts."}), 403
 
+    old_role = target.role
     target.role = new_role
+    db.session.add(AuditLog(
+        actor_id=current_user_id(),
+        action="role_change",
+        target_user_id=target.id,
+        details=f"{old_role} → {new_role}",
+    ))
     db.session.commit()
     return jsonify({"user": target.to_dict()}), 200
+
+
+@users_bp.route("/audit-log", methods=["GET"])
+@admin_required
+def list_audit_log():
+    entries = AuditLog.query.order_by(AuditLog.created_at.desc(), AuditLog.id.desc()).limit(50).all()
+    return jsonify({"entries": [e.to_dict() for e in entries]}), 200

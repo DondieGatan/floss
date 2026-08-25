@@ -9,15 +9,21 @@ const ALL_ROLES = ['patient', 'staff', 'admin', 'owner'];
 export default function ManageUsersPage() {
   const { user: me } = useAuth();
   const [users, setUsers] = useState(null);
+  const [auditLog, setAuditLog] = useState(null);
   const [error, setError] = useState(null);
   const [pendingId, setPendingId] = useState(null);
 
   useEffect(() => {
     load();
+    loadAuditLog();
   }, []);
 
   function load() {
     api.get('/users').then((data) => setUsers(data.users));
+  }
+
+  function loadAuditLog() {
+    api.get('/users/audit-log').then((data) => setAuditLog(data.entries));
   }
 
   async function handleRoleChange(userId, role) {
@@ -26,6 +32,7 @@ export default function ManageUsersPage() {
     try {
       const data = await api.patch(`/users/${userId}/role`, { role });
       setUsers((prev) => prev.map((u) => (u.id === userId ? data.user : u)));
+      loadAuditLog();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Something went wrong.');
     } finally {
@@ -99,6 +106,34 @@ export default function ManageUsersPage() {
             })}
           </div>
         )}
+
+        <div className="section">
+          <div className="section-header">
+            <h2 className="section-title">Recent activity</h2>
+          </div>
+          {auditLog === null ? (
+            <div className="skeleton skeleton-card" role="status" aria-live="polite">
+              <span className="sr-only">Loading…</span>
+            </div>
+          ) : auditLog.length === 0 ? (
+            <p className="page-subtitle">No role changes yet.</p>
+          ) : (
+            <div className="list-col">
+              {auditLog.map((entry) => (
+                <div key={entry.id} className="appointment-card">
+                  <div className="appointment-main">
+                    <span className="appointment-doctor">
+                      {entry.actorName} changed {entry.targetName}&apos;s role
+                    </span>
+                    <span className="appointment-time">
+                      {entry.details} · {new Date(entry.createdAt).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </AppLayout>
   );
