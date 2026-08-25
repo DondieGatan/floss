@@ -15,6 +15,7 @@ from app.appointments.conflicts import (
     ConflictError,
 )
 from app.chat.injection_guard import log_if_suspicious
+from app.pagination import paginate
 
 DEFAULT_DURATION_MINUTES = 30
 MAX_DURATION_MINUTES = 240
@@ -140,12 +141,16 @@ def list_appointments():
             query = query.filter(
                 Appointment.scheduled_start >= day_start, Appointment.scheduled_start < day_start + timedelta(days=1)
             )
-    else:
-        patient = _current_patient_profile()
-        if patient is None:
-            return jsonify({"appointments": []}), 200
-        query = Appointment.query.filter_by(patient_id=patient.id)
+        # A single patient's own appointment history is naturally bounded
+        # (see the else branch below, left as .all()) — the clinic-wide
+        # view here is the one with no such natural ceiling.
+        appointments, meta = paginate(query.order_by(Appointment.scheduled_start.desc()))
+        return jsonify({"appointments": [a.to_dict() for a in appointments], **meta}), 200
 
+    patient = _current_patient_profile()
+    if patient is None:
+        return jsonify({"appointments": []}), 200
+    query = Appointment.query.filter_by(patient_id=patient.id)
     appointments = query.order_by(Appointment.scheduled_start.desc()).all()
     return jsonify({"appointments": [a.to_dict() for a in appointments]}), 200
 

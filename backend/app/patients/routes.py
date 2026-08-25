@@ -8,6 +8,7 @@ from app.extensions import db
 from app.models import PatientProfile, User
 from app.utils import current_user_id
 from app.auth.decorators import staff_required
+from app.pagination import paginate
 
 
 def _parse_date(value):
@@ -62,12 +63,9 @@ def update_my_profile():
 @patients_bp.route("", methods=["GET"])
 @staff_required
 def list_patients():
-    profiles = (
-        PatientProfile.query.join(User, PatientProfile.user_id == User.id)
-        .order_by(User.full_name)
-        .all()
-    )
-    return jsonify({"patients": [_profile_with_user(p) for p in profiles]}), 200
+    query = PatientProfile.query.join(User, PatientProfile.user_id == User.id).order_by(User.full_name)
+    profiles, meta = paginate(query)
+    return jsonify({"patients": [_profile_with_user(p) for p in profiles], **meta}), 200
 
 
 @patients_bp.route("/<int:patient_id>", methods=["GET"])

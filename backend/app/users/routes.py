@@ -6,6 +6,7 @@ from app.extensions import db
 from app.models import User, AuditLog
 from app.utils import current_user_id
 from app.auth.decorators import admin_required
+from app.pagination import paginate
 
 ASSIGNABLE_ROLES = {"patient", "staff", "admin", "owner"}
 SENSITIVE_ROLES = {"admin", "owner"}
@@ -14,8 +15,8 @@ SENSITIVE_ROLES = {"admin", "owner"}
 @users_bp.route("", methods=["GET"])
 @admin_required
 def list_users():
-    users = User.query.order_by(User.full_name).all()
-    return jsonify({"users": [u.to_dict() for u in users]}), 200
+    users, meta = paginate(User.query.order_by(User.full_name))
+    return jsonify({"users": [u.to_dict() for u in users], **meta}), 200
 
 
 @users_bp.route("/<int:user_id>/role", methods=["PATCH"])

@@ -12,6 +12,9 @@ export default function ManageUsersPage() {
   const [auditLog, setAuditLog] = useState(null);
   const [error, setError] = useState(null);
   const [pendingId, setPendingId] = useState(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     load();
@@ -19,7 +22,23 @@ export default function ManageUsersPage() {
   }, []);
 
   function load() {
-    api.get('/users').then((data) => setUsers(data.users));
+    api.get('/users?page=1').then((data) => {
+      setUsers(data.users);
+      setPage(1);
+      setHasMore(data.hasMore);
+    });
+  }
+
+  async function handleLoadMore() {
+    setLoadingMore(true);
+    try {
+      const data = await api.get(`/users?page=${page + 1}`);
+      setUsers((prev) => [...prev, ...data.users]);
+      setPage((p) => p + 1);
+      setHasMore(data.hasMore);
+    } finally {
+      setLoadingMore(false);
+    }
   }
 
   function loadAuditLog() {
@@ -105,6 +124,18 @@ export default function ManageUsersPage() {
               );
             })}
           </div>
+        )}
+
+        {hasMore && (
+          <button
+            className="btn btn-ghost btn-small"
+            type="button"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            style={{ marginTop: 12 }}
+          >
+            {loadingMore ? 'Loading…' : 'Load more'}
+          </button>
         )}
 
         <div className="section">

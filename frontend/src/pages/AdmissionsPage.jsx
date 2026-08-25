@@ -193,7 +193,10 @@ export default function AdmissionsPage() {
 
   useEffect(() => {
     loadAll();
-    api.get('/patients').then((data) => setPatients(data.patients));
+    // The admit-patient picker below needs every patient, not a page of
+    // them — pass an explicit high perPage rather than paginating a plain
+    // <select> (see app/pagination.py for the endpoint's actual cap).
+    api.get('/patients?perPage=200').then((data) => setPatients(data.patients));
     api.get('/doctors').then((data) => setDoctors(data.doctors));
   }, []);
 

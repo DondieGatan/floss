@@ -8,6 +8,9 @@ export default function AllAppointmentsPage() {
   const [date, setDate] = useState('');
   const [doctorId, setDoctorId] = useState('');
   const [appointments, setAppointments] = useState(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     api.get('/doctors').then((data) => setDoctors(data.doctors));
@@ -17,13 +20,33 @@ export default function AllAppointmentsPage() {
     load();
   }, [date, doctorId]);
 
-  function load() {
-    setAppointments(null);
+  function buildQuery(pageNum) {
     const params = new URLSearchParams();
     if (date) params.set('date', date);
     if (doctorId) params.set('doctorId', doctorId);
-    const query = params.toString() ? `?${params}` : '';
-    api.get(`/appointments${query}`).then((data) => setAppointments(data.appointments));
+    params.set('page', pageNum);
+    return `?${params}`;
+  }
+
+  function load() {
+    setAppointments(null);
+    api.get(`/appointments${buildQuery(1)}`).then((data) => {
+      setAppointments(data.appointments);
+      setPage(1);
+      setHasMore(data.hasMore);
+    });
+  }
+
+  async function handleLoadMore() {
+    setLoadingMore(true);
+    try {
+      const data = await api.get(`/appointments${buildQuery(page + 1)}`);
+      setAppointments((prev) => [...prev, ...data.appointments]);
+      setPage((p) => p + 1);
+      setHasMore(data.hasMore);
+    } finally {
+      setLoadingMore(false);
+    }
   }
 
   async function handleCancel(appointment) {
@@ -71,6 +94,18 @@ export default function AllAppointmentsPage() {
               <AppointmentCard key={a.id} appointment={a} showPatient onCancel={handleCancel} />
             ))}
           </div>
+        )}
+
+        {hasMore && (
+          <button
+            className="btn btn-ghost btn-small"
+            type="button"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            style={{ marginTop: 12 }}
+          >
+            {loadingMore ? 'Loading…' : 'Load more'}
+          </button>
         )}
       </div>
     </AppLayout>

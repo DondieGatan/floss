@@ -13,6 +13,7 @@ from app.chat.generation import build_prompt, stream_answer
 from app.chat.account_context import build_account_context
 from app.chat.greetings import is_pure_greeting, GREETING_RESPONSE
 from app.chat.injection_guard import log_if_suspicious
+from app.pagination import paginate
 
 FALLBACK_MESSAGE = "I don't have enough information in the uploaded document(s) to answer that."
 
@@ -70,12 +71,9 @@ def create_conversation():
 @chat_bp.route("/conversations", methods=["GET"])
 @jwt_required()
 def list_conversations():
-    conversations = (
-        Conversation.query.filter_by(owner_id=current_user_id())
-        .order_by(Conversation.created_at.desc())
-        .all()
-    )
-    return jsonify({"conversations": [c.to_dict() for c in conversations]}), 200
+    query = Conversation.query.filter_by(owner_id=current_user_id()).order_by(Conversation.created_at.desc())
+    conversations, meta = paginate(query)
+    return jsonify({"conversations": [c.to_dict() for c in conversations], **meta}), 200
 
 
 @chat_bp.route("/conversations/<int:conversation_id>", methods=["DELETE"])
