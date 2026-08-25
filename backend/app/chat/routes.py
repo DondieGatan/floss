@@ -78,6 +78,19 @@ def list_conversations():
     return jsonify({"conversations": [c.to_dict() for c in conversations]}), 200
 
 
+@chat_bp.route("/conversations/<int:conversation_id>", methods=["DELETE"])
+@jwt_required()
+def delete_conversation(conversation_id):
+    conversation = Conversation.query.filter_by(id=conversation_id, owner_id=current_user_id()).first()
+    if conversation is None:
+        return jsonify({"error": "Conversation not found."}), 404
+    # cascade="all, delete-orphan" on Conversation.messages takes its
+    # attached Messages with it — no separate cleanup needed.
+    db.session.delete(conversation)
+    db.session.commit()
+    return "", 204
+
+
 @chat_bp.route("/conversations/<int:conversation_id>/messages", methods=["GET"])
 @jwt_required()
 def list_messages(conversation_id):

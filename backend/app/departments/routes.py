@@ -2,7 +2,7 @@ from flask import request, jsonify
 from flask_jwt_extended import jwt_required
 
 from app.departments import departments_bp
-from app.extensions import db
+from app.extensions import db, limiter
 from app.models import Department, Doctor
 from app.utils import current_user_id
 from app.auth.decorators import staff_required
@@ -35,6 +35,7 @@ def get_department(department_id):
 
 @departments_bp.route("", methods=["POST"])
 @staff_required
+@limiter.limit("60 per hour")
 def create_department():
     fields, error = _validate(request.get_json(silent=True) or {})
     if error:
@@ -51,6 +52,7 @@ def create_department():
 
 @departments_bp.route("/<int:department_id>", methods=["PUT"])
 @staff_required
+@limiter.limit("60 per hour")
 def update_department(department_id):
     department = db.session.get(Department, department_id)
     if department is None:
@@ -69,6 +71,7 @@ def update_department(department_id):
 
 @departments_bp.route("/<int:department_id>", methods=["DELETE"])
 @staff_required
+@limiter.limit("60 per hour")
 def delete_department(department_id):
     department = db.session.get(Department, department_id)
     if department is None:

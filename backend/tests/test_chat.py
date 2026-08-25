@@ -55,6 +55,33 @@ def test_post_message_cross_user_conversation_returns_404(client, register_user)
     assert resp.status_code == 404
 
 
+def test_delete_conversation_removes_it_and_its_messages(client, auth_headers):
+    conv_id = client.post("/api/chat/conversations", headers=auth_headers, json={}).get_json()["conversation"]["id"]
+
+    resp = client.delete(f"/api/chat/conversations/{conv_id}", headers=auth_headers)
+    assert resp.status_code == 204
+
+    assert client.get(f"/api/chat/conversations/{conv_id}/messages", headers=auth_headers).status_code == 404
+    conversations = client.get("/api/chat/conversations", headers=auth_headers).get_json()["conversations"]
+    assert all(c["id"] != conv_id for c in conversations)
+
+
+def test_delete_conversation_cross_user_returns_404(client, register_user):
+    headers_a, _ = register_user(email="a@example.com")
+    headers_b, _ = register_user(email="b@example.com")
+    conv_id = client.post("/api/chat/conversations", headers=headers_a, json={}).get_json()["conversation"]["id"]
+
+    resp = client.delete(f"/api/chat/conversations/{conv_id}", headers=headers_b)
+    assert resp.status_code == 404
+    # Never touched — still there for the actual owner.
+    assert client.get(f"/api/chat/conversations/{conv_id}/messages", headers=headers_a).status_code == 200
+
+
+def test_delete_missing_conversation_returns_404(client, auth_headers):
+    resp = client.delete("/api/chat/conversations/999999", headers=auth_headers)
+    assert resp.status_code == 404
+
+
 def test_post_message_low_confidence_skips_groq_entirely(client, uploaded_document, mock_stream_answer):
     # uploaded_document's chunks carry fake, independently-random unit
     # vectors, so any real query embedding should score well below

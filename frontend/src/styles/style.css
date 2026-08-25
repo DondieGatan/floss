@@ -671,6 +671,13 @@ textarea {
   box-shadow: var(--shadow-hover);
 }
 
+.floating-chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .floating-chat-header button {
   background: rgba(255, 255, 255, 0.18);
   border: none;

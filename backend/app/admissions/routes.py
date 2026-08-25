@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from flask import request, jsonify
 
 from app.admissions import admissions_bp, wards_bp
-from app.extensions import db
+from app.extensions import db, limiter
 from app.models import Admission, Bed, Doctor, PatientProfile, Ward
 from app.auth.decorators import staff_required
 
@@ -31,6 +31,7 @@ def list_wards():
 
 @wards_bp.route("", methods=["POST"])
 @staff_required
+@limiter.limit("60 per hour")
 def create_ward():
     fields, error = _validate_ward(request.get_json(silent=True) or {})
     if error:
@@ -56,6 +57,7 @@ def list_beds(ward_id):
 
 @wards_bp.route("/<int:ward_id>/beds", methods=["POST"])
 @staff_required
+@limiter.limit("60 per hour")
 def create_bed(ward_id):
     ward = db.session.get(Ward, ward_id)
     if ward is None:
@@ -97,6 +99,7 @@ def list_admissions():
 
 @admissions_bp.route("", methods=["POST"])
 @staff_required
+@limiter.limit("60 per hour")
 def create_admission():
     data = request.get_json(silent=True) or {}
     patient_id = data.get("patientId")
@@ -137,6 +140,7 @@ def create_admission():
 
 @admissions_bp.route("/<int:admission_id>/discharge", methods=["PATCH"])
 @staff_required
+@limiter.limit("60 per hour")
 def discharge_admission(admission_id):
     admission = db.session.get(Admission, admission_id)
     if admission is None:

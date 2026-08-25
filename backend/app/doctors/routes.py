@@ -4,7 +4,7 @@ from flask import request, jsonify
 from flask_jwt_extended import jwt_required
 
 from app.doctors import doctors_bp
-from app.extensions import db
+from app.extensions import db, limiter
 from app.models import Doctor, Department, DoctorAvailability
 from app.utils import current_user_id
 from app.auth.decorators import staff_required
@@ -66,6 +66,7 @@ def get_doctor(doctor_id):
 
 @doctors_bp.route("", methods=["POST"])
 @staff_required
+@limiter.limit("60 per hour")
 def create_doctor():
     fields, error = _validate_doctor(request.get_json(silent=True) or {})
     if error:
@@ -80,6 +81,7 @@ def create_doctor():
 
 @doctors_bp.route("/<int:doctor_id>", methods=["PUT"])
 @staff_required
+@limiter.limit("60 per hour")
 def update_doctor(doctor_id):
     doctor = db.session.get(Doctor, doctor_id)
     if doctor is None:
@@ -98,6 +100,7 @@ def update_doctor(doctor_id):
 
 @doctors_bp.route("/<int:doctor_id>", methods=["DELETE"])
 @staff_required
+@limiter.limit("60 per hour")
 def delete_doctor(doctor_id):
     doctor = db.session.get(Doctor, doctor_id)
     if doctor is None:
@@ -113,6 +116,7 @@ def delete_doctor(doctor_id):
 
 @doctors_bp.route("/<int:doctor_id>/availability", methods=["POST"])
 @staff_required
+@limiter.limit("60 per hour")
 def add_availability(doctor_id):
     doctor = db.session.get(Doctor, doctor_id)
     if doctor is None:
@@ -141,6 +145,7 @@ def add_availability(doctor_id):
 
 @doctors_bp.route("/<int:doctor_id>/availability/<int:availability_id>", methods=["DELETE"])
 @staff_required
+@limiter.limit("60 per hour")
 def delete_availability(doctor_id, availability_id):
     availability = DoctorAvailability.query.filter_by(id=availability_id, doctor_id=doctor_id).first()
     if availability is None:

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api } from '../api/client';
 import ChatWindow from './ChatWindow';
 import AssistantAvatar from './AssistantAvatar';
@@ -19,19 +19,27 @@ function CloseIcon() {
   );
 }
 
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 7h16" />
+      <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+      <path d="M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13" />
+    </svg>
+  );
+}
+
 export default function FloatingChatWidget() {
   const [open, setOpen] = useState(false);
   const [conversationId, setConversationId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState(null);
+  const panelRef = useRef(null);
+  const fabRef = useRef(null);
+  const previouslyFocusedRef = useRef(null);
 
-  async function handleToggle() {
-    if (open) {
-      setOpen(false);
-      return;
-    }
-    setOpen(true);
-    if (conversationId || loading) return;
+  async function startConversation() {
     setLoading(true);
     setError(null);
     try {
@@ -44,10 +52,64 @@ export default function FloatingChatWidget() {
     }
   }
 
+  function handleClose() {
+    setOpen(false);
+  }
+
+  async function handleToggle() {
+    if (open) {
+      handleClose();
+      return;
+    }
+    setOpen(true);
+    if (conversationId || loading) return;
+    startConversation();
+  }
+
+  async function handleDeleteConversation() {
+    if (!conversationId) return;
+    setDeleting(true);
+    try {
+      await api.del(`/chat/conversations/${conversationId}`);
+      setConversationId(null);
+      await startConversation();
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  // Move focus into the dialog on open and back to the FAB on close, and
+  // let Escape close it — without this, a keyboard/screen-reader user gets
+  // no cue the dialog opened and no way out except tabbing past it.
+  useEffect(() => {
+    if (open) {
+      previouslyFocusedRef.current = document.activeElement;
+      panelRef.current?.focus();
+    } else if (previouslyFocusedRef.current) {
+      fabRef.current?.focus();
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    function onKeyDown(e) {
+      if (e.key === 'Escape') handleClose();
+    }
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [open]);
+
   return (
     <div className="floating-chat">
       {open && (
-        <div className="floating-chat-panel" role="dialog" aria-label="Ask Floss Clinic">
+        <div
+          className="floating-chat-panel"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Ask Floss Clinic"
+          tabIndex={-1}
+          ref={panelRef}
+        >
           <div className="floating-chat-header">
             <div className="floating-chat-identity">
               <AssistantAvatar size="md" />
@@ -59,21 +121,34 @@ export default function FloatingChatWidget() {
                 </span>
               </div>
             </div>
-            <button type="button" onClick={() => setOpen(false)} aria-label="Close chat">
-              <CloseIcon />
-            </button>
+            <div className="floating-chat-header-actions">
+              {conversationId && (
+                <button
+                  type="button"
+                  onClick={handleDeleteConversation}
+                  disabled={deleting}
+                  aria-label="Delete this conversation"
+                  title="Delete this conversation"
+                >
+                  <TrashIcon />
+                </button>
+              )}
+              <button type="button" onClick={handleClose} aria-label="Close chat">
+                <CloseIcon />
+              </button>
+            </div>
           </div>
           <div className="floating-chat-body">
             {error ? (
               <p className="form-error" role="alert" style={{ margin: 16 }}>
                 {error}
               </p>
-            ) : loading || !conversationId ? (
+            ) : loading || deleting || !conversationId ? (
               <p className="page-loading" role="status" aria-live="polite">
-                Loading…
+                {deleting ? 'Starting a fresh conversation…' : 'Loading…'}
               </p>
             ) : (
-              <ChatWindow conversationId={conversationId} initialMessages={[]} />
+              <ChatWindow key={conversationId} conversationId={conversationId} initialMessages={[]} />
             )}
           </div>
         </div>
@@ -85,6 +160,7 @@ export default function FloatingChatWidget() {
         onClick={handleToggle}
         aria-label={open ? 'Close chat' : 'Ask Floss Clinic'}
         aria-expanded={open}
+        ref={fabRef}
       >
         {open ? <CloseIcon /> : <ChatBubbleIcon />}
       </button>
