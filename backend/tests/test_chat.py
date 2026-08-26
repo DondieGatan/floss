@@ -125,13 +125,16 @@ def test_export_exposes_content_disposition_cross_origin(client, auth_headers):
     assert "Content-Disposition" in resp.headers.get("Access-Control-Expose-Headers", "")
 
 
-def test_post_message_low_confidence_skips_groq_entirely(client, uploaded_document, mock_stream_answer):
+def test_post_message_low_confidence_still_calls_model_but_omits_citations(
+    client, uploaded_document, mock_stream_answer
+):
     # uploaded_document's chunks carry fake, independently-random unit
     # vectors, so any real query embedding should score well below
     # SIMILARITY_THRESHOLD against them — this is deliberately NOT testing
     # retrieval quality (that's test_retrieval.py's job with the real
-    # fixture doc), just that the low-confidence gate actually prevents a
-    # Groq call and burns no quota.
+    # fixture doc). The model is still consulted (it can answer from its own
+    # general dental knowledge, per SYSTEM_PROMPT), it just isn't handed a
+    # probably-irrelevant chunk to cite as an authoritative source.
     headers = uploaded_document["headers"]
     doc_id = uploaded_document["document"].id
 
@@ -147,11 +150,10 @@ def test_post_message_low_confidence_skips_groq_entirely(client, uploaded_docume
     events = _parse_sse(resp.data)
     done_event = next(data for name, data in events if name == "done")
     assert done_event["citedChunkIds"] == []
-    assert "don't have enough information" in done_event["content"].lower()
-    mock_stream_answer.assert_not_called()
+    mock_stream_answer.assert_called_once()
 
 
-def test_post_message_high_confidence_calls_groq_and_persists_citations(
+def test_post_message_high_confidence_calls_claude_and_persists_citations(
     client, uploaded_document, mock_stream_answer, monkeypatch
 ):
     import app.chat.routes as chat_routes
@@ -189,7 +191,7 @@ def test_post_message_high_confidence_calls_groq_and_persists_citations(
     mock_stream_answer.assert_called_once()
 
 
-def test_post_message_groq_failure_streams_error_without_persisting(
+def test_post_message_claude_failure_streams_error_without_persisting(
     client, uploaded_document, monkeypatch
 ):
     import app.chat.routes as chat_routes

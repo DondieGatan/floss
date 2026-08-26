@@ -106,10 +106,10 @@ def test_account_context_never_leaks_another_patients_appointment(client, staff_
     assert "Dr. Jane Smith" not in context_b
 
 
-def test_post_message_uses_account_context_to_bypass_fallback(client, auth_headers, mock_stream_answer):
+def test_post_message_uses_account_context_in_prompt(client, auth_headers, mock_stream_answer):
     # No documents exist at all (retrieve() returns nothing -> low
     # confidence), but the query is personal and the user has a patient
-    # profile — the assistant should still answer instead of falling back.
+    # profile — the account context block should still reach the model.
     conv_id = client.post("/api/chat/conversations", headers=auth_headers, json={}).get_json()["conversation"]["id"]
 
     resp = client.post(
@@ -121,28 +121,30 @@ def test_post_message_uses_account_context_to_bypass_fallback(client, auth_heade
     mock_stream_answer.assert_called_once()
 
     # The prompt actually sent to the model must carry the account context,
-    # not just an empty source-passages block.
-    sent_messages = mock_stream_answer.call_args[0][0]
-    user_content = sent_messages[-1]["content"]
+    # not just an empty source-passages block. Claude's Messages API takes
+    # the prompt as {"system": ..., "messages": [...]}, not a flat list.
+    prompt = mock_stream_answer.call_args[0][0]
+    user_content = prompt["messages"][0]["content"]
     assert "<account_context>" in user_content
     assert "no appointments on file" in user_content.lower()
 
 
-def test_post_message_still_falls_back_for_unrelated_low_confidence_query(client, auth_headers, mock_stream_answer):
+def test_post_message_omits_account_context_for_unrelated_low_confidence_query(
+    client, auth_headers, mock_stream_answer
+):
     # A registered patient (has a PatientProfile) asking something with no
-    # matching documents and no personal-account phrasing should still hit
-    # the static fallback and never spend a Groq call — the original
-    # low-confidence guarantee, unaffected by account context.
+    # matching documents and no personal-account phrasing should still call
+    # the model (it can fall back to general dental knowledge), just without
+    # any account context or citable source passages in the prompt.
     conv_id = client.post("/api/chat/conversations", headers=auth_headers, json={}).get_json()["conversation"]["id"]
 
     resp = client.post(
         f"/api/chat/conversations/{conv_id}/messages", headers=auth_headers, json={"content": "Anything at all"}
     )
     assert resp.status_code == 200
+    mock_stream_answer.assert_called_once()
 
-    from tests.test_chat import _parse_sse
-
-    events = _parse_sse(resp.data)
-    done_event = next(data for name, data in events if name == "done")
-    assert "don't have enough information" in done_event["content"].lower()
-    mock_stream_answer.assert_not_called()
+    prompt = mock_stream_answer.call_args[0][0]
+    user_content = prompt["messages"][0]["content"]
+    assert "<account_context>" not in user_content
+    assert "(no relevant knowledge-base passages found)" in user_content

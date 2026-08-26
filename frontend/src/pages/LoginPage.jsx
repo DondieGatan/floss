@@ -58,7 +58,7 @@ export default function LoginPage() {
             Back.
           </h2>
           <p className="auth-visual-sub">
-            Sign in to manage appointments, message your care team, and get instant, cited answers from your
+            Sign in to manage appointments, message your care team, and get instant answers from your
             clinic's assistant.
           </p>
         </div>

@@ -51,7 +51,7 @@ export default function RegisterPage() {
             Us.
           </h2>
           <p className="auth-visual-sub">
-            Create a free account to book appointments, meet our dentists, and get instant, cited answers from
+            Create a free account to book appointments, meet our dentists, and get instant answers from
             your clinic's assistant.
           </p>
         </div>

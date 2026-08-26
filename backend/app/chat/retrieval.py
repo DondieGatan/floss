@@ -38,8 +38,10 @@ def retrieve(document_id, query_vector, top_k=TOP_K):
 
 def is_low_confidence(results):
     """True if there's nothing to search, or the best match isn't good
-    enough to trust — the actual grounding gate that keeps the model from
-    answering off unrelated content, and saves a Groq call when it fires."""
+    enough to trust — keeps a probably-irrelevant chunk from being handed
+    to the model as if it were an authoritative, citable numbered source.
+    The model is still consulted either way (see app/chat/routes.py); this
+    just controls whether it gets to cite anything."""
     if not results:
         return True
     top_score = results[0][1]

@@ -40,8 +40,9 @@ export default function DocumentsPage() {
       <div className="page-body">
         <h1 className="page-title">Ask Floss Clinic</h1>
         <p className="page-subtitle">
-          Chat with the clinic's knowledge base — policies, hours, and the dentist directory. Every answer is
-          cited, and Floss Clinic will never offer dental or medical advice.
+          Chat with the clinic's knowledge base — policies, hours, the dentist directory, and general dental
+          questions. Answers drawn from our own materials are cited; Floss Clinic will never offer medical
+          advice or diagnose your symptoms.
         </p>
 
         <div className="documents-toolbar">

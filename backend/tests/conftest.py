@@ -153,9 +153,9 @@ def uploaded_document(app, register_user):
 @pytest.fixture()
 def mock_stream_answer(monkeypatch):
     """Replaces app.chat.generation.stream_answer with a canned,
-    deterministic token generator and records whether it was called — so
-    chat tests never hit the real Groq API, and the low-confidence fallback
-    path can assert it was skipped entirely."""
+    deterministic token generator and records whether/how it was called —
+    so chat tests never hit the real Claude API, and can assert on the
+    prompt actually built for it."""
     from unittest.mock import MagicMock
     import app.chat.routes as chat_routes
 

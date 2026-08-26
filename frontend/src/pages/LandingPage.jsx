@@ -145,7 +145,7 @@ export default function LandingPage() {
                 Your <span className="accent">Best Dental</span> Experience Awaits
               </h1>
               <p className="hero-sub">
-                Book appointments, meet our dentists, and get instant, cited answers from Floss Clinic — your
+                Book appointments, meet our dentists, and get instant answers from Floss Clinic — your
                 clinic's own assistant. All in one place.
               </p>
               <div className="hero-actions">
@@ -166,10 +166,10 @@ export default function LandingPage() {
           <div ref={quickbookRef} className={`landing-section quickbook-section reveal${quickbookVisible ? ' reveal-visible' : ''}`}>
             <div className="quickbook-intro">
               <p className="eyebrow">Meet Your Assistant</p>
-              <h2 className="section-heading">Get Instant, Cited Answers</h2>
+              <h2 className="section-heading">Get Instant, Helpful Answers</h2>
               <p className="quickbook-intro-sub">
-                Ask about hours, policies, insurance, or our dentists — Floss Assistant answers only from your
-                clinic's own information, with a source cited every time.
+                Ask about hours, policies, insurance, our dentists, or general dental questions — sourced
+                from our own materials whenever it can be, always upfront when it isn't.
               </p>
             </div>
             <AssistantPreviewCard user={user} />
@@ -190,16 +190,16 @@ export default function LandingPage() {
             </h2>
             <p>
               Floss Clinic brings your dental clinic's directory, scheduling, and patient records into a single place —
-              with a built-in assistant that only ever answers from your clinic's own information. No more juggling
-              spreadsheets, phone tag, or outdated patient files: everything your team and your patients need lives in
-              one connected, always-up-to-date platform.
+              with a built-in assistant that draws on your clinic's own information first, and general dental
+              knowledge when it doesn't have that. No more juggling spreadsheets, phone tag, or outdated patient
+              files: everything your team and your patients need lives in one connected, always-up-to-date platform.
             </p>
             <ul className="check-list">
               <li>
                 <span className="check-mark" aria-hidden="true">✓</span> Real-time appointment booking with conflict detection
               </li>
               <li>
-                <span className="check-mark" aria-hidden="true">✓</span> An assistant that cites its sources, every time
+                <span className="check-mark" aria-hidden="true">✓</span> An assistant that cites its sources whenever it has one
               </li>
               <li>
                 <span className="check-mark" aria-hidden="true">✓</span> Dedicated portals for patients and staff
@@ -272,7 +272,7 @@ export default function LandingPage() {
                 </div>
                 <div className="stat-block">
                   <p className="stat-num">100%</p>
-                  <p className="stat-cap">Cited assistant answers</p>
+                  <p className="stat-cap">Judgment-free, always on</p>
                 </div>
                 <div className="stat-block">
                   <p className="stat-num">2</p>
@@ -304,7 +304,7 @@ export default function LandingPage() {
                 <img src={logoIcon} alt="" className="landing-brand-mark" />
                 Floss Clinic
               </span>
-              <p className="footer-brand-sub">Your dental clinic, one place — appointments, records, and a cited assistant.</p>
+              <p className="footer-brand-sub">Your dental clinic, one place — appointments, records, and a smart assistant.</p>
             </div>
             <div className="footer-links">
               <div className="footer-col">

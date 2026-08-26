@@ -32,10 +32,10 @@ class Config:
     # already gets its own override via TestConfig below regardless.
     RATELIMIT_ENABLED = os.environ.get("RATELIMIT_ENABLED", "true").lower() != "false"
 
-    # GROQ_API_KEY is read lazily (os.environ.get, no validation here) so the
-    # app can start, run migrations, and run the test suite without a real
-    # key — it's only needed when a chat message actually reaches Groq.
-    GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+    # ANTHROPIC_API_KEY is read lazily (os.environ.get, no validation here)
+    # so the app can start, run migrations, and run the test suite without a
+    # real key — it's only needed when a chat message actually reaches Claude.
+    ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
     # Same lazy-config pattern for outbound email (see app/email.py) — no
     # key means send_email() logs instead of sending, so password reset and

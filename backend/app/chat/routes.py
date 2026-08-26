@@ -15,8 +15,6 @@ from app.chat.greetings import is_pure_greeting, GREETING_RESPONSE
 from app.chat.injection_guard import log_if_suspicious
 from app.pagination import paginate
 
-FALLBACK_MESSAGE = "I don't have enough information in the uploaded document(s) to answer that."
-
 
 def _sse(event, data):
     payload = json.dumps(data)
@@ -146,13 +144,11 @@ def post_message(conversation_id):
 
     greeting = is_pure_greeting(query)
     # Skip embedding/retrieval/account-lookup entirely for a bare "hi" —
-    # none of that work is needed to answer it, and it'd otherwise fall
-    # through to the low-confidence fallback ("I don't have enough
-    # information"), which is a bad response to a greeting.
+    # none of that work is needed to answer it, and the canned greeting
+    # reply is a better response than routing it through the model anyway.
     if greeting:
         doc_results = []
         account_context = None
-        has_context = True
     else:
         query_vector = embed_query(query)
         results = retrieve(conversation.document_id, query_vector)
@@ -161,8 +157,13 @@ def post_message(conversation_id):
         # app/chat/account_context.py. None for staff/admin (no PatientProfile),
         # so their behavior is unchanged.
         account_context = build_account_context(current_user_id(), query)
+        # Excluded from the prompt as citable sources when low-confidence —
+        # not because the model isn't consulted at all (it always is, see
+        # below), just so it doesn't present a probably-irrelevant chunk as
+        # an authoritative numbered source. The model still answers from its
+        # own general dental knowledge or the account context if either
+        # applies — see SYSTEM_PROMPT.
         doc_results = [] if low_confidence else results
-        has_context = bool(doc_results) or account_context is not None
     conversation_id_ = conversation.id  # captured for the generator, run after this request's own context
 
     def generate():
@@ -172,10 +173,6 @@ def post_message(conversation_id):
             answer_parts.append(GREETING_RESPONSE)
             yield _sse(None, GREETING_RESPONSE)
             cited_ids = []
-        elif not has_context:
-            answer_parts.append(FALLBACK_MESSAGE)
-            yield _sse(None, FALLBACK_MESSAGE)
-            cited_ids = []
         else:
             cited_ids = [chunk.id for chunk, _score in doc_results]
             try:
@@ -183,7 +180,7 @@ def post_message(conversation_id):
                     answer_parts.append(token)
                     yield _sse(None, token)
             except Exception:
-                # Groq unreachable/misconfigured/rate-limited mid-stream —
+                # Claude unreachable/misconfigured/rate-limited mid-stream —
                 # tell the client and don't persist a half-formed reply.
                 db.session.rollback()
                 yield _sse("error", {"error": "The assistant is temporarily unavailable. Please try again shortly."})
