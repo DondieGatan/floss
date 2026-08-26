@@ -1,15 +1,9 @@
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import LandingPage from './LandingPage';
 import { AuthProvider } from '../context/AuthContext';
 import { api } from '../api/client';
-
-const navigateMock = vi.fn();
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
-  return { ...actual, useNavigate: () => navigateMock };
-});
 
 vi.mock('../api/client', async () => {
   const actual = await vi.importActual('../api/client');
@@ -24,6 +18,18 @@ function renderLanding() {
       </AuthProvider>
     </MemoryRouter>
   );
+}
+
+async function renderLoggedIn(user) {
+  localStorage.setItem('floss_access_token', 'fake-token');
+  api.get.mockResolvedValue({ user });
+  renderLanding();
+  // Waits for AuthContext's own /auth/me check to resolve — until then
+  // `user` is still null and the nav shows the logged-out state. Scoped to
+  // the nav specifically: the page has a second "Dashboard" link elsewhere
+  // (a footer CTA) once logged in.
+  const nav = screen.getByRole('navigation', { name: 'Primary' });
+  await within(nav).findByRole('link', { name: 'Dashboard' });
 }
 
 describe('LandingPage', () => {
@@ -50,38 +56,46 @@ describe('LandingPage', () => {
     expect(screen.getByRole('link', { name: /skip to content/i })).toHaveAttribute('href', '#main-content');
   });
 
-  it('submitting the quick-book bar routes to registration instead of silently failing', () => {
+  it('showcases the assistant with a sign-up CTA for an anonymous visitor', () => {
     renderLanding();
-    fireEvent.click(screen.getByRole('button', { name: 'Book an Appointment' }));
-    expect(navigateMock).toHaveBeenCalledWith('/register');
+    expect(screen.getByText('Floss Assistant')).toBeInTheDocument();
+    expect(screen.getByText(/What are your Saturday hours/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Create a Free Account' })).toHaveAttribute('href', '/register');
   });
 
-  it('carries a filled-in name and phone through to registration instead of discarding them', () => {
-    renderLanding();
-    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Jamie Rivera' } });
-    fireEvent.change(screen.getByLabelText('Phone Number'), { target: { value: '555-0199' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Book an Appointment' }));
+  describe('when already logged in', () => {
+    it('shows an "Ask a Question" CTA to the dashboard for a patient', async () => {
+      await renderLoggedIn({ id: 1, fullName: 'Jordan Ellis', role: 'patient' });
 
-    expect(navigateMock).toHaveBeenCalledWith('/register?name=Jamie+Rivera&phone=555-0199');
-  });
+      expect(screen.getByText('Floss Assistant')).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Ask a Question' })).toHaveAttribute('href', '/dashboard');
+    });
 
-  it('when already logged in, sends the quick-book bar to real booking instead of the register dead end', async () => {
-    localStorage.setItem('floss_access_token', 'fake-token');
-    api.get.mockResolvedValue({ user: { id: 1, fullName: 'Jordan Ellis', role: 'patient' } });
+    it('sends staff to the Knowledge Base instead of the patient dashboard widget', async () => {
+      await renderLoggedIn({ id: 2, fullName: 'Nora Bennett', role: 'staff' });
 
-    renderLanding();
-    // Waits for AuthContext's own /auth/me check to resolve — until then
-    // `user` is still null and the nav shows the logged-out state. Scoped
-    // to the nav specifically: the page has a second "Dashboard" link
-    // elsewhere (a footer CTA) once logged in.
-    const nav = screen.getByRole('navigation', { name: 'Primary' });
-    await within(nav).findByRole('link', { name: 'Dashboard' });
+      expect(screen.getByRole('link', { name: 'Ask a Question' })).toHaveAttribute('href', '/knowledge-base');
+    });
 
-    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Jamie Rivera' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Book an Appointment' }));
+    it('every other CTA on the page also points somewhere real instead of the register dead end', async () => {
+      await renderLoggedIn({ id: 1, fullName: 'Jordan Ellis', role: 'patient' });
 
-    // Not /register — that route would just bounce a logged-in visitor
-    // straight back here via RedirectIfAuthed, dropping the input again.
-    expect(navigateMock).toHaveBeenCalledWith('/doctors');
+      expect(screen.getByRole('link', { name: 'Learn More' })).toHaveAttribute('href', '/dashboard');
+      expect(screen.getByRole('link', { name: 'Explore All Services' })).toHaveAttribute('href', '/doctors');
+      for (const link of screen.getAllByRole('link', { name: 'Learn more →' })) {
+        expect(link).toHaveAttribute('href', '/doctors');
+      }
+      expect(screen.getByRole('link', { name: 'Book an Appointment' })).toHaveAttribute('href', '/doctors');
+      expect(screen.getByRole('link', { name: 'Meet Our Dentists' })).toHaveAttribute('href', '/doctors');
+    });
+
+    it('no link on the page still points at /register once logged in', async () => {
+      await renderLoggedIn({ id: 1, fullName: 'Jordan Ellis', role: 'patient' });
+
+      const registerLinks = screen
+        .getAllByRole('link')
+        .filter((link) => link.getAttribute('href') === '/register');
+      expect(registerLinks).toHaveLength(0);
+    });
   });
 });

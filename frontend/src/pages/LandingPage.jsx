@@ -1,8 +1,7 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import '../styles/landing.css';
 import { useReveal } from '../hooks/useReveal';
 import { useAuth } from '../context/AuthContext';
+import AssistantAvatar from '../components/AssistantAvatar';
 import logoIcon from '../assets/logo-icon.png';
 import heroPhoto from '../assets/Top_background.jpg';
 import aboutPhoto from '../assets/Third_Page.jpg';
@@ -42,58 +41,41 @@ function TickerStrip() {
   );
 }
 
-function QuickBookBar() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [form, setForm] = useState({ name: '', phone: '', date: '', time: '' });
-
-  function update(field) {
-    return (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
-  }
-
-  function handleSubmit(e) {
-    e.preventDefault();
-    if (user) {
-      // Already has an account — /register would just bounce them straight
-      // back here via RedirectIfAuthed, silently dropping whatever they
-      // typed a second time. Send them into the real booking flow instead,
-      // which is what they actually want.
-      navigate('/doctors');
-      return;
-    }
-    // Date/time aren't carried further — booking always needs a specific
-    // dentist, which this bar never collects, so there's nowhere real for
-    // them to land yet. Name and phone at least survive into the account
-    // instead of being silently dropped like before.
-    const params = new URLSearchParams();
-    if (form.name.trim()) params.set('name', form.name.trim());
-    if (form.phone.trim()) params.set('phone', form.phone.trim());
-    const query = params.toString();
-    navigate(query ? `/register?${query}` : '/register');
-  }
+// Replaces the old "Quick Book" form — that always required creating an
+// account before an appointment actually got booked anyway (see git
+// history), so it never delivered on its own premise. This showcases the
+// clinic's actual standout feature instead, which nothing else on the page
+// demonstrates (elsewhere it's just a bullet point in a checklist).
+function AssistantPreviewCard({ user }) {
+  const isStaff = user && (user.role === 'staff' || user.role === 'admin' || user.role === 'owner');
+  // Chat itself always requires an account — for patients it lives on the
+  // dashboard (a floating widget, not its own page); for staff/admin it's
+  // the Knowledge Base page. Anonymous visitors go create that account.
+  const ctaHref = !user ? '/register' : isStaff ? '/knowledge-base' : '/dashboard';
+  const ctaLabel = user ? 'Ask a Question' : 'Create a Free Account';
 
   return (
-    <form className="quickbook-bar" onSubmit={handleSubmit} aria-label="Quick appointment request">
-      <div className="quickbook-field">
-        <label htmlFor="qb-name">Name</label>
-        <input id="qb-name" type="text" placeholder="Jordan Ellis" value={form.name} onChange={update('name')} />
+    <div className="assistant-preview-card">
+      <div className="assistant-preview-header">
+        <AssistantAvatar size="md" />
+        <div>
+          <p className="assistant-preview-name">Floss Assistant</p>
+          <span className="assistant-preview-status">
+            <span className="assistant-preview-dot" aria-hidden="true" />
+            Online now
+          </span>
+        </div>
       </div>
-      <div className="quickbook-field">
-        <label htmlFor="qb-phone">Phone Number</label>
-        <input id="qb-phone" type="tel" placeholder="Your phone" value={form.phone} onChange={update('phone')} />
+      <div className="assistant-preview-chat" aria-hidden="true">
+        <div className="assistant-preview-bubble assistant-preview-bubble-user">What are your Saturday hours?</div>
+        <div className="assistant-preview-bubble assistant-preview-bubble-bot">
+          We&apos;re open 9 AM–2 PM on Saturdays.<span className="assistant-preview-citation">[1]</span>
+        </div>
       </div>
-      <div className="quickbook-field">
-        <label htmlFor="qb-date">Preferred Date</label>
-        <input id="qb-date" type="date" value={form.date} onChange={update('date')} />
-      </div>
-      <div className="quickbook-field">
-        <label htmlFor="qb-time">Preferred Time</label>
-        <input id="qb-time" type="time" value={form.time} onChange={update('time')} />
-      </div>
-      <button className="l-btn l-btn-primary" type="submit">
-        Book an Appointment
-      </button>
-    </form>
+      <a className="l-btn l-btn-primary" href={ctaHref}>
+        {ctaLabel}
+      </a>
+    </div>
   );
 }
 
@@ -103,6 +85,14 @@ export default function LandingPage() {
   const [servicesRef, servicesVisible] = useReveal();
   const [benefitsRef, benefitsVisible] = useReveal();
   const { user, logout } = useAuth();
+  // The rest of the page had several more CTAs hardcoded to /register
+  // regardless of login state — same dead end the Quick Book bar had:
+  // RedirectIfAuthed just bounces an already-logged-in visitor straight
+  // to /dashboard before they ever reach whatever the link promised.
+  // /doctors has no role gate, so it's a safe real destination for any
+  // logged-in role, not just patients.
+  const bookingHref = user ? '/doctors' : '/register';
+  const learnMoreHref = user ? '/dashboard' : '/register';
 
   function handleLogout() {
     logout();
@@ -175,13 +165,14 @@ export default function LandingPage() {
         <div className="quickbook-band">
           <div ref={quickbookRef} className={`landing-section quickbook-section reveal${quickbookVisible ? ' reveal-visible' : ''}`}>
             <div className="quickbook-intro">
-              <p className="eyebrow">Quick Booking</p>
-              <h2 className="section-heading">Request an Appointment in Under a Minute</h2>
+              <p className="eyebrow">Meet Your Assistant</p>
+              <h2 className="section-heading">Get Instant, Cited Answers</h2>
               <p className="quickbook-intro-sub">
-                Tell us who you are and when works best — our team will confirm your visit shortly after.
+                Ask about hours, policies, insurance, or our dentists — Floss Assistant answers only from your
+                clinic's own information, with a source cited every time.
               </p>
             </div>
-            <QuickBookBar />
+            <AssistantPreviewCard user={user} />
           </div>
         </div>
 
@@ -214,7 +205,7 @@ export default function LandingPage() {
                 <span className="check-mark" aria-hidden="true">✓</span> Dedicated portals for patients and staff
               </li>
             </ul>
-            <a className="l-btn l-btn-primary" href="/register">
+            <a className="l-btn l-btn-primary" href={learnMoreHref}>
               Learn More
             </a>
           </div>
@@ -232,7 +223,7 @@ export default function LandingPage() {
                 A Wide Range of Services <br /> for Your Best Smile
               </h2>
             </div>
-            <a className="l-btn l-btn-ghost" href="/register">
+            <a className="l-btn l-btn-ghost" href={bookingHref}>
               Explore All Services
             </a>
           </div>
@@ -245,7 +236,7 @@ export default function LandingPage() {
                 <div className="service-card-body">
                   <h3>{s.title}</h3>
                   <p>{s.text}</p>
-                  <a className="service-card-link" href="/register">
+                  <a className="service-card-link" href={bookingHref}>
                     Learn more →
                   </a>
                 </div>
@@ -330,8 +321,8 @@ export default function LandingPage() {
               </div>
               <div className="footer-col">
                 <h4>Care</h4>
-                <a href="/register">Book an Appointment</a>
-                <a href="/register">Meet Our Dentists</a>
+                <a href={bookingHref}>Book an Appointment</a>
+                <a href={bookingHref}>Meet Our Dentists</a>
               </div>
             </div>
           </div>
