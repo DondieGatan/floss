@@ -1,13 +1,19 @@
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import LandingPage from './LandingPage';
 import { AuthProvider } from '../context/AuthContext';
+import { api } from '../api/client';
 
 const navigateMock = vi.fn();
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return { ...actual, useNavigate: () => navigateMock };
+});
+
+vi.mock('../api/client', async () => {
+  const actual = await vi.importActual('../api/client');
+  return { ...actual, api: { ...actual.api, get: vi.fn() } };
 });
 
 function renderLanding() {
@@ -21,6 +27,11 @@ function renderLanding() {
 }
 
 describe('LandingPage', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+  });
+
   it('renders the hero headline and a working entry point for both roles', () => {
     renderLanding();
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Your Best Dental Experience Awaits');
@@ -52,5 +63,25 @@ describe('LandingPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Book an Appointment' }));
 
     expect(navigateMock).toHaveBeenCalledWith('/register?name=Jamie+Rivera&phone=555-0199');
+  });
+
+  it('when already logged in, sends the quick-book bar to real booking instead of the register dead end', async () => {
+    localStorage.setItem('floss_access_token', 'fake-token');
+    api.get.mockResolvedValue({ user: { id: 1, fullName: 'Jordan Ellis', role: 'patient' } });
+
+    renderLanding();
+    // Waits for AuthContext's own /auth/me check to resolve — until then
+    // `user` is still null and the nav shows the logged-out state. Scoped
+    // to the nav specifically: the page has a second "Dashboard" link
+    // elsewhere (a footer CTA) once logged in.
+    const nav = screen.getByRole('navigation', { name: 'Primary' });
+    await within(nav).findByRole('link', { name: 'Dashboard' });
+
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Jamie Rivera' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Book an Appointment' }));
+
+    // Not /register — that route would just bounce a logged-in visitor
+    // straight back here via RedirectIfAuthed, dropping the input again.
+    expect(navigateMock).toHaveBeenCalledWith('/doctors');
   });
 });

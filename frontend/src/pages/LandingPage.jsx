@@ -44,6 +44,7 @@ function TickerStrip() {
 
 function QuickBookBar() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [form, setForm] = useState({ name: '', phone: '', date: '', time: '' });
 
   function update(field) {
@@ -52,6 +53,14 @@ function QuickBookBar() {
 
   function handleSubmit(e) {
     e.preventDefault();
+    if (user) {
+      // Already has an account — /register would just bounce them straight
+      // back here via RedirectIfAuthed, silently dropping whatever they
+      // typed a second time. Send them into the real booking flow instead,
+      // which is what they actually want.
+      navigate('/doctors');
+      return;
+    }
     // Date/time aren't carried further — booking always needs a specific
     // dentist, which this bar never collects, so there's nowhere real for
     // them to land yet. Name and phone at least survive into the account
