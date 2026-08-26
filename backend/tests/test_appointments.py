@@ -242,3 +242,116 @@ def test_booking_with_ordinary_reason_does_not_log(client, auth_headers, doctor_
         resp = _book(client, auth_headers, doctor_with_monday_availability, start, reason="Routine cleaning")
     assert resp.status_code == 201
     assert "Suspected prompt-injection" not in caplog.text
+
+
+def test_patient_can_reschedule_own_appointment_to_open_slot(client, auth_headers, doctor_with_monday_availability):
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    appointment_id = _book(client, auth_headers, doctor_with_monday_availability, start).get_json()["appointment"][
+        "id"
+    ]
+
+    new_start = start.replace(hour=11)
+    resp = client.patch(
+        f"/api/appointments/{appointment_id}/reschedule",
+        headers=auth_headers,
+        json={"scheduledStart": new_start.isoformat()},
+    )
+    assert resp.status_code == 200
+    data = resp.get_json()["appointment"]
+    assert data["scheduledStart"] == new_start.isoformat()
+    assert data["scheduledEnd"] == (new_start + timedelta(minutes=30)).isoformat()
+
+
+def test_rescheduling_to_its_own_current_slot_does_not_conflict_with_itself(
+    client, auth_headers, doctor_with_monday_availability
+):
+    # Regression test for exclude_appointment_id actually being wired in —
+    # without it, check_no_overlap() would find the appointment's own
+    # unchanged row in the DB and wrongly report a conflict with itself.
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    appointment_id = _book(client, auth_headers, doctor_with_monday_availability, start).get_json()["appointment"][
+        "id"
+    ]
+
+    resp = client.patch(
+        f"/api/appointments/{appointment_id}/reschedule",
+        headers=auth_headers,
+        json={"scheduledStart": start.isoformat()},
+    )
+    assert resp.status_code == 200
+
+
+def test_reschedule_outside_doctor_availability_returns_422(client, auth_headers, doctor_with_monday_availability):
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    appointment_id = _book(client, auth_headers, doctor_with_monday_availability, start).get_json()["appointment"][
+        "id"
+    ]
+
+    before_hours = start.replace(hour=7)
+    resp = client.patch(
+        f"/api/appointments/{appointment_id}/reschedule",
+        headers=auth_headers,
+        json={"scheduledStart": before_hours.isoformat()},
+    )
+    assert resp.status_code == 422
+
+
+def test_reschedule_conflicting_with_a_different_appointment_returns_409(
+    client, auth_headers, doctor_with_monday_availability
+):
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    first_id = _book(client, auth_headers, doctor_with_monday_availability, start).get_json()["appointment"]["id"]
+    second_start = start.replace(hour=10)
+    _book(client, auth_headers, doctor_with_monday_availability, second_start)
+
+    resp = client.patch(
+        f"/api/appointments/{first_id}/reschedule",
+        headers=auth_headers,
+        json={"scheduledStart": second_start.isoformat()},
+    )
+    assert resp.status_code == 409
+
+
+def test_reschedule_cross_patient_returns_404(client, register_user, doctor_with_monday_availability):
+    headers_a, _ = register_user(email="a@example.com")
+    headers_b, _ = register_user(email="b@example.com")
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    appointment_id = _book(client, headers_a, doctor_with_monday_availability, start).get_json()["appointment"]["id"]
+
+    resp = client.patch(
+        f"/api/appointments/{appointment_id}/reschedule",
+        headers=headers_b,
+        json={"scheduledStart": start.replace(hour=10).isoformat()},
+    )
+    assert resp.status_code == 404
+
+
+def test_staff_can_reschedule_any_patients_appointment(
+    client, staff_headers, auth_headers, doctor_with_monday_availability
+):
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    appointment_id = _book(client, auth_headers, doctor_with_monday_availability, start).get_json()["appointment"][
+        "id"
+    ]
+
+    resp = client.patch(
+        f"/api/appointments/{appointment_id}/reschedule",
+        headers=staff_headers,
+        json={"scheduledStart": start.replace(hour=11).isoformat()},
+    )
+    assert resp.status_code == 200
+
+
+def test_rescheduling_a_cancelled_appointment_is_rejected(client, auth_headers, doctor_with_monday_availability):
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    appointment_id = _book(client, auth_headers, doctor_with_monday_availability, start).get_json()["appointment"][
+        "id"
+    ]
+    client.patch(f"/api/appointments/{appointment_id}/cancel", headers=auth_headers, json={})
+
+    resp = client.patch(
+        f"/api/appointments/{appointment_id}/reschedule",
+        headers=auth_headers,
+        json={"scheduledStart": start.replace(hour=11).isoformat()},
+    )
+    assert resp.status_code == 400

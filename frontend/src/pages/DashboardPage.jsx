@@ -5,6 +5,7 @@ import { api } from '../api/client';
 import AppLayout from '../components/AppLayout';
 import AppointmentCard from '../components/AppointmentCard';
 import AppointmentReminderBanner from '../components/AppointmentReminderBanner';
+import RescheduleModal from '../components/RescheduleModal';
 import { ToothIcon, ClinicIcon, ChairIcon, ClipboardIcon, CalendarIcon, CheckCircleIcon } from '../components/icons';
 
 function firstName(fullName) {
@@ -14,10 +15,24 @@ function firstName(fullName) {
 function PatientDashboard() {
   const { user } = useAuth();
   const [appointments, setAppointments] = useState(null);
+  const [rescheduleTarget, setRescheduleTarget] = useState(null);
 
   useEffect(() => {
-    api.get('/appointments').then((data) => setAppointments(data.appointments));
+    load();
   }, []);
+
+  function load() {
+    api.get('/appointments').then((data) => setAppointments(data.appointments));
+  }
+
+  async function handleCancel(appointment) {
+    await api.patch(`/appointments/${appointment.id}/cancel`, {});
+    setAppointments((prev) => prev.map((a) => (a.id === appointment.id ? { ...a, status: 'cancelled' } : a)));
+  }
+
+  function handleRescheduled(updated) {
+    setAppointments((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
+  }
 
   const upcoming = (appointments || [])
     .filter((a) => a.status === 'scheduled' && new Date(a.scheduledStart) >= new Date())
@@ -58,7 +73,7 @@ function PatientDashboard() {
         <div className="section-header">
           <h2 className="section-title">Upcoming appointments</h2>
           <Link className="back-link" to="/appointments">
-            View all →
+            History →
           </Link>
         </div>
         {appointments === null ? (
@@ -77,12 +92,25 @@ function PatientDashboard() {
           </div>
         ) : (
           <div className="list-col stagger-in">
-            {upcoming.slice(0, 4).map((a) => (
-              <AppointmentCard key={a.id} appointment={a} />
+            {upcoming.map((a) => (
+              <AppointmentCard
+                key={a.id}
+                appointment={a}
+                onCancel={handleCancel}
+                onReschedule={setRescheduleTarget}
+              />
             ))}
           </div>
         )}
       </div>
+
+      {rescheduleTarget && (
+        <RescheduleModal
+          appointment={rescheduleTarget}
+          onClose={() => setRescheduleTarget(null)}
+          onRescheduled={handleRescheduled}
+        />
+      )}
     </div>
   );
 }

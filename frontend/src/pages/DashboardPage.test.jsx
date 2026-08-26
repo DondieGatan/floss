@@ -66,6 +66,22 @@ describe('DashboardPage', () => {
       const pastStat = screen.getByText('Past visits');
       expect(pastStat.previousElementSibling).toHaveTextContent('1');
     });
+
+    it('renders every upcoming appointment with no cap, each with Cancel and Edit', async () => {
+      const makeAppt = (id) => ({
+        id,
+        status: 'scheduled',
+        scheduledStart: new Date(Date.now() + id * 86400000).toISOString(),
+        scheduledEnd: new Date(Date.now() + id * 86400000).toISOString(),
+        doctorName: 'Dr. Amara Osei',
+      });
+      api.get.mockResolvedValue({ appointments: [1, 2, 3, 4, 5, 6].map(makeAppt) });
+      renderDashboard();
+
+      const cancelButtons = await screen.findAllByRole('button', { name: 'Cancel' });
+      expect(cancelButtons).toHaveLength(6);
+      expect(screen.getAllByRole('button', { name: 'Edit' })).toHaveLength(6);
+    });
   });
 
   describe('staff view', () => {

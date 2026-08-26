@@ -14,7 +14,7 @@ const COLLAPSE_KEY = 'floss_sidebar_collapsed';
 const PATIENT_LINKS = [
   { to: '/dashboard', icon: <HouseIcon />, label: 'Dashboard' },
   { to: '/doctors', icon: <ToothIcon />, label: 'Dentists' },
-  { to: '/appointments', icon: <CalendarIcon />, label: 'My Appointments' },
+  { to: '/appointments', icon: <CalendarIcon />, label: 'History' },
 ];
 
 const MANAGEMENT_LINKS = [

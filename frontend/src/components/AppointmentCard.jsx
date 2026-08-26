@@ -6,8 +6,9 @@ function formatWhen(startIso, endIso) {
   return `${dateLabel} · ${timeLabel}`;
 }
 
-export default function AppointmentCard({ appointment, showPatient = false, onCancel }) {
+export default function AppointmentCard({ appointment, showPatient = false, onCancel, onReschedule }) {
   const canCancel = onCancel && appointment.status === 'scheduled';
+  const canReschedule = onReschedule && appointment.status === 'scheduled';
 
   return (
     <div className={`appointment-card status-${appointment.status}`}>
@@ -21,6 +22,11 @@ export default function AppointmentCard({ appointment, showPatient = false, onCa
       </div>
       <div className="appointment-actions">
         <span className={`status-badge status-badge-${appointment.status}`}>{appointment.status.replace('_', ' ')}</span>
+        {canReschedule && (
+          <button className="btn btn-small btn-secondary" onClick={() => onReschedule(appointment)}>
+            Edit
+          </button>
+        )}
         {canCancel && (
           <button className="btn btn-small btn-danger" onClick={() => onCancel(appointment)}>
             Cancel

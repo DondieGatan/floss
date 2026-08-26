@@ -46,4 +46,25 @@ describe('AppointmentCard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
     expect(onCancel).toHaveBeenCalledWith(baseAppointment);
   });
+
+  it('shows an Edit button only for scheduled appointments, even when onReschedule is provided', () => {
+    const onReschedule = vi.fn();
+    const { rerender } = render(<AppointmentCard appointment={baseAppointment} onReschedule={onReschedule} />);
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeInTheDocument();
+
+    rerender(<AppointmentCard appointment={{ ...baseAppointment, status: 'completed' }} onReschedule={onReschedule} />);
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument();
+  });
+
+  it('does not render an Edit button when onReschedule is omitted', () => {
+    render(<AppointmentCard appointment={baseAppointment} />);
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument();
+  });
+
+  it('calls onReschedule with the appointment when Edit is clicked', () => {
+    const onReschedule = vi.fn();
+    render(<AppointmentCard appointment={baseAppointment} onReschedule={onReschedule} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    expect(onReschedule).toHaveBeenCalledWith(baseAppointment);
+  });
 });

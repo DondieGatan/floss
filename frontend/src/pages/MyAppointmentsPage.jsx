@@ -7,23 +7,23 @@ export default function MyAppointmentsPage() {
   const [appointments, setAppointments] = useState(null);
 
   useEffect(() => {
-    load();
+    api.get('/appointments').then((data) => setAppointments(data.appointments));
   }, []);
 
-  function load() {
-    api.get('/appointments').then((data) => setAppointments(data.appointments));
-  }
-
-  async function handleCancel(appointment) {
-    await api.patch(`/appointments/${appointment.id}/cancel`, {});
-    setAppointments((prev) => prev.map((a) => (a.id === appointment.id ? { ...a, status: 'cancelled' } : a)));
-  }
+  // Upcoming, still-scheduled appointments now live on the dashboard, where
+  // they can be cancelled or rescheduled — this page is a read-only record
+  // of everything else: completed, no-show, or scheduled appointments whose
+  // time has simply passed without ever being marked either way. Cancelled
+  // appointments are deliberately excluded from history entirely.
+  const history = (appointments || [])
+    .filter((a) => a.status !== 'cancelled' && (a.status !== 'scheduled' || new Date(a.scheduledStart) < new Date()))
+    .sort((a, b) => new Date(b.scheduledStart) - new Date(a.scheduledStart));
 
   return (
     <AppLayout>
       <div className="page-body">
-        <h1 className="page-title">My Appointments</h1>
-        <p className="page-subtitle">Upcoming and past visits.</p>
+        <h1 className="page-title">Appointment History</h1>
+        <p className="page-subtitle">Your past visits.</p>
 
         {appointments === null ? (
           <div role="status" aria-live="polite">
@@ -31,14 +31,14 @@ export default function MyAppointmentsPage() {
             <div className="skeleton skeleton-card" />
             <div className="skeleton skeleton-card" />
           </div>
-        ) : appointments.length === 0 ? (
+        ) : history.length === 0 ? (
           <div className="empty-state">
-            <p>You don't have any appointments yet.</p>
+            <p>No past visits yet.</p>
           </div>
         ) : (
           <div className="list-col stagger-in">
-            {appointments.map((a) => (
-              <AppointmentCard key={a.id} appointment={a} onCancel={handleCancel} />
+            {history.map((a) => (
+              <AppointmentCard key={a.id} appointment={a} />
             ))}
           </div>
         )}

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import AppLayout from '../components/AppLayout';
 import AppointmentCard from '../components/AppointmentCard';
+import RescheduleModal from '../components/RescheduleModal';
 
 export default function AllAppointmentsPage() {
   const [doctors, setDoctors] = useState([]);
@@ -11,6 +12,7 @@ export default function AllAppointmentsPage() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [rescheduleTarget, setRescheduleTarget] = useState(null);
 
   useEffect(() => {
     api.get('/doctors').then((data) => setDoctors(data.doctors));
@@ -54,6 +56,10 @@ export default function AllAppointmentsPage() {
     setAppointments((prev) => prev.map((a) => (a.id === appointment.id ? { ...a, status: 'cancelled' } : a)));
   }
 
+  function handleRescheduled(updated) {
+    setAppointments((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
+  }
+
   return (
     <AppLayout>
       <div className="page-body page-body-wide">
@@ -91,7 +97,13 @@ export default function AllAppointmentsPage() {
         ) : (
           <div className="list-col stagger-in">
             {appointments.map((a) => (
-              <AppointmentCard key={a.id} appointment={a} showPatient onCancel={handleCancel} />
+              <AppointmentCard
+                key={a.id}
+                appointment={a}
+                showPatient
+                onCancel={handleCancel}
+                onReschedule={setRescheduleTarget}
+              />
             ))}
           </div>
         )}
@@ -106,6 +118,14 @@ export default function AllAppointmentsPage() {
           >
             {loadingMore ? 'Loading…' : 'Load more'}
           </button>
+        )}
+
+        {rescheduleTarget && (
+          <RescheduleModal
+            appointment={rescheduleTarget}
+            onClose={() => setRescheduleTarget(null)}
+            onRescheduled={handleRescheduled}
+          />
         )}
       </div>
     </AppLayout>

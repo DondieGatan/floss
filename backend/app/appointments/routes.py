@@ -176,6 +176,47 @@ def get_appointment(appointment_id):
     return jsonify({"appointment": appointment.to_dict()}), 200
 
 
+@appointments_bp.route("/<int:appointment_id>/reschedule", methods=["PATCH"])
+@jwt_required()
+@limiter.limit("60 per hour")
+def reschedule_appointment(appointment_id):
+    appointment = _get_owned_or_staff_appointment(appointment_id)
+    if appointment is None:
+        return jsonify({"error": "Appointment not found."}), 404
+    if appointment.status != "scheduled":
+        return jsonify({"error": "Only a scheduled appointment can be rescheduled."}), 400
+
+    data = request.get_json(silent=True) or {}
+    try:
+        new_start = datetime.fromisoformat(data.get("scheduledStart"))
+    except (TypeError, ValueError):
+        return jsonify({"error": "scheduledStart must be an ISO datetime."}), 400
+
+    # Duration is carried over from the existing appointment, not
+    # re-specified by the client — rescheduling only changes *when*, not
+    # *how long*.
+    duration = appointment.scheduled_end - appointment.scheduled_start
+    new_end = new_start + duration
+
+    try:
+        check_availability(appointment.doctor_id, new_start, new_end)
+        # exclude_appointment_id keeps this appointment's own current slot
+        # from being reported as a conflict with itself.
+        check_no_overlap(appointment.doctor_id, new_start, new_end, exclude_appointment_id=appointment.id)
+    except AvailabilityError as exc:
+        db.session.rollback()
+        return jsonify({"error": str(exc)}), 422
+    except ConflictError as exc:
+        db.session.rollback()
+        return jsonify({"error": str(exc)}), 409
+
+    appointment.scheduled_start = new_start
+    appointment.scheduled_end = new_end
+    appointment.reminder_sent_at = None  # new time gets its own reminder
+    db.session.commit()
+    return jsonify({"appointment": appointment.to_dict()}), 200
+
+
 @appointments_bp.route("/<int:appointment_id>/cancel", methods=["PATCH"])
 @jwt_required()
 def cancel_appointment(appointment_id):

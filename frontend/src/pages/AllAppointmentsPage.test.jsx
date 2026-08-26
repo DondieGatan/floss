@@ -8,7 +8,16 @@ vi.mock('../components/AppLayout', () => ({ default: ({ children }) => <div>{chi
 
 function makeAppointment(id, doctorName) {
   const start = new Date(Date.now() + 86400000).toISOString();
-  return { id, doctorName, patientName: 'Jordan Ellis', status: 'scheduled', scheduledStart: start, scheduledEnd: start };
+  const end = new Date(Date.now() + 86400000 + 30 * 60000).toISOString();
+  return {
+    id,
+    doctorId: id,
+    doctorName,
+    patientName: 'Jordan Ellis',
+    status: 'scheduled',
+    scheduledStart: start,
+    scheduledEnd: end,
+  };
 }
 
 describe('AllAppointmentsPage pagination', () => {
@@ -22,6 +31,7 @@ describe('AllAppointmentsPage pagination', () => {
       if (path === '/appointments?page=2') {
         return Promise.resolve({ appointments: [makeAppointment(2, 'Dr. Liam Chen')], page: 2, hasMore: false });
       }
+      if (path.startsWith('/appointments/availability')) return Promise.resolve({ slots: [] });
       return Promise.reject(new Error(`unexpected path: ${path}`));
     });
   });
@@ -59,5 +69,13 @@ describe('AllAppointmentsPage pagination', () => {
     fireEvent.change(screen.getByLabelText('Date'), { target: { value: '2026-01-01' } });
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith(expect.stringContaining('date=2026-01-01&page=1')));
+  });
+
+  it('shows an Edit button for staff on scheduled appointments, opening the reschedule modal', async () => {
+    render(<AllAppointmentsPage />);
+    await screen.findByText(/Amara Osei/);
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0]);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 });
