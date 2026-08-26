@@ -19,6 +19,7 @@ from app.auth import auth_bp
 from app.extensions import db, limiter
 from app.models import User, TokenBlocklist, PatientProfile, RecoveryCode
 from app.utils import current_user_id
+from app.email import send_email
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 RESET_TOKEN_MAX_AGE_SECONDS = 1800  # 30 minutes
@@ -246,6 +247,22 @@ def two_factor_disable():
     return jsonify({"message": "Two-factor authentication is now disabled."}), 200
 
 
+def _reset_email_html(reset_url):
+    return f"""
+    <div style="font-family: -apple-system, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; color: #222;">
+      <h2 style="color: #2f6fed;">Floss Clinic</h2>
+      <p>We received a request to reset your password. This link expires in 30 minutes.</p>
+      <p style="text-align: center; margin: 28px 0;">
+        <a href="{reset_url}" style="background: #2f6fed; color: #fff; padding: 12px 24px; border-radius: 8px;
+           text-decoration: none; font-weight: 600; display: inline-block;">Reset your password</a>
+      </p>
+      <p style="color: #666; font-size: 13px;">
+        If you didn't request this, you can safely ignore this email — your password won't be changed.
+      </p>
+    </div>
+    """
+
+
 @auth_bp.route("/forgot-password", methods=["POST"])
 @limiter.limit("5 per hour")
 def forgot_password():
@@ -259,14 +276,17 @@ def forgot_password():
 
     if user is not None:
         token = _make_reset_token(user)
-        # No email provider is wired up (see GROQ_API_KEY for the same
-        # lazy-config pattern elsewhere in this app) — log the token so the
-        # flow is usable locally, and echo it back in the response too, but
-        # only outside of production. Wire a real provider (SendGrid/SES/
-        # SMTP) behind this branch before this app ever reaches real users.
-        current_app.logger.info("Password reset requested for %s — token: %s", user.email, token)
-        if current_app.debug or current_app.testing:
-            response["resetToken"] = token
+        reset_url = f"{current_app.config['FRONTEND_URL']}/reset-password?token={token}"
+        sent = send_email(user.email, "Reset your Floss Clinic password", _reset_email_html(reset_url))
+        # Only expose the raw token — via log or in the response itself —
+        # when there's no real provider to have actually delivered it, and
+        # only outside of production even then. Once email is configured,
+        # neither happens: the token only ever leaves the server inside a
+        # real email.
+        if not sent:
+            current_app.logger.info("Password reset requested for %s — token: %s", user.email, token)
+            if current_app.debug or current_app.testing:
+                response["resetToken"] = token
 
     return jsonify(response), 200
 

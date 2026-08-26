@@ -1,10 +1,7 @@
-"""Appointment reminders.
-
-No real email provider is wired up yet (same gap as auth/routes.py's
-forgot_password — see its comment) — send_reminder_email logs the message
-it would send instead of actually delivering it, so the scheduling/dedup
-logic here is real and testable today, and swapping in a real provider
-(SendGrid/SES/SMTP) later only touches this one function.
+"""Appointment reminders — see app/email.py for the delivery mechanism
+(Resend, or a log-only fallback when no API key is configured). The
+scheduling/dedup logic below is what's actually load-bearing; swapping
+email providers only ever touches app/email.py, never this file.
 """
 from datetime import datetime, timedelta
 
@@ -12,6 +9,7 @@ from flask import current_app
 
 from app.extensions import db
 from app.models import Appointment
+from app.email import send_email
 
 # Naive, matching scheduled_start (see appointments/routes.py and
 # appointments/conflicts.py — this whole subsystem deals in naive
@@ -26,11 +24,32 @@ def _reminder_message(appointment):
     return f"Hi {patient_name}, this is a reminder that you have an appointment with {doctor_name} on {when}."
 
 
+def _reminder_email_html(appointment):
+    patient_name = appointment.patient.user.full_name if appointment.patient else "there"
+    doctor_name = appointment.doctor.full_name if appointment.doctor else "your dentist"
+    when = appointment.scheduled_start.strftime("%A, %B %d at %I:%M %p")
+    return f"""
+    <div style="font-family: -apple-system, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; color: #222;">
+      <h2 style="color: #2f6fed;">Floss Clinic</h2>
+      <p>Hi {patient_name},</p>
+      <p>This is a reminder that you have an appointment with <strong>{doctor_name}</strong> on
+        <strong>{when}</strong>.</p>
+      <p style="color: #666; font-size: 13px;">
+        Need to reschedule or cancel? Sign in to your account to manage this appointment.
+      </p>
+    </div>
+    """
+
+
 def send_reminder_email(appointment):
     to = appointment.patient.user.email if appointment.patient and appointment.patient.user else None
-    current_app.logger.info(
-        "Appointment reminder for %s (appointment #%s): %s", to, appointment.id, _reminder_message(appointment)
-    )
+    if not to:
+        return
+    sent = send_email(to, "Appointment reminder — Floss Clinic", _reminder_email_html(appointment))
+    if not sent:
+        current_app.logger.info(
+            "Appointment reminder for %s (appointment #%s): %s", to, appointment.id, _reminder_message(appointment)
+        )
 
 
 def send_due_reminders():

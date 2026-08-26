@@ -100,6 +100,33 @@ def test_does_not_remind_twice(app, patient_and_doctor):
     assert appt.reminder_sent_at == already_reminded_at
 
 
+def test_sends_a_real_email_when_a_provider_is_configured(app, patient_and_doctor, monkeypatch):
+    import httpx
+
+    app.config["RESEND_API_KEY"] = "test-key"
+    captured = {}
+
+    class _FakeResponse:
+        def raise_for_status(self):
+            pass
+
+    def _fake_post(url, headers, json, timeout):
+        captured["json"] = json
+        return _FakeResponse()
+
+    monkeypatch.setattr(httpx, "post", _fake_post)
+
+    appt = _make_appointment(
+        patient_and_doctor["patient_id"], patient_and_doctor["doctor_id"], datetime.now() + timedelta(hours=5)
+    )
+
+    due = send_due_reminders()
+
+    assert [a.id for a in due] == [appt.id]
+    assert captured["json"]["subject"] == "Appointment reminder — Floss Clinic"
+    assert appt.doctor.full_name in captured["json"]["html"]
+
+
 def test_reminds_multiple_due_appointments_in_one_pass(app, patient_and_doctor):
     appt_a = _make_appointment(
         patient_and_doctor["patient_id"], patient_and_doctor["doctor_id"], datetime.now() + timedelta(hours=1)

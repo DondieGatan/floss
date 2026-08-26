@@ -112,6 +112,38 @@ def test_forgot_password_returns_token_for_known_email(client, register_user):
     assert "resetToken" in resp.get_json()
 
 
+def test_forgot_password_sends_a_real_email_and_does_not_echo_the_token_when_configured(
+    client, register_user, app, monkeypatch
+):
+    import httpx
+
+    register_user(email="alex@example.com")
+    app.config["RESEND_API_KEY"] = "test-key"
+
+    captured = {}
+
+    class _FakeResponse:
+        def raise_for_status(self):
+            pass
+
+    def _fake_post(url, headers, json, timeout):
+        captured["json"] = json
+        return _FakeResponse()
+
+    monkeypatch.setattr(httpx, "post", _fake_post)
+
+    resp = client.post("/api/auth/forgot-password", json={"email": "alex@example.com"})
+
+    assert resp.status_code == 200
+    # Once a real provider is configured, the token only ever leaves the
+    # server inside the email itself — never echoed back in the response,
+    # even in testing mode (unlike the not-configured fallback tested
+    # above).
+    assert "resetToken" not in resp.get_json()
+    assert captured["json"]["to"] == ["alex@example.com"]
+    assert "reset-password?token=" in captured["json"]["html"]
+
+
 def test_reset_password_changes_password(client, register_user):
     register_user(email="alex@example.com", password="original123")
     token = client.post(

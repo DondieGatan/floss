@@ -26,12 +26,26 @@ class Config:
     CORS_ORIGINS = _build_cors_origins()
 
     # In-memory storage — fine for a single free-tier instance, resets on restart.
-    RATELIMIT_ENABLED = True
+    # Overridable via env — the Playwright E2E suite (frontend/playwright.
+    # config.js) logs in via the real UI many times across specs, well
+    # under the 5-per-minute login limit's window, and needs it off; pytest
+    # already gets its own override via TestConfig below regardless.
+    RATELIMIT_ENABLED = os.environ.get("RATELIMIT_ENABLED", "true").lower() != "false"
 
     # GROQ_API_KEY is read lazily (os.environ.get, no validation here) so the
     # app can start, run migrations, and run the test suite without a real
     # key — it's only needed when a chat message actually reaches Groq.
     GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+
+    # Same lazy-config pattern for outbound email (see app/email.py) — no
+    # key means send_email() logs instead of sending, so password reset and
+    # appointment reminders stay fully usable without a real account.
+    RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
+    EMAIL_FROM_ADDRESS = os.environ.get("EMAIL_FROM_ADDRESS", "Floss Clinic <onboarding@resend.dev>")
+    # Used to build links inside outbound emails (e.g. the password-reset
+    # link) — the backend has no other way to know where the frontend is
+    # actually hosted.
+    FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173")
 
     basedir = os.path.abspath(os.path.dirname(__file__))
     SQLALCHEMY_DATABASE_URI = os.environ.get(
