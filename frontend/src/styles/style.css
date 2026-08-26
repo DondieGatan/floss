@@ -1089,11 +1089,13 @@ textarea {
 /* Buttons */
 
 .btn {
+  display: inline-block;
   border: none;
   border-radius: 10px;
   padding: 10px 18px;
   font-size: 14px;
   font-weight: 600;
+  text-decoration: none;
   cursor: pointer;
   transition: opacity 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
 }
@@ -1893,7 +1895,7 @@ textarea {
 .empty-state-icon {
   display: inline-flex;
   color: var(--text-muted);
-  margin-bottom: 10px;
+  margin-bottom: 14px;
   opacity: 0.7;
 }
 
@@ -1903,11 +1905,13 @@ textarea {
 }
 
 .empty-state p {
-  margin: 0 0 4px;
+  margin: 0 0 8px;
 }
 
 .empty-state .btn {
-  margin-top: 14px;
+  margin-top: 18px;
+  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
 }
 
 .dashboard-page .empty-state .btn {

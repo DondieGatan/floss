@@ -31,11 +31,6 @@ function PatientDashboard() {
         </p>
         <h1 className="hero-greeting">Welcome back, {firstName(user?.fullName)}</h1>
         <p className="hero-sub">Here's what's coming up with your care.</p>
-        <div className="quick-actions">
-          <Link className="quick-action-btn" to="/doctors">
-            + Book an appointment
-          </Link>
-        </div>
       </div>
 
       {appointments !== null && <AppointmentReminderBanner appointments={appointments} />}
@@ -76,8 +71,8 @@ function PatientDashboard() {
           <div className="empty-state">
             <div className="empty-state-icon" aria-hidden="true"><CalendarIcon /></div>
             <p>No upcoming appointments. Ready to book one?</p>
-            <Link className="btn btn-primary btn-small" to="/doctors">
-              + Book an appointment
+            <Link className="btn btn-primary" to="/doctors">
+              Book an appointment
             </Link>
           </div>
         ) : (
