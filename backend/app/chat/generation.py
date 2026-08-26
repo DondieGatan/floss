@@ -107,7 +107,14 @@ def stream_answer(prompt):
     build_prompt()'s return value."""
     from google.genai import types
 
-    stream = _client().models.generate_content_stream(
+    # Held in a local (not chained inline) so it stays alive for the whole
+    # generator, not just this call — genai.Client owns the underlying httpx
+    # client, and an inline `_client().models...` temporary gets garbage
+    # collected (closing that httpx client) before the `for` loop below
+    # actually starts pulling chunks, since generate_content_stream()
+    # doesn't send the request until first iterated.
+    client = _client()
+    stream = client.models.generate_content_stream(
         model=GEMINI_MODEL,
         contents=prompt["contents"],
         config=types.GenerateContentConfig(
