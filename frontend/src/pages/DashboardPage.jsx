@@ -5,7 +5,7 @@ import { api } from '../api/client';
 import AppLayout from '../components/AppLayout';
 import AppointmentCard from '../components/AppointmentCard';
 import AppointmentReminderBanner from '../components/AppointmentReminderBanner';
-import { ToothIcon, ChatIcon, ClinicIcon, ChairIcon, ClipboardIcon, CalendarIcon, CheckCircleIcon } from '../components/icons';
+import { ToothIcon, ClinicIcon, ChairIcon, ClipboardIcon, CalendarIcon, CheckCircleIcon } from '../components/icons';
 
 function firstName(fullName) {
   return (fullName || '').split(' ')[0] || 'there';
@@ -34,9 +34,6 @@ function PatientDashboard() {
         <div className="quick-actions">
           <Link className="quick-action-btn" to="/doctors">
             + Book an appointment
-          </Link>
-          <Link className="quick-action-btn" to="/knowledge-base">
-            <ChatIcon /> Ask Floss Clinic a question
           </Link>
         </div>
       </div>
