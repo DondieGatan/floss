@@ -47,6 +47,14 @@ describe('RegisterPage', () => {
     expect(screen.getByLabelText('Password')).toBeInTheDocument();
   });
 
+  it('disables autofill so a new account never starts pre-filled with a previously-saved login', () => {
+    renderRegister();
+    expect(screen.getByLabelText('Email')).toHaveAttribute('autoComplete', 'off');
+    // "new-password" (not "off") is the actual signal browsers honor for
+    // suppressing a saved-password suggestion on this field.
+    expect(screen.getByLabelText('Password')).toHaveAttribute('autoComplete', 'new-password');
+  });
+
   it('on success, registers and navigates to the dashboard', async () => {
     api.post.mockResolvedValue({
       accessToken: 'access-token',

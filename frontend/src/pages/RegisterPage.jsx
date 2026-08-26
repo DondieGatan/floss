@@ -58,7 +58,7 @@ export default function RegisterPage() {
       </div>
 
       <div className="auth-form-col">
-        <form className="auth-card" onSubmit={handleSubmit}>
+        <form className="auth-card" onSubmit={handleSubmit} autoComplete="off">
           <h1 className="brand">
             <img src={logoIcon} alt="" className="brand-mark" />
             Floss Clinic
@@ -74,11 +74,23 @@ export default function RegisterPage() {
 
           <label className="field">
             <span>Full name</span>
-            <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+            <input
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              autoComplete="off"
+              required
+            />
           </label>
           <label className="field">
             <span>Email</span>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="off"
+              required
+            />
           </label>
           <label className="field">
             <span>Password</span>
@@ -87,6 +99,10 @@ export default function RegisterPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               minLength={6}
+              // "new-password" (not "off") is what actually stops browsers
+              // from suggesting a previously-saved password here — this is
+              // a new account being created, not a login.
+              autoComplete="new-password"
               required
             />
           </label>
