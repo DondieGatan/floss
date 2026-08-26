@@ -44,4 +44,13 @@ describe('LandingPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Book an Appointment' }));
     expect(navigateMock).toHaveBeenCalledWith('/register');
   });
+
+  it('carries a filled-in name and phone through to registration instead of discarding them', () => {
+    renderLanding();
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Jamie Rivera' } });
+    fireEvent.change(screen.getByLabelText('Phone Number'), { target: { value: '555-0199' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Book an Appointment' }));
+
+    expect(navigateMock).toHaveBeenCalledWith('/register?name=Jamie+Rivera&phone=555-0199');
+  });
 });

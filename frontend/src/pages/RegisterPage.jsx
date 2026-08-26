@@ -1,14 +1,21 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth, ApiError } from '../context/AuthContext';
 import { useSlowRequestNotice } from '../hooks/useSlowRequestNotice';
+import { api } from '../api/client';
 import heroPhoto from '../assets/Login_Page_picture.jpg';
 import logoIcon from '../assets/logo-icon.png';
 
 export default function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [fullName, setFullName] = useState('');
+  const [searchParams] = useSearchParams();
+  // Carried over from the landing page's Quick Book bar (see LandingPage.jsx)
+  // so filling that in isn't wasted effort — phone has no field on this
+  // form, so it's saved to the new patient profile directly, once
+  // registration actually creates one.
+  const [fullName, setFullName] = useState(searchParams.get('name') || '');
+  const prefillPhone = searchParams.get('phone');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
@@ -21,6 +28,11 @@ export default function RegisterPage() {
     setSubmitting(true);
     try {
       await register(fullName, email, password);
+      if (prefillPhone) {
+        // Best-effort — a failure here shouldn't block a successful
+        // registration, the account itself is already created.
+        await api.put('/patients/me', { phone: prefillPhone }).catch(() => {});
+      }
       navigate('/dashboard');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Something went wrong.');

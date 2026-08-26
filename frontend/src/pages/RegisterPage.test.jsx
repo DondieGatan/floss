@@ -13,12 +13,12 @@ vi.mock('react-router-dom', async () => {
 
 vi.mock('../api/client', async () => {
   const actual = await vi.importActual('../api/client');
-  return { ...actual, api: { ...actual.api, post: vi.fn(), get: vi.fn() } };
+  return { ...actual, api: { ...actual.api, post: vi.fn(), get: vi.fn(), put: vi.fn() } };
 });
 
-function renderRegister() {
+function renderRegister(initialEntries = ['/register']) {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={initialEntries}>
       <AuthProvider>
         <RegisterPage />
       </AuthProvider>
@@ -88,5 +88,57 @@ describe('RegisterPage', () => {
 
     resolveRegister({ accessToken: 'a', refreshToken: 'r', user: { id: 1, fullName: 'Jordan', role: 'patient' } });
     await waitFor(() => expect(navigateMock).toHaveBeenCalled());
+  });
+
+  describe('arriving from the landing page\'s Quick Book bar', () => {
+    it('pre-fills the full name field from the name query param', () => {
+      renderRegister(['/register?name=Jamie+Rivera']);
+      expect(screen.getByLabelText('Full name')).toHaveValue('Jamie Rivera');
+    });
+
+    it('saves the phone query param to the new patient profile after registering', async () => {
+      api.post.mockResolvedValue({
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token',
+        user: { id: 1, fullName: 'Jamie Rivera', role: 'patient' },
+      });
+      api.put.mockResolvedValue({ patient: {} });
+
+      renderRegister(['/register?name=Jamie+Rivera&phone=555-0199']);
+      fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'jamie@example.com' } });
+      fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'password123' } });
+      fireEvent.click(screen.getByRole('button', { name: /Create Account/ }));
+
+      await waitFor(() => expect(navigateMock).toHaveBeenCalledWith('/dashboard'));
+      expect(api.put).toHaveBeenCalledWith('/patients/me', { phone: '555-0199' });
+    });
+
+    it('still navigates to the dashboard even if saving the phone fails', async () => {
+      api.post.mockResolvedValue({
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token',
+        user: { id: 1, fullName: 'Jamie Rivera', role: 'patient' },
+      });
+      api.put.mockRejectedValue(new Error('network error'));
+
+      renderRegister(['/register?phone=555-0199']);
+      fillAndSubmit();
+
+      await waitFor(() => expect(navigateMock).toHaveBeenCalledWith('/dashboard'));
+    });
+
+    it('does not call the profile endpoint when no phone was carried over', async () => {
+      api.post.mockResolvedValue({
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token',
+        user: { id: 1, fullName: 'Jordan Ellis', role: 'patient' },
+      });
+
+      renderRegister(['/register']);
+      fillAndSubmit();
+
+      await waitFor(() => expect(navigateMock).toHaveBeenCalledWith('/dashboard'));
+      expect(api.put).not.toHaveBeenCalled();
+    });
   });
 });

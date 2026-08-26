@@ -52,7 +52,15 @@ function QuickBookBar() {
 
   function handleSubmit(e) {
     e.preventDefault();
-    navigate('/register');
+    // Date/time aren't carried further — booking always needs a specific
+    // dentist, which this bar never collects, so there's nowhere real for
+    // them to land yet. Name and phone at least survive into the account
+    // instead of being silently dropped like before.
+    const params = new URLSearchParams();
+    if (form.name.trim()) params.set('name', form.name.trim());
+    if (form.phone.trim()) params.set('phone', form.phone.trim());
+    const query = params.toString();
+    navigate(query ? `/register?${query}` : '/register');
   }
 
   return (
