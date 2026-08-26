@@ -121,10 +121,10 @@ def test_post_message_uses_account_context_in_prompt(client, auth_headers, mock_
     mock_stream_answer.assert_called_once()
 
     # The prompt actually sent to the model must carry the account context,
-    # not just an empty source-passages block. Claude's Messages API takes
-    # the prompt as {"system": ..., "messages": [...]}, not a flat list.
+    # not just an empty source-passages block. Gemini's API takes the prompt
+    # as {"system_instruction": ..., "contents": ...}, not a message list.
     prompt = mock_stream_answer.call_args[0][0]
-    user_content = prompt["messages"][0]["content"]
+    user_content = prompt["contents"]
     assert "<account_context>" in user_content
     assert "no appointments on file" in user_content.lower()
 
@@ -145,6 +145,6 @@ def test_post_message_omits_account_context_for_unrelated_low_confidence_query(
     mock_stream_answer.assert_called_once()
 
     prompt = mock_stream_answer.call_args[0][0]
-    user_content = prompt["messages"][0]["content"]
+    user_content = prompt["contents"]
     assert "<account_context>" not in user_content
     assert "(no relevant knowledge-base passages found)" in user_content

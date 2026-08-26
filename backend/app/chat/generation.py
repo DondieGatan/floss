@@ -1,6 +1,6 @@
 import re
 
-CLAUDE_MODEL = "claude-sonnet-5"
+GEMINI_MODEL = "gemini-2.5-flash"
 
 SYSTEM_PROMPT = (
     "You are Floss Assistant, Floss Clinic's dental clinic assistant. You help with appointments, "
@@ -65,8 +65,9 @@ def _scrub_delimiters(text):
 def build_prompt(query, results, account_context=None):
     """results: [(Chunk, score), ...], already in citation order ([1]..[k]).
     account_context: build_account_context()'s return value, or None.
-    Returns {"system": ..., "messages": [...]} — Claude's Messages API takes
-    the system prompt as its own top-level parameter, not as a message.
+    Returns {"system_instruction": ..., "contents": ...} — Gemini's API
+    takes the system prompt as its own config field, not as part of the
+    conversation content.
 
     Source passages (document text, staff-uploaded) and account context
     (includes a patient's own free-text appointment reason) are both
@@ -86,30 +87,35 @@ def build_prompt(query, results, account_context=None):
     user_parts.append(f"<question>\n{_scrub_delimiters(query)}\n</question>")
 
     return {
-        "system": SYSTEM_PROMPT,
-        "messages": [{"role": "user", "content": "\n\n".join(user_parts)}],
+        "system_instruction": SYSTEM_PROMPT,
+        "contents": "\n\n".join(user_parts),
     }
 
 
 def _client():
     from flask import current_app
-    from anthropic import Anthropic
+    from google import genai
 
-    api_key = current_app.config["ANTHROPIC_API_KEY"]
+    api_key = current_app.config["GEMINI_API_KEY"]
     if not api_key:
-        raise RuntimeError("ANTHROPIC_API_KEY is not configured.")
-    return Anthropic(api_key=api_key)
+        raise RuntimeError("GEMINI_API_KEY is not configured.")
+    return genai.Client(api_key=api_key)
 
 
 def stream_answer(prompt):
     """Streaming generator — yields answer text incrementally. `prompt` is
     build_prompt()'s return value."""
-    with _client().messages.stream(
-        model=CLAUDE_MODEL,
-        max_tokens=1024,
-        temperature=0.3,
-        system=prompt["system"],
-        messages=prompt["messages"],
-    ) as stream:
-        for text in stream.text_stream:
-            yield text
+    from google.genai import types
+
+    stream = _client().models.generate_content_stream(
+        model=GEMINI_MODEL,
+        contents=prompt["contents"],
+        config=types.GenerateContentConfig(
+            system_instruction=prompt["system_instruction"],
+            temperature=0.3,
+            max_output_tokens=1024,
+        ),
+    )
+    for chunk in stream:
+        if chunk.text:
+            yield chunk.text

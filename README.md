@@ -103,7 +103,7 @@ across the same route set on purpose.
 | | |
 |---|---|
 | **Backend** | Flask (app-factory + blueprints), SQLAlchemy, Alembic, Flask-JWT-Extended, Flask-Limiter, SQLite |
-| **RAG** | Hugging Face Inference API (`all-MiniLM-L6-v2` embeddings, called remotely), Claude (`claude-sonnet-5`, generation), brute-force cosine retrieval |
+| **RAG** | Hugging Face Inference API (`all-MiniLM-L6-v2` embeddings, called remotely), Google Gemini (`gemini-2.5-flash`, generation), brute-force cosine retrieval |
 | **Frontend** | React 19, Vite, react-router-dom, fetch + ReadableStream SSE (not EventSource — it can't carry auth headers) |
 | **Testing** | pytest (112 tests, backend), Vitest + React Testing Library (frontend) |
 
@@ -154,7 +154,7 @@ npm install
 npm run dev           # http://localhost:5173
 ```
 
-**Environment variables** (backend, `.env` or shell): `ANTHROPIC_API_KEY` (chat generation; without it, chat
+**Environment variables** (backend, `.env` or shell): `GEMINI_API_KEY` (chat generation; without it, chat
 degrades gracefully to an "assistant temporarily unavailable" message rather than crashing), `HF_TOKEN`
 (embeddings via Hugging Face's Inference API — required for ingestion and retrieval to work at all),
 `JWT_SECRET_KEY`, `SECRET_KEY`, `DATABASE_URL` (defaults to a local SQLite file).

@@ -153,7 +153,7 @@ def test_post_message_low_confidence_still_calls_model_but_omits_citations(
     mock_stream_answer.assert_called_once()
 
 
-def test_post_message_high_confidence_calls_claude_and_persists_citations(
+def test_post_message_high_confidence_calls_gemini_and_persists_citations(
     client, uploaded_document, mock_stream_answer, monkeypatch
 ):
     import app.chat.routes as chat_routes
@@ -191,7 +191,7 @@ def test_post_message_high_confidence_calls_claude_and_persists_citations(
     mock_stream_answer.assert_called_once()
 
 
-def test_post_message_claude_failure_streams_error_without_persisting(
+def test_post_message_gemini_failure_streams_error_without_persisting(
     client, uploaded_document, monkeypatch
 ):
     import app.chat.routes as chat_routes

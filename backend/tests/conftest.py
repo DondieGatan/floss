@@ -154,7 +154,7 @@ def uploaded_document(app, register_user):
 def mock_stream_answer(monkeypatch):
     """Replaces app.chat.generation.stream_answer with a canned,
     deterministic token generator and records whether/how it was called —
-    so chat tests never hit the real Claude API, and can assert on the
+    so chat tests never hit the real Gemini API, and can assert on the
     prompt actually built for it."""
     from unittest.mock import MagicMock
     import app.chat.routes as chat_routes

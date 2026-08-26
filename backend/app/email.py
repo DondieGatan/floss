@@ -1,6 +1,6 @@
 """Outbound email via the Resend API.
 
-Lazy-configured like ANTHROPIC_API_KEY/HF_TOKEN elsewhere in this app (see
+Lazy-configured like GEMINI_API_KEY/HF_TOKEN elsewhere in this app (see
 config.py) — send_email() logs the message instead of sending it when
 RESEND_API_KEY isn't set, so password reset and appointment reminders stay
 fully usable locally and in tests without a real account. Set a real key

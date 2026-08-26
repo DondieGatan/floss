@@ -180,7 +180,7 @@ def post_message(conversation_id):
                     answer_parts.append(token)
                     yield _sse(None, token)
             except Exception:
-                # Claude unreachable/misconfigured/rate-limited mid-stream —
+                # Gemini unreachable/misconfigured/rate-limited mid-stream —
                 # tell the client and don't persist a half-formed reply.
                 db.session.rollback()
                 yield _sse("error", {"error": "The assistant is temporarily unavailable. Please try again shortly."})

@@ -24,7 +24,7 @@ def test_is_pure_greeting_does_not_match_unrelated_text():
 
 def test_post_message_greeting_gets_instant_canned_reply(client, auth_headers, mock_stream_answer):
     # A bare greeting should never reach the low-confidence fallback or
-    # spend a Groq call — it's answered directly.
+    # spend a Gemini call — it's answered directly.
     conv_id = client.post("/api/chat/conversations", headers=auth_headers, json={}).get_json()["conversation"]["id"]
 
     resp = client.post(f"/api/chat/conversations/{conv_id}/messages", headers=auth_headers, json={"content": "hi"})

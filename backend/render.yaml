@@ -6,7 +6,7 @@ services:
     rootDir: backend
     buildCommand: "pip install -r requirements.txt && flask db upgrade && python seed.py && python seed_knowledge_base.py"
     # Generous safety margin on top of gunicorn's 30s default — a slow
-    # Claude response or a cold Hugging Face Inference API call (see
+    # Gemini response or a cold Hugging Face Inference API call (see
     # app/ml.py) shouldn't turn into a 500.
     startCommand: "gunicorn run:app --timeout 120"
     healthCheckPath: /api/health
@@ -17,7 +17,7 @@ services:
         generateValue: true
       - key: JWT_SECRET_KEY
         generateValue: true
-      - key: ANTHROPIC_API_KEY
+      - key: GEMINI_API_KEY
         sync: false
       - key: HF_TOKEN
         sync: false
