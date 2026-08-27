@@ -17,3 +17,10 @@ const DOCTOR_PHOTOS = {
 export function getDoctorPhoto(fullName) {
   return DOCTOR_PHOTOS[fullName] || null;
 }
+
+// A doctor added through the directory can carry its own photoUrl (see
+// backend/app/doctors/routes.py) — prefer that over the bundled seed-demo
+// photos above, which only ever cover the 5 doctors seed.py creates.
+export function resolveDoctorPhoto(doctor) {
+  return doctor?.photoUrl || getDoctorPhoto(doctor?.fullName) || null;
+}

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import AppLayout from '../components/AppLayout';
-import { getDoctorPhoto } from '../data/doctorPhotos';
+import { resolveDoctorPhoto } from '../data/doctorPhotos';
 
 function initials(name) {
   return (name || '')
@@ -63,7 +63,7 @@ export default function DoctorsPage() {
         ) : (
           <div className="grid grid-3 stagger-in">
             {doctors.map((doc) => {
-              const photo = getDoctorPhoto(doc.fullName);
+              const photo = resolveDoctorPhoto(doc);
               return (
               <div key={doc.id} className="doctor-card card-hover">
                 {photo ? (

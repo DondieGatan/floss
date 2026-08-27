@@ -1,8 +1,19 @@
 import { useEffect, useState } from 'react';
 import { api, ApiError } from '../api/client';
 import AppLayout from '../components/AppLayout';
+import { resolveDoctorPhoto } from '../data/doctorPhotos';
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+function initials(name) {
+  return (name || '')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join('')
+    .toUpperCase();
+}
 
 function DepartmentForm({ onCreated }) {
   const [name, setName] = useState('');
@@ -215,6 +226,7 @@ function DoctorForm({ departments, onCreated }) {
   const [specialty, setSpecialty] = useState('');
   const [departmentId, setDepartmentId] = useState('');
   const [bio, setBio] = useState('');
+  const [photoUrl, setPhotoUrl] = useState('');
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -228,10 +240,12 @@ function DoctorForm({ departments, onCreated }) {
         specialty,
         departmentId: Number(departmentId),
         bio: bio || undefined,
+        photoUrl: photoUrl || undefined,
       });
       setFullName('');
       setSpecialty('');
       setBio('');
+      setPhotoUrl('');
       onCreated(data.doctor);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Something went wrong.');
@@ -276,11 +290,151 @@ function DoctorForm({ departments, onCreated }) {
           <span>Bio (optional)</span>
           <input value={bio} onChange={(e) => setBio(e.target.value)} />
         </label>
+        <label className="field">
+          <span>Photo URL (optional)</span>
+          <input
+            type="url"
+            value={photoUrl}
+            onChange={(e) => setPhotoUrl(e.target.value)}
+            placeholder="https://…"
+          />
+        </label>
       </div>
       <button className="btn btn-primary" type="submit" disabled={submitting || departments.length === 0}>
         {submitting ? 'Adding…' : '+ Add dentist'}
       </button>
     </form>
+  );
+}
+
+function DoctorCard({ doctor, departments, expanded, onToggleExpand, onUpdated, onDeactivate }) {
+  const [editing, setEditing] = useState(false);
+  const [fullName, setFullName] = useState(doctor.fullName);
+  const [specialty, setSpecialty] = useState(doctor.specialty);
+  const [departmentId, setDepartmentId] = useState(doctor.departmentId);
+  const [bio, setBio] = useState(doctor.bio || '');
+  const [photoUrl, setPhotoUrl] = useState(doctor.photoUrl || '');
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  function cancelEdit() {
+    setEditing(false);
+    setError(null);
+    setFullName(doctor.fullName);
+    setSpecialty(doctor.specialty);
+    setDepartmentId(doctor.departmentId);
+    setBio(doctor.bio || '');
+    setPhotoUrl(doctor.photoUrl || '');
+  }
+
+  async function handleSave(e) {
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      await api.put(`/doctors/${doctor.id}`, {
+        fullName,
+        specialty,
+        departmentId: Number(departmentId),
+        bio: bio || undefined,
+        photoUrl: photoUrl || undefined,
+      });
+      setEditing(false);
+      onUpdated();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Something went wrong.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (editing) {
+    return (
+      <form className="card" onSubmit={handleSave}>
+        {error && (
+          <div className="form-error" role="alert">
+            {error}
+          </div>
+        )}
+        <div className="grid grid-2">
+          <label className="field">
+            <span>Full name</span>
+            <input value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+          </label>
+          <label className="field">
+            <span>Specialty</span>
+            <input value={specialty} onChange={(e) => setSpecialty(e.target.value)} required />
+          </label>
+          <label className="field">
+            <span>Department</span>
+            <select value={departmentId} onChange={(e) => setDepartmentId(e.target.value)} required>
+              {departments.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>Photo URL (optional)</span>
+            <input type="url" value={photoUrl} onChange={(e) => setPhotoUrl(e.target.value)} placeholder="https://…" />
+          </label>
+        </div>
+        <label className="field" style={{ marginBottom: 8 }}>
+          <span>Bio (optional)</span>
+          <input value={bio} onChange={(e) => setBio(e.target.value)} />
+        </label>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-small btn-primary" type="submit" disabled={submitting}>
+            {submitting ? 'Saving…' : 'Save'}
+          </button>
+          <button className="btn btn-small btn-secondary" type="button" onClick={cancelEdit}>
+            Cancel
+          </button>
+        </div>
+      </form>
+    );
+  }
+
+  const photo = resolveDoctorPhoto(doctor);
+
+  return (
+    <div className="card card-hover">
+      <div className="appointment-card" style={{ border: 'none', padding: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {photo ? (
+            <img src={photo} alt="" className="doctor-avatar doctor-avatar-photo" style={{ width: 44, height: 44 }} />
+          ) : (
+            <div className="doctor-avatar" style={{ width: 44, height: 44 }}>
+              {initials(doctor.fullName)}
+            </div>
+          )}
+          <div className="appointment-main">
+            <span className="appointment-doctor">{doctor.fullName}</span>
+            <span className="appointment-time">
+              {doctor.specialty} · {doctor.departmentName}
+            </span>
+          </div>
+        </div>
+        <div className="appointment-actions">
+          <button className="btn btn-small btn-secondary" type="button" onClick={() => setEditing(true)}>
+            Edit
+          </button>
+          <button
+            className="btn btn-small btn-secondary"
+            type="button"
+            onClick={onToggleExpand}
+            aria-expanded={expanded}
+          >
+            {expanded ? 'Hide availability' : 'Manage availability'}
+          </button>
+          <button className="btn btn-small btn-danger" onClick={onDeactivate}>
+            Deactivate
+          </button>
+        </div>
+      </div>
+      {expanded && <AvailabilityEditor doctor={doctor} onChange={onUpdated} />}
+    </div>
   );
 }
 
@@ -338,30 +492,15 @@ export default function ManageDirectoryPage() {
           ) : (
             <div className="list-col">
               {doctors.map((doc) => (
-                <div key={doc.id} className="card card-hover">
-                  <div className="appointment-card" style={{ border: 'none', padding: 0 }}>
-                    <div className="appointment-main">
-                      <span className="appointment-doctor">{doc.fullName}</span>
-                      <span className="appointment-time">
-                        {doc.specialty} · {doc.departmentName}
-                      </span>
-                    </div>
-                    <div className="appointment-actions">
-                      <button
-                        className="btn btn-small btn-secondary"
-                        type="button"
-                        onClick={() => setExpandedId(expandedId === doc.id ? null : doc.id)}
-                        aria-expanded={expandedId === doc.id}
-                      >
-                        {expandedId === doc.id ? 'Hide availability' : 'Manage availability'}
-                      </button>
-                      <button className="btn btn-small btn-danger" onClick={() => handleDeactivate(doc.id)}>
-                        Deactivate
-                      </button>
-                    </div>
-                  </div>
-                  {expandedId === doc.id && <AvailabilityEditor doctor={doc} onChange={loadDoctors} />}
-                </div>
+                <DoctorCard
+                  key={doc.id}
+                  doctor={doc}
+                  departments={departments}
+                  expanded={expandedId === doc.id}
+                  onToggleExpand={() => setExpandedId(expandedId === doc.id ? null : doc.id)}
+                  onUpdated={loadDoctors}
+                  onDeactivate={() => handleDeactivate(doc.id)}
+                />
               ))}
             </div>
           )}

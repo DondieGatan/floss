@@ -33,6 +33,65 @@ def test_staff_can_create_doctor(client, staff_headers, department_id):
     assert data["availability"] == []
 
 
+def test_create_doctor_with_photo_url(client, staff_headers, department_id):
+    resp = client.post(
+        "/api/doctors",
+        headers=staff_headers,
+        json=_doctor_payload(department_id, photoUrl="https://example.com/jane.jpg"),
+    )
+    assert resp.status_code == 201
+    assert resp.get_json()["doctor"]["photoUrl"] == "https://example.com/jane.jpg"
+
+
+def test_create_doctor_without_photo_url_defaults_to_none(client, staff_headers, department_id):
+    resp = client.post("/api/doctors", headers=staff_headers, json=_doctor_payload(department_id))
+    assert resp.status_code == 201
+    assert resp.get_json()["doctor"]["photoUrl"] is None
+
+
+def test_staff_can_update_doctor(client, staff_headers, department_id):
+    doctor_id = client.post(
+        "/api/doctors", headers=staff_headers, json=_doctor_payload(department_id)
+    ).get_json()["doctor"]["id"]
+
+    resp = client.put(
+        f"/api/doctors/{doctor_id}",
+        headers=staff_headers,
+        json=_doctor_payload(department_id, fullName="Dr. Jane Renamed", photoUrl="https://example.com/new.jpg"),
+    )
+    assert resp.status_code == 200
+    data = resp.get_json()["doctor"]
+    assert data["fullName"] == "Dr. Jane Renamed"
+    assert data["photoUrl"] == "https://example.com/new.jpg"
+
+
+def test_patient_cannot_update_doctor(client, auth_headers, staff_headers, department_id):
+    doctor_id = client.post(
+        "/api/doctors", headers=staff_headers, json=_doctor_payload(department_id)
+    ).get_json()["doctor"]["id"]
+
+    resp = client.put(f"/api/doctors/{doctor_id}", headers=auth_headers, json=_doctor_payload(department_id))
+    assert resp.status_code == 403
+
+
+def test_update_missing_doctor_returns_404(client, staff_headers, department_id):
+    resp = client.put(
+        "/api/doctors/999999", headers=staff_headers, json=_doctor_payload(department_id)
+    )
+    assert resp.status_code == 404
+
+
+def test_update_doctor_requires_valid_department(client, staff_headers, department_id):
+    doctor_id = client.post(
+        "/api/doctors", headers=staff_headers, json=_doctor_payload(department_id)
+    ).get_json()["doctor"]["id"]
+
+    resp = client.put(
+        f"/api/doctors/{doctor_id}", headers=staff_headers, json=_doctor_payload(department_id=999999)
+    )
+    assert resp.status_code == 400
+
+
 def test_create_doctor_requires_valid_department(client, staff_headers):
     resp = client.post("/api/doctors", headers=staff_headers, json=_doctor_payload(department_id=999999))
     assert resp.status_code == 400
