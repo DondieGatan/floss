@@ -1,8 +1,9 @@
 # Floss Clinic — Dental Clinic Management Platform
 
 Appointment booking with real conflict detection, a staff-managed doctor directory, patient records, and a
-RAG chatbot that only ever answers from your clinic's own cited sources. Built as a full-stack portfolio
-project: Flask + SQLAlchemy backend, React + Vite frontend.
+RAG chatbot that cites its answers when they come from your clinic's own documents and falls back to
+general dental knowledge — clearly uncited — when they don't. Built as a full-stack portfolio project:
+Flask + SQLAlchemy backend, React + Vite frontend.
 
 **Live**: [floss-beta.vercel.app](https://floss-beta.vercel.app) (frontend, Vercel) ·
 [floss-backend.onrender.com](https://floss-backend.onrender.com) (API, Render free tier)
@@ -26,13 +27,18 @@ about.
 
 ## What it does
 
-**Patients** register, browse dentists by specialty, book an appointment against real open slots, manage
-their own upcoming/past visits, and ask the clinic's assistant questions — hours, policies, "who treats
-orthodontics" — with every answer tracing back to a source document.
+**Patients** register, browse dentists by specialty, book an appointment against real open slots, and manage
+their care entirely from the dashboard — cancel or reschedule any upcoming appointment (including switching
+to a different dentist, not just a different time), with a separate read-only History page for past visits.
+They can also ask the clinic's assistant questions — hours, policies, "who treats orthodontics," or general
+dental questions — with clinic-specific answers cited back to the exact document and general-knowledge
+answers clearly left uncited.
 
-**Staff/admin** manage the department & dentist directory (including weekly availability windows), see and
-cancel any appointment clinic-wide, run a treatment-room/chair occupancy board (seat a patient, check them
-out), and curate the knowledge base the assistant draws from.
+**Staff/admin** manage the department & dentist directory (photos, bios, weekly availability windows), see,
+cancel, or reschedule any appointment clinic-wide, check a Schedule page showing every dentist's open and
+booked slots for a given day at a glance, run a treatment-room/chair occupancy board (seat a patient, check
+them out), curate the knowledge base the assistant draws from, and (owner/admin) grant or revoke staff/admin
+access through an audited Team & Roles console.
 
 ## Under the hood
 
@@ -67,21 +73,30 @@ unique constraint can't tell a cancelled row from a live one. This is a real DB-
 the realistic failure mode (double-submit), with the narrower theoretical race documented as an accepted,
 scale-appropriate limitation rather than silently missing.
 
-### Grounded, cited chat — not a hallucination machine
+### Cited when grounded, honest when it isn't
 
 `all-MiniLM-L6-v2` embeds every uploaded document into 384-dim vectors at ingest time, called remotely
 through Hugging Face's Inference API (`app/ml.py`) rather than run in-process — `torch` + `transformers`'
 baseline memory footprint alone doesn't fit alongside the rest of the app on a 512MB instance, confirmed the
 hard way via Render's own memory metrics. Retrieval is a brute-force cosine similarity search (a matrix
 dot-product — no vector DB, because at portfolio scale a few thousand chunks fit in memory and an external
-index would be unjustified infrastructure). Retrieval sits behind a **similarity-confidence threshold**: if nothing retrieved clears
-it, the assistant says it doesn't know instead of guessing. Every answer streams token-by-token over SSE and
-carries `[1]`, `[2]`-style citations back to the exact source chunk.
+index would be unjustified infrastructure). Retrieval sits behind a **similarity-confidence threshold**:
+below it, the retrieved chunk is dropped from the prompt entirely rather than handed to the model as if it
+were an authoritative source.
 
-The system prompt also draws an explicit line: Floss Clinic is an *operational* assistant (appointments, hours,
-policies, directory) and is instructed to refuse anything that reads as a diagnostic or treatment question,
-directing the user to book an appointment instead. That instruction is guarded by a test
-(`test_system_prompt_refuses_medical_advice`) so it can't silently regress.
+The model (Google Gemini) is still consulted either way — it isn't gated behind retrieval succeeding. The
+system prompt draws the actual line: an answer grounded in a retrieved passage gets bracketed `[1]`/`[2]`
+citations back to the exact source chunk; a question that's on-topic but has no matching document gets
+answered from the model's own general dental knowledge instead, with **no citation**, so a reader can never
+mistake general knowledge for something the clinic's own materials actually said; a question with nothing
+to do with dentistry gets a plain decline. Every answer streams token-by-token over SSE.
+
+The system prompt also draws a second, unrelated line: Floss Clinic is an *operational* assistant
+(appointments, hours, policies, directory, general dental education) and is instructed to refuse anything
+that reads as diagnosing this specific patient's symptoms or recommending their treatment, directing them to
+book an appointment instead. Both lines are guarded by tests (`test_system_prompt_refuses_medical_advice`,
+`test_system_prompt_allows_general_dental_knowledge_uncited`,
+`test_system_prompt_declines_fully_unrelated_questions`) so neither can silently regress.
 
 ### An auto-updating knowledge base, not a stale one
 
@@ -105,7 +120,7 @@ across the same route set on purpose.
 | **Backend** | Flask (app-factory + blueprints), SQLAlchemy, Alembic, Flask-JWT-Extended, Flask-Limiter, SQLite |
 | **RAG** | Hugging Face Inference API (`all-MiniLM-L6-v2` embeddings, called remotely), Google Gemini (`gemini-2.5-flash`, generation), brute-force cosine retrieval |
 | **Frontend** | React 19, Vite, react-router-dom, fetch + ReadableStream SSE (not EventSource — it can't carry auth headers) |
-| **Testing** | pytest (112 tests, backend), Vitest + React Testing Library (frontend) |
+| **Testing** | pytest (222 tests, backend), Vitest + React Testing Library (92 tests, frontend), Playwright (E2E) |
 
 ## Project structure
 
@@ -116,23 +131,25 @@ backend/
     departments/    dental specialty areas (CRUD, staff-only writes)
     doctors/        dentist directory + weekly availability windows
     patients/       self-service profile + staff patient lookup
-    appointments/   booking, conflict detection, availability computation
+    appointments/   booking, cancel/reschedule (time and/or dentist), conflict detection, availability computation
     admissions/     treatment rooms & chairs (ward/bed model, relabeled)
     documents/      knowledge-base uploads + the auto-regenerating directory digest
     chat/           retrieval, citation-grounded generation, SSE streaming
+    users/          Team & Roles — grant/revoke staff/admin/owner access, audit log
     models.py       User, Department, Doctor, DoctorAvailability, PatientProfile,
-                    Appointment, Ward, Bed, Admission, Document, Chunk, Conversation, Message
+                    Appointment, Ward, Bed, Admission, Document, Chunk, Conversation, Message, AuditLog
   migrations/       Alembic, one migration per schema change
-  tests/            112 tests across every blueprint + retrieval/generation
+  tests/            222 tests across every blueprint + retrieval/generation
   seed.py           demo departments, dentists, rooms/chairs, and login accounts
 
 frontend/
   src/
     pages/          route-level screens (patient + staff), LandingPage.jsx (public)
-    components/     AppLayout (role-aware nav), AppointmentCard, chat components
+    components/     AppLayout (role-aware nav), AppointmentCard, RescheduleModal, chat components
     context/        AuthContext (JWT storage, refresh-on-401)
     hooks/          useChatStream (SSE parsing), useReveal (scroll animations)
     api/client.js   fetch wrapper with automatic access-token refresh
+  e2e/              Playwright specs (excludes chat flows, which need a real HF_TOKEN)
 ```
 
 ## Running it locally
@@ -162,17 +179,20 @@ degrades gracefully to an "assistant temporarily unavailable" message rather tha
 ## Testing
 
 ```bash
-cd backend && pytest -q                 # 112 tests
-cd frontend && npm test                  # Vitest + React Testing Library
+cd backend && pytest -q                 # 222 tests
+cd frontend && npm test                  # Vitest + React Testing Library, 92 tests
+cd frontend && npm run test:e2e          # Playwright, real backend + frontend servers
 ```
 
 Backend coverage includes appointment boundary conditions (exact-duplicate rejection, partial-overlap
-rejection, back-to-back acceptance, cancelled-slot rebooking), RBAC edges (403 vs 404), and the
-directory-digest regeneration lifecycle. Frontend coverage (34 tests) spans the booking flow end-to-end
-(slot selection → confirm → success, and the 409-conflict error path), the public landing page, sign-in
-and registration (success, server-rejected input, pending state), the patient/staff dashboards (empty
-states, stat calculations, role-specific quick actions), the doctors directory (list, filter, empty
-state), and the chat window (message history, citations, streaming state, error display).
+rejection, back-to-back acceptance, cancelled-slot rebooking, and the reschedule endpoint's own edge cases —
+moving an appointment to its own current slot must not conflict with itself, moving it to a different
+dentist re-validates that dentist's hours and conflicts from scratch), RBAC edges (403 vs 404), and the
+directory-digest regeneration lifecycle. Frontend coverage spans the booking and reschedule flows end-to-end
+(slot selection → confirm → success, the 409-conflict error path, switching dentists mid-reschedule), the
+public landing page, sign-in and registration, the patient/staff dashboards, the doctors directory and
+staff-only directory management (including the doctor photo/edit flow), the Schedule availability view, the
+Team & Roles console, and the chat window (message history, citations, streaming state, error display).
 
 Both the public landing page and the authenticated app have a real accessibility pass: skip links,
 semantic landmarks, `prefers-reduced-motion` support, keyboard-operable controls (no click-only `<div>`s),
@@ -180,11 +200,13 @@ a labeled/focus-managed modal, labeled form inputs, and `aria-live` regions on l
 
 ## What's not done yet
 
-- **Frontend test coverage** — booking, landing page, sign-in/registration, both dashboards, the doctors
-  directory, and the chat window are covered; staff-only management pages (directory editing, treatment
-  rooms) aren't yet
+- **Frontend test coverage** — most pages are covered; the appointment History page, and the forgot/reset
+  password pages, aren't yet
+- **Error monitoring** — production failures currently surface through Render's own logs, not a dedicated
+  error tracker
 
 ## CI
 
-GitHub Actions runs the backend (`pytest`) and frontend (`Vitest` + a production build) test suites on
-every push and pull request against `main`. See `.github/workflows/ci.yml`.
+GitHub Actions runs on every push and pull request against `main`: backend tests (`pytest`), frontend tests
+(`Vitest` + a production build), a full Playwright E2E pass against real backend/frontend dev servers, and a
+dependency vulnerability audit for both `pip` and `npm` (high/critical only). See `.github/workflows/ci.yml`.
