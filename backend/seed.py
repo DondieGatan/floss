@@ -36,6 +36,11 @@ DOCTORS = [
     ("Dr. Priya Nair", "Endodontics", "Root Canal Therapy", "Focused on pain-free root canal treatment."),
     ("Dr. Marcus Webb", "Pediatric Dentistry", "Pediatric Dental Care", "Loves working with kids of all ages."),
     ("Dr. Sofia Torres", "Oral & Maxillofacial Surgery", "Wisdom Tooth Extraction", "Helps patients through extractions and jaw surgery."),
+    ("Dr. Elena Vasquez", "Periodontics", "Gum Disease & Periodontal Care", "Dedicated to healthy gums and long-term tooth stability."),
+    ("Dr. Noah Bergström", "General Dentistry", "Family & Cosmetic Dentistry", "Believes a healthy smile starts with a comfortable visit."),
+    ("Dr. Aisha Rahman", "Orthodontics", "Clear Aligners & Retainers", "Passionate about confident, low-hassle smile corrections."),
+    ("Dr. Thomas Okafor", "Endodontics", "Microscopic Root Canal Therapy", "Uses precision tools to make root canals fast and comfortable."),
+    ("Dr. Grace Lindqvist", "Pediatric Dentistry", "Early Childhood Dental Care", "Makes every child's first dental visit a positive one."),
 ]
 
 # Mon-Fri 9-1 and 2-5 for every seeded dentist — enough to exercise booking.
