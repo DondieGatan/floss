@@ -14,6 +14,8 @@ export default function RescheduleModal({ appointment, onClose, onRescheduled })
     (new Date(appointment.scheduledEnd) - new Date(appointment.scheduledStart)) / 60000
   );
   const [date, setDate] = useState(appointment.scheduledStart.slice(0, 10));
+  const [doctorId, setDoctorId] = useState(appointment.doctorId);
+  const [doctors, setDoctors] = useState(null);
   const [slots, setSlots] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [error, setError] = useState(null);
@@ -21,12 +23,20 @@ export default function RescheduleModal({ appointment, onClose, onRescheduled })
   const cardRef = useRef(null);
 
   useEffect(() => {
+    api.get('/doctors').then((data) => setDoctors(data.doctors));
+  }, []);
+
+  useEffect(() => {
     setSlots(null);
     setSelectedSlot(null);
     api
-      .get(`/appointments/availability?doctorId=${appointment.doctorId}&date=${date}&durationMinutes=${durationMinutes}`)
+      .get(`/appointments/availability?doctorId=${doctorId}&date=${date}&durationMinutes=${durationMinutes}`)
       .then((data) => setSlots(data.slots));
-  }, [appointment.doctorId, date, durationMinutes]);
+  }, [doctorId, date, durationMinutes]);
+
+  const selectedDoctorName =
+    doctors?.find((d) => d.id === doctorId)?.fullName?.replace(/^Dr\.?\s*/, '') ??
+    appointment.doctorName?.replace(/^Dr\.?\s*/, '');
 
   // Same focus-trap + Escape-to-close pattern as AdmissionsPage's AdmitModal.
   useEffect(() => {
@@ -37,7 +47,7 @@ export default function RescheduleModal({ appointment, onClose, onRescheduled })
         return;
       }
       if (e.key !== 'Tab' || !cardRef.current) return;
-      const focusables = cardRef.current.querySelectorAll('input, button:not([disabled])');
+      const focusables = cardRef.current.querySelectorAll('input, select, button:not([disabled])');
       if (focusables.length === 0) return;
       const first = focusables[0];
       const last = focusables[focusables.length - 1];
@@ -59,6 +69,7 @@ export default function RescheduleModal({ appointment, onClose, onRescheduled })
     try {
       const data = await api.patch(`/appointments/${appointment.id}/reschedule`, {
         scheduledStart: selectedSlot,
+        doctorId,
       });
       onRescheduled(data.appointment);
       onClose();
@@ -81,7 +92,7 @@ export default function RescheduleModal({ appointment, onClose, onRescheduled })
         ref={cardRef}
       >
         <h3 className="section-title" id="reschedule-modal-title">
-          Reschedule with Dr. {appointment.doctorName?.replace(/^Dr\.?\s*/, '')}
+          Reschedule with Dr. {selectedDoctorName}
         </h3>
 
         {error && (
@@ -89,6 +100,21 @@ export default function RescheduleModal({ appointment, onClose, onRescheduled })
             {error}
           </div>
         )}
+
+        <label className="field" style={{ maxWidth: 260 }}>
+          <span>Dentist</span>
+          <select value={doctorId} onChange={(e) => setDoctorId(Number(e.target.value))} disabled={doctors === null}>
+            {doctors === null ? (
+              <option>Loading…</option>
+            ) : (
+              doctors.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.fullName}
+                </option>
+              ))
+            )}
+          </select>
+        </label>
 
         <label className="field" style={{ maxWidth: 220 }}>
           <span>Date</span>

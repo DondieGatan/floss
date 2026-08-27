@@ -192,17 +192,28 @@ def reschedule_appointment(appointment_id):
     except (TypeError, ValueError):
         return jsonify({"error": "scheduledStart must be an ISO datetime."}), 400
 
+    # doctorId is optional — defaults to the appointment's current doctor,
+    # so a plain time-only reschedule (the common case) doesn't need to
+    # resend it. When it IS a different doctor, validate it the same way
+    # create_appointment() does.
+    doctor_id = data.get("doctorId", appointment.doctor_id)
+    if doctor_id != appointment.doctor_id:
+        doctor = db.session.get(Doctor, doctor_id) if isinstance(doctor_id, int) else None
+        if doctor is None or not doctor.is_active:
+            return jsonify({"error": "A valid doctor is required."}), 400
+
     # Duration is carried over from the existing appointment, not
-    # re-specified by the client — rescheduling only changes *when*, not
-    # *how long*.
+    # re-specified by the client — rescheduling only changes *when* (and
+    # optionally *who*), not *how long*.
     duration = appointment.scheduled_end - appointment.scheduled_start
     new_end = new_start + duration
 
     try:
-        check_availability(appointment.doctor_id, new_start, new_end)
+        check_availability(doctor_id, new_start, new_end)
         # exclude_appointment_id keeps this appointment's own current slot
-        # from being reported as a conflict with itself.
-        check_no_overlap(appointment.doctor_id, new_start, new_end, exclude_appointment_id=appointment.id)
+        # from being reported as a conflict with itself — irrelevant once
+        # the doctor actually changes, but harmless either way.
+        check_no_overlap(doctor_id, new_start, new_end, exclude_appointment_id=appointment.id)
     except AvailabilityError as exc:
         db.session.rollback()
         return jsonify({"error": str(exc)}), 422
@@ -212,6 +223,7 @@ def reschedule_appointment(appointment_id):
 
     appointment.scheduled_start = new_start
     appointment.scheduled_end = new_end
+    appointment.doctor_id = doctor_id
     appointment.reminder_sent_at = None  # new time gets its own reminder
     db.session.commit()
     return jsonify({"appointment": appointment.to_dict()}), 200
