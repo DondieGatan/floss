@@ -10,7 +10,6 @@ import DocumentsPage from './pages/DocumentsPage';
 import ChatPage from './pages/ChatPage';
 import DashboardPage from './pages/DashboardPage';
 import DoctorsPage from './pages/DoctorsPage';
-import DoctorProfilePage from './pages/DoctorProfilePage';
 import BookAppointmentPage from './pages/BookAppointmentPage';
 import MyAppointmentsPage from './pages/MyAppointmentsPage';
 import ManageDirectoryPage from './pages/ManageDirectoryPage';
@@ -49,7 +48,6 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/team/:doctorId" element={<DoctorProfilePage />} />
           <Route path="/login" element={<RedirectIfAuthed><LoginPage /></RedirectIfAuthed>} />
           <Route path="/register" element={<RedirectIfAuthed><RegisterPage /></RedirectIfAuthed>} />
           <Route path="/forgot-password" element={<RedirectIfAuthed><ForgotPasswordPage /></RedirectIfAuthed>} />

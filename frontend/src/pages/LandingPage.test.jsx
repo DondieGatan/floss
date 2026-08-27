@@ -92,7 +92,7 @@ describe('LandingPage', () => {
       expect(api.get).toHaveBeenCalledWith('/public/doctors');
     });
 
-    it("links each dentist card to their own highlight page, not the old doctors listing", async () => {
+    it('shows each dentist as a plain display card, not a link to a booking flow', async () => {
       api.get.mockImplementation((path) => {
         if (path === '/public/doctors') return Promise.resolve({ doctors: DOCTORS });
         return Promise.resolve({ user: null });
@@ -100,8 +100,8 @@ describe('LandingPage', () => {
       renderLanding();
       await screen.findByText('Dr. Amara Osei');
 
-      const links = screen.getAllByRole('link').filter((l) => l.getAttribute('href')?.startsWith('/team/'));
-      expect(links.map((l) => l.getAttribute('href')).sort()).toEqual(['/team/1', '/team/2']);
+      const teamLinks = screen.getAllByRole('link').filter((l) => l.getAttribute('href')?.startsWith('/team'));
+      expect(teamLinks).toHaveLength(0);
     });
 
     it('shows an empty state instead of an empty grid when the team directory has nobody in it', async () => {

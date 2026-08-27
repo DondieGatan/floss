@@ -742,7 +742,14 @@
 
 /* Team (Meet the Dentists) — an in-page section on the landing page
    itself, styled to match .services-section right above it rather than
-   as its own route. */
+   as its own route. Its own band (like About/Services/Benefits already
+   have) so it reads as a distinct section, not a continuation of Services. */
+
+.team-band {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  background: linear-gradient(135deg, #d9f2ef, #eafbf8);
+}
 
 .team-section {
   font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -763,13 +770,6 @@
   border: 1px solid var(--l-border);
   border-radius: 20px;
   overflow: hidden;
-  transition: transform 0.3s var(--l-ease), box-shadow 0.3s var(--l-ease), border-color 0.3s ease;
-}
-
-.team-card:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--l-shadow);
-  border-color: rgba(47, 95, 224, 0.25);
 }
 
 .team-card-photo {
@@ -784,10 +784,13 @@
 .team-card-photo img {
   width: 100%;
   height: 100%;
-  /* contain, not cover — a shorter box than the (square) source photos
-     would otherwise crop them; this always shows the whole photo,
-     letterboxed against the card's background gradient instead. */
-  object-fit: contain;
+  /* cover, not contain — contain avoided cropping but left empty gaps on
+     either side (the box is wider than the square source photos). Every
+     photo here has been picked/re-cropped with clear headroom, so a cover
+     fill biased toward the top keeps faces in frame while trimming
+     background top/bottom instead of leaving gaps. */
+  object-fit: cover;
+  object-position: center 20%;
 }
 
 .team-card-initials {
@@ -828,78 +831,6 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-/* Doctor profile (highlight page) */
-
-.profile-band {
-  padding: 64px 0 96px;
-}
-
-.back-link-landing {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--l-text-muted);
-  font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 32px;
-}
-
-.back-link-landing:hover {
-  color: var(--l-blue);
-}
-
-.profile-grid {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 48px;
-  align-items: start;
-}
-
-.profile-photo {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: var(--l-shadow-soft);
-  background: linear-gradient(150deg, var(--l-bg-soft), #d6e4fb);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.profile-photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.profile-photo-initials {
-  font-size: 72px;
-  font-weight: 800;
-  color: var(--l-blue);
-}
-
-.profile-specialty {
-  color: var(--l-blue);
-  font-weight: 700;
-  font-size: 16px;
-  margin: 0 0 4px;
-}
-
-.profile-dept {
-  color: var(--l-text-muted);
-  font-size: 14px;
-  margin: 0 0 24px;
-}
-
-.profile-bio {
-  color: var(--l-text-muted);
-  font-size: 16px;
-  line-height: 1.75;
-  margin: 0 0 28px;
-  max-width: 560px;
 }
 
 /* Benefits */
@@ -1116,14 +1047,6 @@
   .services-grid,
   .team-grid {
     grid-template-columns: 1fr;
-  }
-
-  .profile-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .profile-photo {
-    max-width: 280px;
   }
 
   .stat-grid {

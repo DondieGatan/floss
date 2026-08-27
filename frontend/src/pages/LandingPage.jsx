@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import '../styles/landing.css';
 import { useReveal } from '../hooks/useReveal';
 import { useAuth } from '../context/AuthContext';
@@ -235,6 +234,7 @@ export default function LandingPage() {
         </section>
         </div>
 
+        <div className="team-band">
         <section
           ref={teamRef}
           className={`landing-section team-section reveal${teamVisible ? ' reveal-visible' : ''}`}
@@ -260,7 +260,7 @@ export default function LandingPage() {
               {doctors.map((doc) => {
                 const photo = resolveDoctorPhoto(doc);
                 return (
-                  <Link key={doc.id} to={`/team/${doc.id}`} className="team-card">
+                  <div key={doc.id} className="team-card">
                     <div className="team-card-photo">
                       {photo ? (
                         <img src={photo} alt="" />
@@ -274,12 +274,13 @@ export default function LandingPage() {
                       <p className="team-card-dept">{doc.departmentName}</p>
                       {doc.bio && <p className="team-card-bio">{doc.bio}</p>}
                     </div>
-                  </Link>
+                  </div>
                 );
               })}
             </div>
           )}
         </section>
+        </div>
 
         <div className="benefits-band">
         <section ref={benefitsRef} className="landing-section">
