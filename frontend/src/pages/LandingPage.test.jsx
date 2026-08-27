@@ -20,9 +20,21 @@ function renderLanding() {
   );
 }
 
+// LandingPage fetches /public/doctors for its "Meet Our Dentists" section
+// on every render regardless of login state, alongside AuthContext's own
+// /auth/me check — this default keeps both resolving sensibly for tests
+// that don't care about team content, and renderLoggedIn overrides just
+// the /auth/me half.
+function mockApiGet(user) {
+  api.get.mockImplementation((path) => {
+    if (path === '/public/doctors') return Promise.resolve({ doctors: [] });
+    return Promise.resolve({ user });
+  });
+}
+
 async function renderLoggedIn(user) {
   localStorage.setItem('floss_access_token', 'fake-token');
-  api.get.mockResolvedValue({ user });
+  mockApiGet(user);
   renderLanding();
   // Waits for AuthContext's own /auth/me check to resolve — until then
   // `user` is still null and the nav shows the logged-out state.
@@ -34,6 +46,7 @@ describe('LandingPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+    mockApiGet(null);
   });
 
   it('renders the hero headline and a working entry point for both roles', () => {
@@ -61,6 +74,43 @@ describe('LandingPage', () => {
     expect(screen.getByRole('link', { name: 'Create a Free Account' })).toHaveAttribute('href', '/register');
   });
 
+  describe('the Meet Our Dentists section', () => {
+    const DOCTORS = [
+      { id: 1, fullName: 'Dr. Amara Osei', specialty: 'General & Preventive Dentistry', departmentName: 'General Dentistry', bio: 'Loves cleanings.', photoUrl: null },
+      { id: 2, fullName: 'Dr. Liam Chen', specialty: 'Braces & Invisalign', departmentName: 'Orthodontics', bio: null, photoUrl: null },
+    ];
+
+    it('renders dentists fetched from the public endpoint, right on the landing page', async () => {
+      api.get.mockImplementation((path) => {
+        if (path === '/public/doctors') return Promise.resolve({ doctors: DOCTORS });
+        return Promise.resolve({ user: null });
+      });
+      renderLanding();
+
+      expect(await screen.findByText('Dr. Amara Osei')).toBeInTheDocument();
+      expect(screen.getByText('Dr. Liam Chen')).toBeInTheDocument();
+      expect(api.get).toHaveBeenCalledWith('/public/doctors');
+    });
+
+    it("links each dentist card to their own highlight page, not the old doctors listing", async () => {
+      api.get.mockImplementation((path) => {
+        if (path === '/public/doctors') return Promise.resolve({ doctors: DOCTORS });
+        return Promise.resolve({ user: null });
+      });
+      renderLanding();
+      await screen.findByText('Dr. Amara Osei');
+
+      const links = screen.getAllByRole('link').filter((l) => l.getAttribute('href')?.startsWith('/team/'));
+      expect(links.map((l) => l.getAttribute('href')).sort()).toEqual(['/team/1', '/team/2']);
+    });
+
+    it('shows an empty state instead of an empty grid when the team directory has nobody in it', async () => {
+      renderLanding();
+
+      expect(await screen.findByText(/team directory is being updated/i)).toBeInTheDocument();
+    });
+  });
+
   describe('when already logged in', () => {
     it('shows an "Ask a Question" CTA to the dashboard for a patient', async () => {
       await renderLoggedIn({ id: 1, fullName: 'Jordan Ellis', role: 'patient' });
@@ -84,7 +134,7 @@ describe('LandingPage', () => {
         expect(link).toHaveAttribute('href', '/doctors');
       }
       expect(screen.getByRole('link', { name: 'Book an Appointment' })).toHaveAttribute('href', '/doctors');
-      expect(screen.getByRole('link', { name: 'Meet Our Dentists' })).toHaveAttribute('href', '/team');
+      expect(screen.getByRole('link', { name: 'Meet Our Dentists' })).toHaveAttribute('href', '/#team');
     });
 
     it('no longer shows a footer Dashboard link now that the nav already has one', async () => {

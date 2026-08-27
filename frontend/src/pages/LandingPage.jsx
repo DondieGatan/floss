@@ -1,9 +1,13 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import '../styles/landing.css';
 import { useReveal } from '../hooks/useReveal';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../api/client';
 import AssistantAvatar from '../components/AssistantAvatar';
 import PublicHeader from '../components/PublicHeader';
 import PublicFooter from '../components/PublicFooter';
+import { resolveDoctorPhoto } from '../data/doctorPhotos';
 import heroPhoto from '../assets/Top_background.jpg';
 import aboutPhoto from '../assets/Third_Page.jpg';
 import generalPhoto from '../assets/General_Dentistry.jpg';
@@ -25,6 +29,16 @@ const TICKER_ITEMS = [
   { icon: '⚕️', label: 'Oral Surgery' },
   { icon: '👶', label: 'Pediatric Dentistry' },
 ];
+
+function initials(name) {
+  return (name || '')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join('')
+    .toUpperCase();
+}
 
 function TickerStrip() {
   const items = [...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS];
@@ -85,7 +99,13 @@ export default function LandingPage() {
   const [aboutRef, aboutVisible] = useReveal();
   const [servicesRef, servicesVisible] = useReveal();
   const [benefitsRef, benefitsVisible] = useReveal();
+  const [teamRef, teamVisible] = useReveal();
   const { user } = useAuth();
+  const [doctors, setDoctors] = useState(null);
+
+  useEffect(() => {
+    api.get('/public/doctors').then((data) => setDoctors(data.doctors));
+  }, []);
   // The rest of the page had several more CTAs hardcoded to /register
   // regardless of login state — same dead end the Quick Book bar had:
   // RedirectIfAuthed just bounces an already-logged-in visitor straight
@@ -214,6 +234,52 @@ export default function LandingPage() {
           </div>
         </section>
         </div>
+
+        <section
+          ref={teamRef}
+          className={`landing-section team-section reveal${teamVisible ? ' reveal-visible' : ''}`}
+          id="team"
+          aria-labelledby="team-heading"
+        >
+          <div className="services-head">
+            <div>
+              <p className="eyebrow">Our Team</p>
+              <h2 className="section-heading" id="team-heading">
+                Meet Our Dentists
+              </h2>
+            </div>
+          </div>
+          {doctors === null ? (
+            <p role="status" aria-live="polite">
+              Loading our team…
+            </p>
+          ) : doctors.length === 0 ? (
+            <p>Our team directory is being updated — check back soon.</p>
+          ) : (
+            <div className="team-grid">
+              {doctors.map((doc) => {
+                const photo = resolveDoctorPhoto(doc);
+                return (
+                  <Link key={doc.id} to={`/team/${doc.id}`} className="team-card">
+                    <div className="team-card-photo">
+                      {photo ? (
+                        <img src={photo} alt="" />
+                      ) : (
+                        <span className="team-card-initials">{initials(doc.fullName)}</span>
+                      )}
+                    </div>
+                    <div className="team-card-body">
+                      <h3>{doc.fullName}</h3>
+                      <p className="team-card-specialty">{doc.specialty}</p>
+                      <p className="team-card-dept">{doc.departmentName}</p>
+                      {doc.bio && <p className="team-card-bio">{doc.bio}</p>}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </section>
 
         <div className="benefits-band">
         <section ref={benefitsRef} className="landing-section">

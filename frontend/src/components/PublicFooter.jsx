@@ -36,7 +36,7 @@ export default function PublicFooter() {
             <div className="footer-col">
               <h4>Care</h4>
               <a href={bookingHref}>Book an Appointment</a>
-              <a href="/team">Meet Our Dentists</a>
+              <a href="/#team">Meet Our Dentists</a>
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import '../styles/landing.css';
 import { api, ApiError } from '../api/client';
 import { useAuth } from '../context/AuthContext';
@@ -17,12 +17,13 @@ function initials(name) {
     .toUpperCase();
 }
 
-// The "highlight page" each dentist gets from TeamPage — public, no login
-// required (see /api/public/doctors/:id). The booking CTA still respects
-// role: a patient goes straight into the booking flow for this doctor,
-// anyone else logged in goes to the doctor directory (same dead-end-avoidance
-// pattern as the rest of the public pages), and a logged-out visitor is
-// sent to register first.
+// The "highlight page" each dentist gets from the landing page's "Meet Our
+// Dentists" section — public, no login required (see
+// /api/public/doctors/:id). The booking CTA still respects role: a patient
+// goes straight into the booking flow for this doctor, anyone else logged
+// in goes to the doctor directory (same dead-end-avoidance pattern as the
+// rest of the public pages), and a logged-out visitor is sent to register
+// first.
 export default function DoctorProfilePage() {
   const { doctorId } = useParams();
   const { user } = useAuth();
@@ -52,9 +53,9 @@ export default function DoctorProfilePage() {
 
       <main id="main-content">
         <div className="landing-section profile-band">
-          <Link to="/team" className="back-link-landing">
+          <a href="/#team" className="back-link-landing">
             ← Meet the team
-          </Link>
+          </a>
 
           {notFound ? (
             <p>We couldn't find that dentist.</p>

@@ -740,22 +740,19 @@
   font-size: 13px;
 }
 
-/* Team (Meet the Dentists) */
+/* Team (Meet the Dentists) — an in-page section on the landing page
+   itself, styled to match .services-section right above it rather than
+   as its own route. */
 
-.team-page-header {
-  padding: 64px 0 32px;
-  text-align: center;
-}
-
-.team-page-header .section-heading {
-  margin: 0;
+.team-section {
+  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  padding: 96px 0;
 }
 
 .team-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 26px;
-  padding-bottom: 96px;
 }
 
 .team-card {
