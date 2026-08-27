@@ -2,7 +2,8 @@ import '../styles/landing.css';
 import { useReveal } from '../hooks/useReveal';
 import { useAuth } from '../context/AuthContext';
 import AssistantAvatar from '../components/AssistantAvatar';
-import logoIcon from '../assets/logo-icon.png';
+import PublicHeader from '../components/PublicHeader';
+import PublicFooter from '../components/PublicFooter';
 import heroPhoto from '../assets/Top_background.jpg';
 import aboutPhoto from '../assets/Third_Page.jpg';
 import generalPhoto from '../assets/General_Dentistry.jpg';
@@ -84,7 +85,7 @@ export default function LandingPage() {
   const [aboutRef, aboutVisible] = useReveal();
   const [servicesRef, servicesVisible] = useReveal();
   const [benefitsRef, benefitsVisible] = useReveal();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   // The rest of the page had several more CTAs hardcoded to /register
   // regardless of login state — same dead end the Quick Book bar had:
   // RedirectIfAuthed just bounces an already-logged-in visitor straight
@@ -94,45 +95,13 @@ export default function LandingPage() {
   const bookingHref = user ? '/doctors' : '/register';
   const learnMoreHref = user ? '/dashboard' : '/register';
 
-  function handleLogout() {
-    logout();
-  }
-
   return (
     <div className="landing">
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>
 
-      <nav className="landing-nav" aria-label="Primary">
-        <div className="landing-nav-inner">
-          <span className="landing-brand">
-            <img src={logoIcon} alt="" className="landing-brand-mark" />
-            Floss Clinic
-          </span>
-          <div className="landing-nav-actions">
-            {user ? (
-              <>
-                <a className="l-btn l-btn-ghost l-btn-small" href="/dashboard">
-                  Dashboard
-                </a>
-                <button className="l-btn l-btn-primary l-btn-small" type="button" onClick={handleLogout}>
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <a className="l-btn l-btn-ghost l-btn-small" href="/login">
-                  Sign In
-                </a>
-                <a className="l-btn l-btn-primary l-btn-small" href="/register">
-                  Get Started
-                </a>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
+      <PublicHeader />
 
       <main id="main-content">
         <header className="landing-section landing-hero">
@@ -296,42 +265,7 @@ export default function LandingPage() {
         </div>
       </main>
 
-      <footer className="landing-footer">
-        <div className="landing-section">
-          <div className="footer-top">
-            <div>
-              <span className="landing-brand">
-                <img src={logoIcon} alt="" className="landing-brand-mark" />
-                Floss Clinic
-              </span>
-              <p className="footer-brand-sub">Your dental clinic, one place — appointments, records, and a smart assistant.</p>
-            </div>
-            <div className="footer-links">
-              <div className="footer-col">
-                <h4>Product</h4>
-                <a href="#services">Services</a>
-                {user ? (
-                  <a href="/dashboard">Dashboard</a>
-                ) : (
-                  <>
-                    <a href="/register">Get Started</a>
-                    <a href="/login">Sign In</a>
-                  </>
-                )}
-              </div>
-              <div className="footer-col">
-                <h4>Care</h4>
-                <a href={bookingHref}>Book an Appointment</a>
-                <a href={bookingHref}>Meet Our Dentists</a>
-              </div>
-            </div>
-          </div>
-          <div className="footer-bottom">
-            <span>© {new Date().getFullYear()} Floss Clinic.</span>
-            <span>Built with Rounds' architecture, reskinned for dental care.</span>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }

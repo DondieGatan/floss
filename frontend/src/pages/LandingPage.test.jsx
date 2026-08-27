@@ -25,9 +25,7 @@ async function renderLoggedIn(user) {
   api.get.mockResolvedValue({ user });
   renderLanding();
   // Waits for AuthContext's own /auth/me check to resolve — until then
-  // `user` is still null and the nav shows the logged-out state. Scoped to
-  // the nav specifically: the page has a second "Dashboard" link elsewhere
-  // (a footer CTA) once logged in.
+  // `user` is still null and the nav shows the logged-out state.
   const nav = screen.getByRole('navigation', { name: 'Primary' });
   await within(nav).findByRole('link', { name: 'Dashboard' });
 }
@@ -86,7 +84,13 @@ describe('LandingPage', () => {
         expect(link).toHaveAttribute('href', '/doctors');
       }
       expect(screen.getByRole('link', { name: 'Book an Appointment' })).toHaveAttribute('href', '/doctors');
-      expect(screen.getByRole('link', { name: 'Meet Our Dentists' })).toHaveAttribute('href', '/doctors');
+      expect(screen.getByRole('link', { name: 'Meet Our Dentists' })).toHaveAttribute('href', '/team');
+    });
+
+    it('no longer shows a footer Dashboard link now that the nav already has one', async () => {
+      await renderLoggedIn({ id: 1, fullName: 'Jordan Ellis', role: 'patient' });
+
+      expect(screen.getAllByRole('link', { name: 'Dashboard' })).toHaveLength(1);
     });
 
     it('no link on the page still points at /register once logged in', async () => {

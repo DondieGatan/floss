@@ -740,6 +740,168 @@
   font-size: 13px;
 }
 
+/* Team (Meet the Dentists) */
+
+.team-page-header {
+  padding: 64px 0 32px;
+  text-align: center;
+}
+
+.team-page-header .section-heading {
+  margin: 0;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+  padding-bottom: 96px;
+}
+
+.team-card {
+  display: block;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--l-border);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: transform 0.3s var(--l-ease), box-shadow 0.3s var(--l-ease), border-color 0.3s ease;
+}
+
+.team-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--l-shadow);
+  border-color: rgba(47, 95, 224, 0.25);
+}
+
+.team-card-photo {
+  height: 220px;
+  background: linear-gradient(150deg, var(--l-bg-soft), #d6e4fb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.team-card-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.team-card-initials {
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--l-blue);
+}
+
+.team-card-body {
+  padding: 22px 24px;
+}
+
+.team-card-body h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.team-card-specialty {
+  color: var(--l-blue);
+  font-weight: 700;
+  font-size: 13px;
+  margin: 0 0 4px;
+}
+
+.team-card-dept {
+  color: var(--l-text-muted);
+  font-size: 12px;
+  margin: 0 0 12px;
+}
+
+.team-card-bio {
+  color: var(--l-text-muted);
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Doctor profile (highlight page) */
+
+.profile-band {
+  padding: 64px 0 96px;
+}
+
+.back-link-landing {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--l-text-muted);
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 32px;
+}
+
+.back-link-landing:hover {
+  color: var(--l-blue);
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.profile-photo {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: var(--l-shadow-soft);
+  background: linear-gradient(150deg, var(--l-bg-soft), #d6e4fb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-photo-initials {
+  font-size: 72px;
+  font-weight: 800;
+  color: var(--l-blue);
+}
+
+.profile-specialty {
+  color: var(--l-blue);
+  font-weight: 700;
+  font-size: 16px;
+  margin: 0 0 4px;
+}
+
+.profile-dept {
+  color: var(--l-text-muted);
+  font-size: 14px;
+  margin: 0 0 24px;
+}
+
+.profile-bio {
+  color: var(--l-text-muted);
+  font-size: 16px;
+  line-height: 1.75;
+  margin: 0 0 28px;
+  max-width: 560px;
+}
+
 /* Benefits */
 
 .benefits-band {
@@ -951,8 +1113,17 @@
     height: 300px;
   }
 
-  .services-grid {
+  .services-grid,
+  .team-grid {
     grid-template-columns: 1fr;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-photo {
+    max-width: 280px;
   }
 
   .stat-grid {

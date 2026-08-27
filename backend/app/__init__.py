@@ -79,6 +79,7 @@ def create_app(config_class=Config):
     from app.chat import chat_bp
     from app.departments import departments_bp
     from app.doctors import doctors_bp
+    from app.public import public_bp
     from app.patients import patients_bp
     from app.appointments import appointments_bp
     from app.admissions import admissions_bp, wards_bp
@@ -89,6 +90,7 @@ def create_app(config_class=Config):
     app.register_blueprint(chat_bp)
     app.register_blueprint(departments_bp)
     app.register_blueprint(doctors_bp)
+    app.register_blueprint(public_bp)
     app.register_blueprint(patients_bp)
     app.register_blueprint(appointments_bp)
     app.register_blueprint(admissions_bp)
