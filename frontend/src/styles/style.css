@@ -511,7 +511,11 @@ textarea {
   border-color: var(--accent);
 }
 
-.app-sidebar-logout {
+/* .btn (two-class selector, so it always wins over the single-class .btn
+   rule regardless of source order) sets display: inline-block for anchor-
+   rendered buttons elsewhere — this button needs it overridden back to a
+   flex row so its icon and label sit side by side instead of stacking. */
+.btn.app-sidebar-logout {
   display: flex;
   align-items: center;
   gap: 8px;
