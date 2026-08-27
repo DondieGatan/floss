@@ -22,7 +22,7 @@ MAX_DURATION_MINUTES = 240
 
 
 def _is_staff():
-    return get_jwt().get("role") in ("staff", "admin")
+    return get_jwt().get("role") in ("staff", "admin", "owner")
 
 
 def _current_patient_profile():

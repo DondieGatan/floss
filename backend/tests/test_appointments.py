@@ -462,3 +462,79 @@ def test_reschedule_without_doctor_id_keeps_the_original_doctor(
     )
     assert resp.status_code == 200
     assert resp.get_json()["appointment"]["doctorId"] == doctor_with_monday_availability
+
+
+# Regression coverage for _is_staff() — it originally checked only
+# role in ("staff", "admin"), silently excluding "owner". Since an owner
+# account has no PatientProfile, every one of these fell through to "no
+# profile -> empty/404" for owner specifically, even though owner-gated
+# pages (staff_required, which does include "owner") let them reach the
+# UI in the first place. Each test below mirrors an existing staff/admin
+# test one-for-one, just with owner_headers instead.
+
+
+def test_owner_can_book_on_behalf_of_a_patient(client, owner_headers, auth_headers, doctor_with_monday_availability):
+    patient_id = client.get("/api/patients/me", headers=auth_headers).get_json()["patient"]["id"]
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+
+    resp = client.post(
+        "/api/appointments",
+        headers=owner_headers,
+        json={
+            "doctorId": doctor_with_monday_availability,
+            "patientId": patient_id,
+            "scheduledStart": start.isoformat(),
+            "durationMinutes": 30,
+        },
+    )
+    assert resp.status_code == 201
+    assert resp.get_json()["appointment"]["patientId"] == patient_id
+
+
+def test_owner_sees_clinic_wide_appointments_not_just_their_own(
+    client, owner_headers, auth_headers, doctor_with_monday_availability
+):
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    _book(client, auth_headers, doctor_with_monday_availability, start)
+
+    resp = client.get("/api/appointments", headers=owner_headers)
+    assert len(resp.get_json()["appointments"]) == 1
+
+
+def test_owner_can_view_any_appointment(client, owner_headers, auth_headers, doctor_with_monday_availability):
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    appointment_id = _book(client, auth_headers, doctor_with_monday_availability, start).get_json()["appointment"][
+        "id"
+    ]
+
+    resp = client.get(f"/api/appointments/{appointment_id}", headers=owner_headers)
+    assert resp.status_code == 200
+
+
+def test_owner_can_cancel_any_patients_appointment(
+    client, owner_headers, auth_headers, doctor_with_monday_availability
+):
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    appointment_id = _book(client, auth_headers, doctor_with_monday_availability, start).get_json()["appointment"][
+        "id"
+    ]
+
+    resp = client.patch(f"/api/appointments/{appointment_id}/cancel", headers=owner_headers, json={})
+    assert resp.status_code == 200
+    assert resp.get_json()["appointment"]["status"] == "cancelled"
+
+
+def test_owner_can_reschedule_any_patients_appointment(
+    client, owner_headers, auth_headers, doctor_with_monday_availability
+):
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    appointment_id = _book(client, auth_headers, doctor_with_monday_availability, start).get_json()["appointment"][
+        "id"
+    ]
+
+    resp = client.patch(
+        f"/api/appointments/{appointment_id}/reschedule",
+        headers=owner_headers,
+        json={"scheduledStart": start.replace(hour=11).isoformat()},
+    )
+    assert resp.status_code == 200
