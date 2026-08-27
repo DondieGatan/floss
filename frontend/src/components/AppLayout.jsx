@@ -21,6 +21,7 @@ const MANAGEMENT_LINKS = [
   { to: '/dashboard', icon: <HouseIcon />, label: 'Dashboard' },
   { to: '/manage/directory', icon: <PeopleIcon />, label: 'Directory' },
   { to: '/manage/appointments', icon: <ClipboardIcon />, label: 'All Appointments' },
+  { to: '/manage/schedule', icon: <CalendarIcon />, label: 'Schedule' },
   { to: '/manage/admissions', icon: <DoorIcon />, label: 'Treatment Rooms' },
 ];
 

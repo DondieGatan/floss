@@ -14,6 +14,7 @@ import BookAppointmentPage from './pages/BookAppointmentPage';
 import MyAppointmentsPage from './pages/MyAppointmentsPage';
 import ManageDirectoryPage from './pages/ManageDirectoryPage';
 import AllAppointmentsPage from './pages/AllAppointmentsPage';
+import SchedulePage from './pages/SchedulePage';
 import AdmissionsPage from './pages/AdmissionsPage';
 import ManageUsersPage from './pages/ManageUsersPage';
 import SecurityPage from './pages/SecurityPage';
@@ -63,6 +64,7 @@ export default function App() {
 
           <Route path="/manage/directory" element={<RequireAuth roles={STAFF_ROLES}><ManageDirectoryPage /></RequireAuth>} />
           <Route path="/manage/appointments" element={<RequireAuth roles={STAFF_ROLES}><AllAppointmentsPage /></RequireAuth>} />
+          <Route path="/manage/schedule" element={<RequireAuth roles={STAFF_ROLES}><SchedulePage /></RequireAuth>} />
           <Route path="/manage/admissions" element={<RequireAuth roles={STAFF_ROLES}><AdmissionsPage /></RequireAuth>} />
           <Route path="/manage/users" element={<RequireAuth roles={ADMIN_ROLES}><ManageUsersPage /></RequireAuth>} />
 
