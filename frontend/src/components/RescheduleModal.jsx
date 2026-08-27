@@ -1,8 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { api, ApiError } from '../api/client';
 
+// Local calendar date as YYYY-MM-DD — not toISOString().slice(0, 10), which
+// converts to UTC first and silently rolls back to the previous day for any
+// positive-UTC-offset timezone during the first few hours after local
+// midnight.
 function todayIso() {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 function formatSlotTime(iso) {

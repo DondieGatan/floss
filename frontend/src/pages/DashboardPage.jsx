@@ -6,10 +6,35 @@ import AppLayout from '../components/AppLayout';
 import AppointmentCard from '../components/AppointmentCard';
 import AppointmentReminderBanner from '../components/AppointmentReminderBanner';
 import RescheduleModal from '../components/RescheduleModal';
+import WeeklyAppointmentsChart from '../components/WeeklyAppointmentsChart';
 import { ToothIcon, ClinicIcon, ChairIcon, ClipboardIcon, CalendarIcon, CheckCircleIcon } from '../components/icons';
 
 function firstName(fullName) {
   return (fullName || '').split(' ')[0] || 'there';
+}
+
+// Local calendar date as YYYY-MM-DD — deliberately not toISOString().slice(0,
+// 10), which converts to UTC first and silently rolls back to the previous
+// day for any positive-UTC-offset timezone whenever local time hasn't yet
+// caught up to UTC's date (e.g. GMT+4 for the first 4 hours after local
+// midnight — exactly when mondayOf() below zeroes each day's clock).
+function toIso(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// Monday of the calendar week containing `date` — clinics run on a
+// Mon-Sun weekly availability pattern (see DoctorAvailability), so "this
+// week" means that, not a rolling 7-day window ending today.
+function mondayOf(date) {
+  const d = new Date(date);
+  const day = d.getDay(); // 0=Sun..6=Sat
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diffToMonday);
+  d.setHours(0, 0, 0, 0);
+  return d;
 }
 
 function PatientDashboard() {
@@ -120,12 +145,32 @@ function StaffDashboard() {
   const [today, setToday] = useState(null);
   const [admissions, setAdmissions] = useState(null);
   const [availableBeds, setAvailableBeds] = useState(null);
+  const [weekly, setWeekly] = useState(null);
 
   useEffect(() => {
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = toIso(new Date());
     api.get(`/appointments?date=${todayStr}`).then((data) => setToday(data.appointments));
     api.get('/admissions?status=active').then((data) => setAdmissions(data.admissions));
     api.get('/admissions/beds?status=available').then((data) => setAvailableBeds(data.beds));
+
+    const monday = mondayOf(new Date());
+    const weekDates = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(monday);
+      d.setDate(d.getDate() + i);
+      return d;
+    });
+    // perPage=200 rather than paginating — a single clinic day realistically
+    // never approaches that, and this only needs a count, not the list.
+    Promise.all(weekDates.map((d) => api.get(`/appointments?date=${toIso(d)}&perPage=200`))).then((results) => {
+      const todayIso = toIso(new Date());
+      setWeekly(
+        weekDates.map((d, i) => ({
+          label: d.toLocaleDateString(undefined, { weekday: 'short' }),
+          count: results[i].appointments.filter((a) => a.status !== 'cancelled').length,
+          isToday: toIso(d) === todayIso,
+        }))
+      );
+    });
   }, []);
 
   return (
@@ -168,6 +213,19 @@ function StaffDashboard() {
             <p className="stat-label">Chairs available</p>
           </div>
         </div>
+      </div>
+
+      <div className="card">
+        <p className="section-title" style={{ marginBottom: 12 }}>
+          Appointments this week
+        </p>
+        {weekly === null ? (
+          <div className="skeleton skeleton-card" role="status" aria-live="polite">
+            <span className="sr-only">Loading…</span>
+          </div>
+        ) : (
+          <WeeklyAppointmentsChart data={weekly} />
+        )}
       </div>
 
       <div className="section">

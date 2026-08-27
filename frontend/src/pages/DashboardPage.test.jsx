@@ -125,5 +125,32 @@ describe('DashboardPage', () => {
       expect(screen.getByText('Treatment rooms')).toBeInTheDocument();
       expect(screen.queryByText('+ Book an appointment')).not.toBeInTheDocument();
     });
+
+    it('renders the weekly appointments chart, excluding cancelled appointments from the count', async () => {
+      api.get.mockImplementation((path) => {
+        if (path.startsWith('/appointments?date=') && path.includes('perPage=200')) {
+          return Promise.resolve({
+            appointments: [
+              { id: 1, status: 'scheduled' },
+              { id: 2, status: 'cancelled' },
+              { id: 3, status: 'completed' },
+            ],
+          });
+        }
+        if (path.startsWith('/appointments')) return Promise.resolve({ appointments: [] });
+        if (path === '/admissions?status=active') return Promise.resolve({ admissions: [] });
+        if (path === '/admissions/beds?status=available') return Promise.resolve({ beds: [] });
+        return Promise.reject(new Error(`unexpected path: ${path}`));
+      });
+      renderDashboard();
+
+      expect(await screen.findByText('Appointments this week')).toBeInTheDocument();
+      const chart = await screen.findByRole('img', { name: /appointments this week/i });
+      // 3 appointments per day, but only 2 are non-cancelled — every one of
+      // the 7 days should report 2, so the accessible summary should never
+      // mention a count of 3.
+      expect(chart.getAttribute('aria-label')).not.toMatch(/\b3\b/);
+      expect(chart.getAttribute('aria-label')).toContain(' 2');
+    });
   });
 });
