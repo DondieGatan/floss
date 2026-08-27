@@ -120,7 +120,7 @@ across the same route set on purpose.
 | **Backend** | Flask (app-factory + blueprints), SQLAlchemy, Alembic, Flask-JWT-Extended, Flask-Limiter, SQLite |
 | **RAG** | Hugging Face Inference API (`all-MiniLM-L6-v2` embeddings, called remotely), Google Gemini (`gemini-2.5-flash`, generation), brute-force cosine retrieval |
 | **Frontend** | React 19, Vite, react-router-dom, fetch + ReadableStream SSE (not EventSource — it can't carry auth headers) |
-| **Testing** | pytest (222 tests, backend), Vitest + React Testing Library (92 tests, frontend), Playwright (E2E) |
+| **Testing** | pytest (222 tests, backend), Vitest + React Testing Library (92 tests, frontend) |
 
 ## Project structure
 
@@ -149,7 +149,6 @@ frontend/
     context/        AuthContext (JWT storage, refresh-on-401)
     hooks/          useChatStream (SSE parsing), useReveal (scroll animations)
     api/client.js   fetch wrapper with automatic access-token refresh
-  e2e/              Playwright specs (excludes chat flows, which need a real HF_TOKEN)
 ```
 
 ## Running it locally
@@ -181,7 +180,6 @@ degrades gracefully to an "assistant temporarily unavailable" message rather tha
 ```bash
 cd backend && pytest -q                 # 222 tests
 cd frontend && npm test                  # Vitest + React Testing Library, 92 tests
-cd frontend && npm run test:e2e          # Playwright, real backend + frontend servers
 ```
 
 Backend coverage includes appointment boundary conditions (exact-duplicate rejection, partial-overlap
@@ -208,5 +206,5 @@ a labeled/focus-managed modal, labeled form inputs, and `aria-live` regions on l
 ## CI
 
 GitHub Actions runs on every push and pull request against `main`: backend tests (`pytest`), frontend tests
-(`Vitest` + a production build), a full Playwright E2E pass against real backend/frontend dev servers, and a
-dependency vulnerability audit for both `pip` and `npm` (high/critical only). See `.github/workflows/ci.yml`.
+(`Vitest` + a production build), and a dependency vulnerability audit for both `pip` and `npm` (high/critical
+only). See `.github/workflows/ci.yml`.

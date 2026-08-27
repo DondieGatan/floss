@@ -26,11 +26,7 @@ class Config:
     CORS_ORIGINS = _build_cors_origins()
 
     # In-memory storage — fine for a single free-tier instance, resets on restart.
-    # Overridable via env — the Playwright E2E suite (frontend/playwright.
-    # config.js) logs in via the real UI many times across specs, well
-    # under the 5-per-minute login limit's window, and needs it off; pytest
-    # already gets its own override via TestConfig below regardless.
-    RATELIMIT_ENABLED = os.environ.get("RATELIMIT_ENABLED", "true").lower() != "false"
+    RATELIMIT_ENABLED = True
 
     # GEMINI_API_KEY is read lazily (os.environ.get, no validation here) so
     # the app can start, run migrations, and run the test suite without a
