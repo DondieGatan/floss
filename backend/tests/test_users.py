@@ -21,16 +21,22 @@ def test_list_users_excludes_patients(client, admin_headers, register_user):
     assert "patient@example.com" not in {u["email"] for u in users}
 
 
-def test_admin_can_grant_and_revoke_staff(client, admin_headers, register_user):
+def test_admin_can_grant_staff(client, admin_headers, register_user):
     _headers, patient_id = register_user(email="patient@example.com")
 
     resp = client.patch(f"/api/users/{patient_id}/role", headers=admin_headers, json={"role": "staff"})
     assert resp.status_code == 200
     assert resp.get_json()["user"]["role"] == "staff"
 
-    resp = client.patch(f"/api/users/{patient_id}/role", headers=admin_headers, json={"role": "patient"})
-    assert resp.status_code == 200
-    assert resp.get_json()["user"]["role"] == "patient"
+
+def test_patient_is_not_an_assignable_role(client, admin_headers, register_staff):
+    # Nobody gets assigned back to "patient" through this console — someone
+    # joining the clinic gets a staff/admin account directly, and there's no
+    # reverse path from here either.
+    _headers, staff_id = register_staff(email="staff-member@example.com", role="staff")
+
+    resp = client.patch(f"/api/users/{staff_id}/role", headers=admin_headers, json={"role": "patient"})
+    assert resp.status_code == 400
 
 
 def test_admin_cannot_promote_to_admin(client, admin_headers, register_user):

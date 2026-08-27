@@ -4,7 +4,7 @@ import { api, ApiError } from '../api/client';
 import AppLayout from '../components/AppLayout';
 
 const SENSITIVE_ROLES = new Set(['admin', 'owner']);
-const ALL_ROLES = ['patient', 'staff', 'admin', 'owner'];
+const ALL_ROLES = ['staff', 'admin', 'owner'];
 
 export default function ManageUsersPage() {
   const { user: me } = useAuth();
@@ -60,7 +60,7 @@ export default function ManageUsersPage() {
   }
 
   const isOwner = me?.role === 'owner';
-  const assignableRoles = isOwner ? ALL_ROLES : ['patient', 'staff'];
+  const assignableRoles = isOwner ? ALL_ROLES : ['staff'];
 
   return (
     <AppLayout>

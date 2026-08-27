@@ -8,7 +8,7 @@ from app.utils import current_user_id
 from app.auth.decorators import admin_required
 from app.pagination import paginate
 
-ASSIGNABLE_ROLES = {"patient", "staff", "admin", "owner"}
+ASSIGNABLE_ROLES = {"staff", "admin", "owner"}
 SENSITIVE_ROLES = {"admin", "owner"}
 
 
@@ -18,8 +18,8 @@ def list_users():
     # Patients are never staff-hire candidates — someone joining the clinic
     # gets a staff/admin account directly, not a promotion from an existing
     # patient login — so this console only ever lists staff/admin/owner.
-    # update_role() below still allows demoting one of them back to
-    # "patient" (e.g. they've left the clinic); that path is unaffected.
+    # "patient" isn't an assignable role either (see ASSIGNABLE_ROLES
+    # above), so there's no path back to it from here.
     query = User.query.filter(User.role != "patient").order_by(User.full_name)
     users, meta = paginate(query)
     return jsonify({"users": [u.to_dict() for u in users], **meta}), 200
