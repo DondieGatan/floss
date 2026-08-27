@@ -42,9 +42,11 @@ def test_paginate_slices_and_reports_has_more(app):
         assert meta["hasMore"] is False
 
 
-def test_list_users_is_paginated(client, admin_headers, register_user):
+def test_list_users_is_paginated(client, admin_headers, register_staff):
+    # /api/users only ever lists staff/admin/owner (see app/users/routes.py)
+    # — patients are excluded, so the extras here must be staff too.
     for i in range(3):
-        register_user(email=f"extra{i}@example.com", full_name=f"Extra {i}")
+        register_staff(email=f"extra{i}@example.com", full_name=f"Extra {i}", role="staff")
 
     resp = client.get("/api/users?perPage=2", headers=admin_headers)
     data = resp.get_json()

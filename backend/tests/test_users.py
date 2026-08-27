@@ -9,6 +9,18 @@ def test_list_users_requires_admin(client, auth_headers, staff_headers, admin_he
     assert resp.status_code == 200
 
 
+def test_list_users_excludes_patients(client, admin_headers, register_user):
+    # Team & Roles exists to promote/demote staff/admin/owner accounts, not
+    # to browse patients — someone joining the clinic gets a staff account
+    # directly rather than being promoted from an existing patient login.
+    _headers, _patient_id = register_user(email="patient@example.com")
+
+    resp = client.get("/api/users", headers=admin_headers)
+    users = resp.get_json()["users"]
+    assert "patient" not in {u["role"] for u in users}
+    assert "patient@example.com" not in {u["email"] for u in users}
+
+
 def test_admin_can_grant_and_revoke_staff(client, admin_headers, register_user):
     _headers, patient_id = register_user(email="patient@example.com")
 

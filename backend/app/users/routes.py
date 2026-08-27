@@ -15,7 +15,13 @@ SENSITIVE_ROLES = {"admin", "owner"}
 @users_bp.route("", methods=["GET"])
 @admin_required
 def list_users():
-    users, meta = paginate(User.query.order_by(User.full_name))
+    # Patients are never staff-hire candidates — someone joining the clinic
+    # gets a staff/admin account directly, not a promotion from an existing
+    # patient login — so this console only ever lists staff/admin/owner.
+    # update_role() below still allows demoting one of them back to
+    # "patient" (e.g. they've left the clinic); that path is unaffected.
+    query = User.query.filter(User.role != "patient").order_by(User.full_name)
+    users, meta = paginate(query)
     return jsonify({"users": [u.to_dict() for u in users], **meta}), 200
 
 
