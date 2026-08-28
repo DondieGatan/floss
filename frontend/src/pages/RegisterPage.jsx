@@ -46,13 +46,13 @@ export default function RegisterPage() {
       <div className="auth-visual-col" aria-hidden="true" style={{ backgroundImage: `url(${heroPhoto})` }}>
         <div className="auth-visual-content">
           <h2 className="auth-visual-heading">
-            Create Your
+            Welcome to
             <br />
-            Account.
+            Floss Clinic.
           </h2>
           <p className="auth-visual-sub">
-            Create an account to schedule appointments, connect with our dental team, and get answers
-            from your clinic's assistant.
+            Join us to schedule appointments, connect with our dental team, and get friendly, reliable
+            answers whenever you need them.
           </p>
         </div>
       </div>
@@ -64,7 +64,7 @@ export default function RegisterPage() {
             Floss Clinic
           </h1>
           <h2 className="auth-card-title">Create Account</h2>
-          <p className="brand-sub">Schedule appointments and get answers from your clinic's assistant.</p>
+          <p className="brand-sub">We're glad you're here — create your account to get started.</p>
 
           {error && (
             <div className="form-error" role="alert">

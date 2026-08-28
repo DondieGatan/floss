@@ -45,7 +45,7 @@ export default function ResetPasswordPage() {
             Choose a<br />
             New Password.
           </h2>
-          <p className="auth-visual-sub">Choose a new password to regain access to your account.</p>
+          <p className="auth-visual-sub">Almost there — choose a new password and you'll be back in your account in no time.</p>
         </div>
       </div>
 
@@ -68,14 +68,14 @@ export default function ResetPasswordPage() {
             </>
           ) : done ? (
             <>
-              <p className="brand-sub">Your password has been updated.</p>
+              <p className="brand-sub">You're all set — your password has been updated successfully.</p>
               <Link className="btn btn-primary" to="/login" style={{ display: 'inline-block', textAlign: 'center' }}>
                 Sign in
               </Link>
             </>
           ) : (
             <form onSubmit={handleSubmit}>
-              <p className="brand-sub">Enter a new password for your account.</p>
+              <p className="brand-sub">Enter a new password below to secure your account.</p>
 
               {error && (
                 <div className="form-error" role="alert">
