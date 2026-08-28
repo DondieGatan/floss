@@ -1,11 +1,13 @@
-import CitationPanel from './CitationPanel';
 import AssistantAvatar from './AssistantAvatar';
 
-// Bold (**text**), italic (*text*), and citation markers ([1]) in one pass,
-// in whichever order they appear — the model interleaves them freely (e.g.
-// "**Monday**[1]"). Bold is tried before italic so "**x**" isn't read as
-// italic-wrapping-an-empty-string plus stray asterisks.
-const INLINE_RE = /\*\*(.+?)\*\*|\*(.+?)\*|\[(\d+)\]/g;
+// Bold (**text**), italic (*text*), and citation markers ([1] or [1, 2]) in
+// one pass, in whichever order they appear — the model interleaves them
+// freely (e.g. "**Monday**[1]"). Bold is tried before italic so "**x**"
+// isn't read as italic-wrapping-an-empty-string plus stray asterisks.
+// Citation markers (with any leading space) are matched but not rendered —
+// sources aren't shown, so a dangling "[1, 2]" with nothing to point to
+// would just be confusing.
+const INLINE_RE = /\*\*(.+?)\*\*|\*(.+?)\*|\s?\[\d+(?:,\s*\d+)*\]/g;
 
 function renderInline(text, keyPrefix) {
   const nodes = [];
@@ -19,12 +21,6 @@ function renderInline(text, keyPrefix) {
       nodes.push(<strong key={`${keyPrefix}-${i}`}>{match[1]}</strong>);
     } else if (match[2] !== undefined) {
       nodes.push(<em key={`${keyPrefix}-${i}`}>{match[2]}</em>);
-    } else {
-      nodes.push(
-        <sup key={`${keyPrefix}-${i}`} className="citation-marker">
-          [{match[3]}]
-        </sup>
-      );
     }
     lastIndex = match.index + match[0].length;
     i += 1;
@@ -101,7 +97,6 @@ export default function MessageBubble({ message }) {
       {!isUser && <AssistantAvatar size="sm" />}
       <div className={`message-bubble ${isUser ? 'message-bubble-user' : 'message-bubble-assistant'}`}>
         {renderContent(message.content, message.streaming)}
-        {!isUser && !message.streaming && <CitationPanel citations={message.citations} />}
       </div>
     </div>
   );

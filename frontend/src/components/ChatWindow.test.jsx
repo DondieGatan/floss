@@ -17,7 +17,7 @@ describe('ChatWindow', () => {
     expect(screen.getByText("Hi, I'm the Floss Assistant")).toBeInTheDocument();
   });
 
-  it('renders prior messages and their citation markers', () => {
+  it('renders prior messages without exposing sources or citation markers', () => {
     useChatStream.mockReturnValue({
       messages: [
         { id: 1, role: 'user', content: 'What are your hours?', citedChunkIds: [] },
@@ -30,7 +30,8 @@ describe('ChatWindow', () => {
     render(<ChatWindow conversationId="1" initialMessages={[]} />);
 
     expect(screen.getByText('What are your hours?')).toBeInTheDocument();
-    expect(screen.getByText('Show sources (1)')).toBeInTheDocument();
+    expect(screen.getByText('We are open 9-5.')).toBeInTheDocument();
+    expect(screen.queryByText('Show sources (1)')).not.toBeInTheDocument();
   });
 
   it('submits the typed question and clears the input', () => {
