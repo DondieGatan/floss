@@ -39,7 +39,10 @@ export default function ForgotPasswordPage() {
             <br />
             Password?
           </h2>
-          <p className="auth-visual-sub">No problem — tell us the email on your account and we'll send you a reset link.</p>
+          <p className="auth-visual-sub">
+            Enter the email address associated with your account and we'll send you a link to reset your
+            password.
+          </p>
         </div>
       </div>
 
@@ -54,7 +57,8 @@ export default function ForgotPasswordPage() {
           {sent ? (
             <>
               <p className="brand-sub">
-                If an account exists for <strong>{email}</strong>, a reset link has been sent to it.
+                If an account exists for <strong>{email}</strong>, we've sent a password reset link to
+                that address.
               </p>
               {devResetToken && (
                 <div className="form-notice" role="status">
@@ -70,7 +74,7 @@ export default function ForgotPasswordPage() {
             </>
           ) : (
             <form onSubmit={handleSubmit}>
-              <p className="brand-sub">Enter the email you used to sign up.</p>
+              <p className="brand-sub">Enter the email address associated with your account.</p>
 
               {error && (
                 <div className="form-error" role="alert">

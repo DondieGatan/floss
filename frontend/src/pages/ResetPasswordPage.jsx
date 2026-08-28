@@ -45,7 +45,7 @@ export default function ResetPasswordPage() {
             Choose a<br />
             New Password.
           </h2>
-          <p className="auth-visual-sub">Pick something you haven't used before, and you're back in.</p>
+          <p className="auth-visual-sub">Choose a new password to regain access to your account.</p>
         </div>
       </div>
 
