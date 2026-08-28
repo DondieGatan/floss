@@ -15,9 +15,9 @@ import pediatricPhoto from '../assets/Pediatric_Dentistry.jpg';
 import benefitsPhoto from '../assets/Second_Page.jpg';
 
 const SERVICES = [
-  { photo: generalPhoto, title: 'General Dentistry', text: 'Cleanings, fillings, and preventive care to keep your smile healthy year-round.' },
-  { photo: orthoPhoto, title: 'Orthodontics', text: 'Braces and aligners for bite correction, for teens and adults alike.' },
-  { photo: pediatricPhoto, title: 'Pediatric Dentistry', text: 'Gentle, friendly dental care built around kids of every age.' },
+  { photo: generalPhoto, title: 'General Dentistry', text: 'Routine cleanings, restorative fillings, and preventive care to maintain a healthy smile year-round.' },
+  { photo: orthoPhoto, title: 'Orthodontics', text: 'Traditional braces and clear aligners for precise, lasting bite correction — for teens and adults.' },
+  { photo: pediatricPhoto, title: 'Pediatric Dentistry', text: 'Gentle, age-appropriate dental care designed specifically for children.' },
 ];
 
 const TICKER_ITEMS = [
@@ -79,7 +79,7 @@ function AssistantPreviewCard({ user }) {
           <p className="assistant-preview-name">Floss Assistant</p>
           <span className="assistant-preview-status">
             <span className="assistant-preview-dot" aria-hidden="true" />
-            Online now
+            Available now
           </span>
         </div>
       </div>
@@ -132,15 +132,15 @@ export default function LandingPage() {
           >
             <div className="hero-content">
               <h1 className="hero-title">
-                Your <span className="accent">Best Dental</span> Experience Awaits
+                Your <span className="accent">Trusted Partner</span> in Dental Care
               </h1>
               <p className="hero-sub">
-                Book appointments, meet our dentists, and get instant answers from Floss Clinic — your
-                clinic's own assistant. All in one place.
+                Schedule appointments, connect with our dental team, and get clear, reliable answers from
+                Floss Clinic's virtual assistant — all within a single, secure platform.
               </p>
               <div className="hero-actions">
                 <a className="hero-cta" href="#services">
-                  See Our Services
+                  Explore Our Services
                   <span className="hero-cta-arrow" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M5 12h13.5M13 6l6.5 6-6.5 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -155,11 +155,12 @@ export default function LandingPage() {
         <div className="quickbook-band">
           <div ref={quickbookRef} className={`landing-section quickbook-section reveal${quickbookVisible ? ' reveal-visible' : ''}`}>
             <div className="quickbook-intro">
-              <p className="eyebrow">Meet Your Assistant</p>
-              <h2 className="section-heading">Get Instant, Helpful Answers</h2>
+              <p className="eyebrow">Your Clinic Assistant</p>
+              <h2 className="section-heading">Get Clear Answers, Instantly</h2>
               <p className="quickbook-intro-sub">
-                Ask about hours, policies, insurance, our dentists, or general dental questions — sourced
-                from our own materials whenever it can be, always upfront when it isn't.
+                Ask about appointment availability, insurance, our clinical team, or general dental care.
+                Every answer draws from our clinic's own records whenever possible, and we're upfront
+                when it doesn't.
               </p>
             </div>
             <AssistantPreviewCard user={user} />
@@ -174,25 +175,26 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="about-copy">
-            <p className="eyebrow">About Us</p>
+            <p className="eyebrow">About Floss Clinic</p>
             <h2 className="section-heading" id="about-heading">
-              One Platform for <br /> Your Whole Smile
+              One Platform for <br /> Comprehensive Care
             </h2>
             <p>
-              Floss Clinic brings your dental clinic's directory, scheduling, and patient records into a single place —
-              with a built-in assistant that draws on your clinic's own information first, and general dental
-              knowledge when it doesn't have that. No more juggling spreadsheets, phone tag, or outdated patient
-              files: everything your team and your patients need lives in one connected, always-up-to-date platform.
+              Floss Clinic brings together scheduling, your care team, and your treatment history in a single,
+              secure platform. Our assistant draws first from our own clinical and administrative records, and
+              from general dental knowledge only when it must — so you always know where an answer comes from.
+              No more phone tag or outdated paperwork: everything you need to manage your care is here, and
+              always current.
             </p>
             <ul className="check-list">
               <li>
-                <span className="check-mark" aria-hidden="true">✓</span> Real-time appointment booking with conflict detection
+                <span className="check-mark" aria-hidden="true">✓</span> Real-time appointment scheduling with automatic conflict checks
               </li>
               <li>
-                <span className="check-mark" aria-hidden="true">✓</span> An assistant that cites its sources whenever it has one
+                <span className="check-mark" aria-hidden="true">✓</span> A virtual assistant that cites its sources for every answer
               </li>
               <li>
-                <span className="check-mark" aria-hidden="true">✓</span> Dedicated portals for patients and staff
+                <span className="check-mark" aria-hidden="true">✓</span> Secure, dedicated portals for patients and staff
               </li>
             </ul>
             <a className="l-btn l-btn-primary" href={bookingHref}>
@@ -210,7 +212,7 @@ export default function LandingPage() {
             <div>
               <p className="eyebrow">Our Services</p>
               <h2 className="section-heading" id="services-heading">
-                A Wide Range of Services <br /> for Your Best Smile
+                A Full Range of Dental Services, <br /> Tailored to You
               </h2>
             </div>
             <a className="l-btn l-btn-ghost" href={bookingHref}>
@@ -289,7 +291,7 @@ export default function LandingPage() {
           <div className="benefits-head">
             <p className="eyebrow">Why Choose Us</p>
             <h2 className="section-heading">
-              Benefits of Our Dental Care: <br /> Your Path to a Healthier Smile
+              The Floss Clinic Difference: <br /> Your Path to Better Oral Health
             </h2>
           </div>
           <div className={`benefits-grid reveal${benefitsVisible ? ' reveal-visible' : ''}`}>
@@ -300,32 +302,32 @@ export default function LandingPage() {
             </div>
             <div>
               <p className="benefits-lead">
-                From the moment you book to the moment you leave, Floss Clinic keeps your care team connected and your
-                questions answered.
+                From your first appointment to your last visit, Floss Clinic keeps your care team connected and
+                your questions answered.
               </p>
               <div className="stat-grid">
                 <div className="stat-block">
                   <p className="stat-num">24/7</p>
-                  <p className="stat-cap">Online booking availability</p>
+                  <p className="stat-cap">Online appointment booking</p>
                 </div>
                 <div className="stat-block">
                   <p className="stat-num">100%</p>
-                  <p className="stat-cap">Judgment-free, always on</p>
+                  <p className="stat-cap">Source-cited, transparent answers</p>
                 </div>
                 <div className="stat-block">
                   <p className="stat-num">2</p>
-                  <p className="stat-cap">Dedicated portals, one platform</p>
+                  <p className="stat-cap">Dedicated care portals</p>
                 </div>
               </div>
               <ul className="check-list">
                 <li>
-                  <span className="check-mark" aria-hidden="true">✓</span> Easy online appointment booking
+                  <span className="check-mark" aria-hidden="true">✓</span> Convenient online appointment booking
                 </li>
                 <li>
-                  <span className="check-mark" aria-hidden="true">✓</span> Experienced and caring dentists
+                  <span className="check-mark" aria-hidden="true">✓</span> Experienced, compassionate dental professionals
                 </li>
                 <li>
-                  <span className="check-mark" aria-hidden="true">✓</span> An AI assistant that never guesses
+                  <span className="check-mark" aria-hidden="true">✓</span> A virtual assistant built on verified information
                 </li>
               </ul>
             </div>

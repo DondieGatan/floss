@@ -20,7 +20,9 @@ export default function PublicFooter() {
               <img src={logoIcon} alt="" className="landing-brand-mark" />
               Floss Clinic
             </span>
-            <p className="footer-brand-sub">Your dental clinic, one place — appointments, records, and a smart assistant.</p>
+            <p className="footer-brand-sub">
+              Comprehensive dental care, appointment scheduling, and clinical support — all in one place.
+            </p>
           </div>
           <div className="footer-links">
             <div className="footer-col">
@@ -41,8 +43,7 @@ export default function PublicFooter() {
           </div>
         </div>
         <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} Floss Clinic.</span>
-          <span>Built with Rounds' architecture, reskinned for dental care.</span>
+          <span>© {new Date().getFullYear()} Floss Clinic. All rights reserved.</span>
         </div>
       </div>
     </footer>

@@ -31,16 +31,16 @@ DEPARTMENTS = [
 ]
 
 DOCTORS = [
-    ("Dr. Amara Osei", "General Dentistry", "General & Preventive Dentistry", "15 years helping patients keep healthy smiles."),
-    ("Dr. Liam Chen", "Orthodontics", "Braces & Invisalign", "Specialist in bite correction for teens and adults."),
-    ("Dr. Priya Nair", "Endodontics", "Root Canal Therapy", "Focused on pain-free root canal treatment."),
-    ("Dr. Marcus Webb", "Pediatric Dentistry", "Pediatric Dental Care", "Loves working with kids of all ages."),
-    ("Dr. Sofia Torres", "Oral & Maxillofacial Surgery", "Wisdom Tooth Extraction", "Helps patients through extractions and jaw surgery."),
-    ("Dr. Elena Vasquez", "Periodontics", "Gum Disease & Periodontal Care", "Dedicated to healthy gums and long-term tooth stability."),
-    ("Dr. Noah Bergström", "General Dentistry", "Family & Cosmetic Dentistry", "Believes a healthy smile starts with a comfortable visit."),
-    ("Dr. Aisha Rahman", "Orthodontics", "Clear Aligners & Retainers", "Passionate about confident, low-hassle smile corrections."),
-    ("Dr. Thomas Okafor", "Endodontics", "Microscopic Root Canal Therapy", "Uses precision tools to make root canals fast and comfortable."),
-    ("Dr. Grace Lindqvist", "Pediatric Dentistry", "Early Childhood Dental Care", "Makes every child's first dental visit a positive one."),
+    ("Dr. Amara Osei", "General Dentistry", "General & Preventive Dentistry", "Brings 15 years of experience in general and preventive dentistry, with a focus on long-term oral health."),
+    ("Dr. Liam Chen", "Orthodontics", "Braces & Invisalign", "Specializes in orthodontic treatment for teens and adults, including traditional braces and Invisalign."),
+    ("Dr. Priya Nair", "Endodontics", "Root Canal Therapy", "Focuses on root canal therapy, with particular attention to patient comfort throughout treatment."),
+    ("Dr. Marcus Webb", "Pediatric Dentistry", "Pediatric Dental Care", "Provides pediatric dental care tailored to children of all ages, from first visits through adolescence."),
+    ("Dr. Sofia Torres", "Oral & Maxillofacial Surgery", "Wisdom Tooth Extraction", "Specializes in oral and maxillofacial surgery, including wisdom tooth extractions and related procedures."),
+    ("Dr. Elena Vasquez", "Periodontics", "Gum Disease & Periodontal Care", "Focuses on periodontics and the long-term management of gum health and disease prevention."),
+    ("Dr. Noah Bergström", "General Dentistry", "Family & Cosmetic Dentistry", "Provides family and cosmetic dentistry with an emphasis on patient comfort and long-term care."),
+    ("Dr. Aisha Rahman", "Orthodontics", "Clear Aligners & Retainers", "Specializes in clear aligner therapy and retainer care for lasting, confident results."),
+    ("Dr. Thomas Okafor", "Endodontics", "Microscopic Root Canal Therapy", "Performs microscopic root canal therapy using advanced precision techniques."),
+    ("Dr. Grace Lindqvist", "Pediatric Dentistry", "Early Childhood Dental Care", "Specializes in early childhood dentistry, focused on positive, comfortable first experiences."),
 ]
 
 # Mon-Fri 9-1 and 2-5 for every seeded dentist — enough to exercise booking.

@@ -51,7 +51,7 @@ describe('LandingPage', () => {
 
   it('renders the hero headline and a working entry point for both roles', () => {
     renderLanding();
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Your Best Dental Experience Awaits');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Your Trusted Partner in Dental Care');
     expect(screen.getAllByRole('link', { name: /Get Started/i }).length).toBeGreaterThan(0);
     const nav = screen.getByRole('navigation', { name: 'Primary' });
     expect(within(nav).getByRole('link', { name: 'Sign In' })).toHaveAttribute('href', '/login');
