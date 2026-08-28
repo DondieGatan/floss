@@ -341,3 +341,90 @@ def test_2fa_disable_clears_email_otp_too(client, register_user):
 
     login_resp = client.post("/api/auth/login", json={"email": "alex@example.com", "password": "password123"})
     assert "accessToken" in login_resp.get_json()
+
+
+# --- Enforcement: 2FA is mandatory for staff/admin/owner, optional for patients ---
+
+
+def test_staff_without_2fa_is_blocked_from_the_rest_of_the_app(client, register_staff):
+    headers, _user_id = register_staff(two_factor_enabled=False)
+
+    resp = client.post("/api/departments", headers=headers, json={"name": "Orthodontics"})
+
+    assert resp.status_code == 403
+    assert resp.get_json()["twoFactorSetupRequired"] is True
+
+
+def test_admin_without_2fa_is_also_blocked(client, register_staff):
+    headers, _user_id = register_staff(email="admin@example.com", role="admin", two_factor_enabled=False)
+
+    resp = client.get("/api/users", headers=headers)
+
+    assert resp.status_code == 403
+    assert resp.get_json()["twoFactorSetupRequired"] is True
+
+
+def test_patient_without_2fa_is_not_blocked(client, register_user):
+    headers, _user_id = register_user(email="alex@example.com", password="password123")
+
+    resp = client.get("/api/departments", headers=headers)
+
+    assert resp.status_code == 200
+
+
+def test_staff_without_2fa_can_still_reach_the_setup_routes_themselves(client, register_staff):
+    """Otherwise there'd be no way to ever finish setup and escape the
+    gate — see the allowlist in app/__init__.py's before_request hook."""
+    headers, _user_id = register_staff(two_factor_enabled=False)
+
+    assert client.get("/api/auth/2fa/status", headers=headers).status_code == 200
+    assert client.post("/api/auth/2fa/setup", headers=headers).status_code == 200
+    assert client.get("/api/auth/me", headers=headers).status_code == 200
+    assert client.post("/api/auth/logout", headers=headers).status_code == 204
+
+
+def test_staff_regains_full_access_once_2fa_setup_is_complete(client, register_staff):
+    headers, _user_id = register_staff(two_factor_enabled=False)
+
+    # Blocked beforehand — same check as the dedicated test above, just to
+    # anchor the "before" half of this before/after.
+    assert client.post("/api/departments", headers=headers, json={"name": "Orthodontics"}).status_code == 403
+
+    setup = client.post("/api/auth/2fa/setup", headers=headers).get_json()
+    code = pyotp.TOTP(setup["secret"]).now()
+    client.post("/api/auth/2fa/enable", headers=headers, json={"code": code})
+
+    resp = client.post("/api/departments", headers=headers, json={"name": "Orthodontics"})
+    assert resp.status_code == 201
+
+
+def test_staff_cannot_disable_2fa(client, staff_headers):
+    resp = client.post("/api/auth/2fa/disable", headers=staff_headers, json={"password": "password123"})
+
+    assert resp.status_code == 400
+    assert "required for your role" in resp.get_json()["error"]
+    assert client.get("/api/auth/2fa/status", headers=staff_headers).get_json()["enabled"] is True
+
+
+def test_owner_cannot_disable_2fa_either(client, owner_headers):
+    resp = client.post("/api/auth/2fa/disable", headers=owner_headers, json={"password": "password123"})
+    assert resp.status_code == 400
+
+
+def test_enforcement_hook_survives_a_tokenless_options_preflight(client):
+    """Regression test: a browser's CORS preflight (an OPTIONS request,
+    carrying no Authorization header at all — no other browser request
+    looks like this) crashed the enforcement hook with a 500 the first time
+    around, even though every other "no token" case in this file passed
+    fine. get_jwt() raises RuntimeError rather than returning falsy when
+    verify_jwt_in_request(optional=True) found no token, and only the
+    verify call itself was wrapped in try/except — not the get_jwt() call
+    right after it. Reproduces only via an actual OPTIONS request; a GET
+    with no headers doesn't trigger it, which is exactly why this needs
+    its own test rather than relying on the many other unauthenticated-
+    request tests in this suite."""
+    resp = client.options("/api/departments")
+    assert resp.status_code == 200
+
+    resp = client.options("/api/auth/login")
+    assert resp.status_code == 200

@@ -10,8 +10,9 @@ vi.mock('../components/AppLayout', () => ({
   default: ({ children }) => <div>{children}</div>,
 }));
 
+const useAuthMock = vi.fn();
 vi.mock('../context/AuthContext', () => ({
-  useAuth: () => ({ user: { email: 'alex@example.com' } }),
+  useAuth: () => useAuthMock(),
 }));
 
 function renderSecurity() {
@@ -25,6 +26,7 @@ function renderSecurity() {
 describe('SecurityPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    useAuthMock.mockReturnValue({ user: { email: 'alex@example.com', role: 'patient' } });
   });
 
   it('shows both method choices when 2FA is off', async () => {
@@ -112,5 +114,29 @@ describe('SecurityPage', () => {
       expect(api.post).toHaveBeenCalledWith('/auth/2fa/disable', { password: 'password123' })
     );
     expect(await screen.findByText('Two-factor authentication is off')).toBeInTheDocument();
+  });
+
+  describe('for a staff-tier role, where 2FA is required rather than optional', () => {
+    beforeEach(() => {
+      useAuthMock.mockReturnValue({ user: { email: 'nora@floss.demo', role: 'staff' } });
+    });
+
+    it('explains it is required and offers no way to skip it', async () => {
+      api.get.mockResolvedValue({ enabled: false, method: null });
+      renderSecurity();
+
+      expect(await screen.findByText(/required for staff accounts/)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Use an authenticator app/ })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Email me a code/ })).toBeInTheDocument();
+    });
+
+    it('does not offer a disable option once enabled', async () => {
+      api.get.mockResolvedValue({ enabled: true, method: 'totp' });
+      renderSecurity();
+
+      expect(await screen.findByText('Two-factor authentication is on')).toBeInTheDocument();
+      expect(screen.getByText(/required for staff accounts and can't be turned off/)).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /Disable two-factor authentication/ })).not.toBeInTheDocument();
+    });
   });
 });

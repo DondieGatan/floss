@@ -71,3 +71,8 @@ class TestConfig(Config):
     TESTING = True
     RATELIMIT_ENABLED = False
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    # Tests must stay deterministic regardless of what's in a developer's
+    # local .env — test_email.py in particular asserts on "no provider
+    # configured" being the default, which a real local RESEND_API_KEY
+    # would otherwise silently violate.
+    RESEND_API_KEY = None

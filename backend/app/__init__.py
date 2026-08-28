@@ -1,7 +1,8 @@
 import os
 import sys
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
+from flask_jwt_extended import verify_jwt_in_request, get_jwt, get_jwt_identity
 
 from config import Config
 from app.extensions import db, migrate, jwt, cors, limiter
@@ -130,6 +131,65 @@ def create_app(config_class=Config):
         from app.models import TokenBlocklist
         jti = payload["jti"]
         return db.session.query(TokenBlocklist.id).filter_by(jti=jti).first() is not None
+
+    # 2FA is mandatory for staff/admin/owner (see TWO_FACTOR_REQUIRED_ROLES
+    # in app/auth/routes.py) — this is the enforcement, gating every
+    # authenticated request from one of those roles until it's set up. The
+    # frontend already redirects to /security for the same reason (see
+    # App.jsx), so a normal browser session never actually hits this; it's
+    # here for anyone hitting the API directly. A short allowlist stays
+    # reachable regardless: the 2FA setup/status/disable routes themselves
+    # (or there'd be no way to ever finish setup), auth/me + logout +
+    # refresh (so a locked-out session can still see its own state and log
+    # out), and the public blueprint (genuinely unauthenticated endpoints
+    # that just happen to receive a stale Authorization header, since the
+    # frontend's api client attaches one to every request whenever a token
+    # is in storage — see frontend/src/api/client.js).
+    TWO_FACTOR_SETUP_ALLOWED_ENDPOINTS = {
+        "auth.two_factor_status",
+        "auth.two_factor_setup",
+        "auth.two_factor_enable",
+        "auth.email_otp_setup",
+        "auth.email_otp_enable",
+        "auth.two_factor_disable",
+        "auth.me",
+        "auth.logout",
+        "auth.refresh",
+    }
+
+    @app.before_request
+    def enforce_two_factor_setup():
+        if request.endpoint is None:
+            return None
+        if request.endpoint in TWO_FACTOR_SETUP_ALLOWED_ENDPOINTS or request.endpoint.startswith("public."):
+            return None
+
+        try:
+            verify_jwt_in_request(optional=True)
+            claims = get_jwt()
+        except Exception:
+            # No token, or an invalid/expired one — either way, let the
+            # route's own @jwt_required() (if it has one) produce the real
+            # error. get_jwt() itself raises (not just returns falsy) when
+            # optional=True found no token at all, e.g. on /auth/login's
+            # own request, which never carries one.
+            return None
+        if not claims:
+            return None
+
+        from app.auth.routes import TWO_FACTOR_REQUIRED_ROLES
+        if claims.get("role") not in TWO_FACTOR_REQUIRED_ROLES:
+            return None
+
+        from app.models import User
+        user = db.session.get(User, int(get_jwt_identity()))
+        if user is None or user.totp_enabled or user.email_otp_enabled:
+            return None
+
+        return jsonify({
+            "error": "Two-factor authentication is required for your role. Set it up to continue.",
+            "twoFactorSetupRequired": True,
+        }), 403
 
     _start_reminder_scheduler(app)
 

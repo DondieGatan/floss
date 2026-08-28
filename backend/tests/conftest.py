@@ -48,12 +48,25 @@ def register_staff(client):
     form pick its own role would be a privilege-escalation hole), so
     staff/admin accounts in tests are provisioned the same way they would
     be in production: out-of-band, not through the public endpoint."""
-    def _register(email="staff@example.com", password="password123", full_name="Staff Member", role="staff"):
+    def _register(
+        email="staff@example.com", password="password123", full_name="Staff Member", role="staff",
+        two_factor_enabled=True,
+    ):
         from flask_jwt_extended import create_access_token
         from app.models import User
 
         user = User(full_name=full_name, email=email, role=role)
         user.set_password(password)
+        # staff/admin/owner are gated behind 2FA (see TWO_FACTOR_REQUIRED_ROLES
+        # in app/auth/routes.py and app/__init__.py's before_request hook) —
+        # tests using this fixture almost always want an already-fully-set-up
+        # staff member so they can exercise something else entirely, not get
+        # a 403 from that gate. totp_enabled alone is enough to satisfy it;
+        # no test using the default needs a real, verifiable secret behind
+        # it. Pass two_factor_enabled=False for tests of the gate itself.
+        if two_factor_enabled:
+            user.totp_secret = "JBSWY3DPEHPK3PXP"
+            user.totp_enabled = True
         _db.session.add(user)
         _db.session.commit()
 

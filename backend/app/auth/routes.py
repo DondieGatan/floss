@@ -28,6 +28,14 @@ RESET_TOKEN_MAX_AGE_SECONDS = 1800  # 30 minutes
 # wait on) — a single pending token can't carry two different expiries.
 TWO_FACTOR_TOKEN_MAX_AGE_SECONDS = 600  # 10 minutes
 EMAIL_OTP_SETUP_TOKEN_MAX_AGE_SECONDS = 600  # 10 minutes
+# staff/admin/owner carry broad access to every patient's data (the whole
+# directory, schedules, chat history), so 2FA is mandatory for them — a
+# compromised one of those accounts is a much bigger blast radius than a
+# patient's own account, which only ever exposes that one patient's data.
+# Enforced here (can't disable) and in app/__init__.py's before_request
+# hook (can't use the rest of the app until it's set up); mirrored in the
+# frontend as App.jsx's own TWO_FACTOR_REQUIRED_ROLES.
+TWO_FACTOR_REQUIRED_ROLES = {"staff", "admin", "owner"}
 RECOVERY_CODE_COUNT = 8
 
 
@@ -365,6 +373,8 @@ def two_factor_disable():
     user = db.session.get(User, current_user_id())
     if not user.totp_enabled and not user.email_otp_enabled:
         return jsonify({"error": "Two-factor authentication isn't enabled."}), 400
+    if user.role in TWO_FACTOR_REQUIRED_ROLES:
+        return jsonify({"error": "Two-factor authentication is required for your role and can't be disabled."}), 400
 
     password = (request.get_json(silent=True) or {}).get("password") or ""
     if not user.check_password(password):

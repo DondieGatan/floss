@@ -3,8 +3,14 @@ import { api, ApiError } from '../api/client';
 import AppLayout from '../components/AppLayout';
 import { useAuth } from '../context/AuthContext';
 
+// Kept in sync with App.jsx's TWO_FACTOR_REQUIRED_ROLES and the backend's
+// own copy in app/auth/routes.py — staff/admin/owner have broad access to
+// every patient's data, so 2FA is mandatory for them, not just offered.
+const TWO_FACTOR_REQUIRED_ROLES = ['staff', 'admin', 'owner'];
+
 export default function SecurityPage() {
   const { user } = useAuth();
+  const requiresTwoFactor = TWO_FACTOR_REQUIRED_ROLES.includes(user?.role);
   const [enabled, setEnabled] = useState(null);
   const [method, setMethod] = useState(null);
   const [error, setError] = useState(null);
@@ -239,7 +245,11 @@ export default function SecurityPage() {
             <p className="page-subtitle">
               Your account is protected with {method === 'email' ? 'email codes' : 'an authenticator app'}.
             </p>
-            {disabling ? (
+            {requiresTwoFactor ? (
+              <p className="page-subtitle">
+                Two-factor authentication is required for {user.role} accounts and can't be turned off.
+              </p>
+            ) : disabling ? (
               <form onSubmit={handleDisable}>
                 <label className="field">
                   <span>Confirm your password to disable</span>
@@ -280,9 +290,15 @@ export default function SecurityPage() {
               <h2 className="section-title">Two-factor authentication is off</h2>
             </div>
             <p className="page-subtitle">
-              Turn it on to require a second code, in addition to your password, when signing in. Choose
-              whichever is easier for you.
+              {requiresTwoFactor
+                ? `Two-factor authentication is required for ${user.role} accounts. Choose whichever method is easier for you to continue.`
+                : 'Turn it on to require a second code, in addition to your password, when signing in. Choose whichever is easier for you.'}
             </p>
+            {requiresTwoFactor && (
+              <div className="form-notice" role="status" style={{ marginBottom: 16 }}>
+                You won't be able to use the rest of the app until this is set up.
+              </div>
+            )}
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               <button className="btn btn-primary" type="button" onClick={handleStartTotpSetup} disabled={submitting}>
                 {submitting ? 'Starting…' : 'Use an authenticator app'}
