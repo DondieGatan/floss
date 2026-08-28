@@ -6,12 +6,19 @@ import heroPhoto from '../assets/Login_Page_picture.jpg';
 import logoIcon from '../assets/logo-icon.png';
 
 export default function LoginPage() {
-  const { login, completeTwoFactorLogin } = useAuth();
+  const { login, completeTwoFactorLogin, resendTwoFactorEmailCode } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
   const [twoFactorToken, setTwoFactorToken] = useState(null);
+  const [twoFactorMethod, setTwoFactorMethod] = useState(null);
+  // Only ever populated when no real email provider is configured (see
+  // AuthContext's login()) — lets this flow stay testable locally without
+  // a real inbox, same convention as ForgotPasswordPage's devResetToken.
+  const [devCode, setDevCode] = useState(null);
+  const [resending, setResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState(null);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const waking = useSlowRequestNotice(submitting);
@@ -24,6 +31,8 @@ export default function LoginPage() {
       const result = await login(email, password);
       if (result.requiresTwoFactor) {
         setTwoFactorToken(result.twoFactorToken);
+        setTwoFactorMethod(result.twoFactorMethod);
+        setDevCode(result.devCode || null);
       } else {
         navigate('/');
       }
@@ -45,6 +54,22 @@ export default function LoginPage() {
       setError(err instanceof ApiError ? err.message : 'Something went wrong.');
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleResendCode() {
+    setError(null);
+    setResendMessage(null);
+    setResending(true);
+    try {
+      const data = await resendTwoFactorEmailCode(twoFactorToken);
+      setTwoFactorToken(data.twoFactorToken);
+      setDevCode(data.devCode || null);
+      setResendMessage('A new code is on its way to your email.');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Something went wrong.');
+    } finally {
+      setResending(false);
     }
   }
 
@@ -72,8 +97,22 @@ export default function LoginPage() {
               Floss Clinic
             </h1>
             <h2 className="auth-card-title">Two-factor verification</h2>
-            <p className="brand-sub">Enter the 6-digit code from your authenticator app, or one of your recovery codes.</p>
+            <p className="brand-sub">
+              {twoFactorMethod === 'email'
+                ? 'Enter the 6-digit code we emailed you, or one of your recovery codes.'
+                : 'Enter the 6-digit code from your authenticator app, or one of your recovery codes.'}
+            </p>
 
+            {devCode && (
+              <div className="form-notice" role="status">
+                No email provider is configured yet, so here's the code directly (dev only): <strong>{devCode}</strong>
+              </div>
+            )}
+            {resendMessage && (
+              <p className="form-notice" role="status">
+                {resendMessage}
+              </p>
+            )}
             {error && (
               <div className="form-error" role="alert">
                 {error}
@@ -97,12 +136,27 @@ export default function LoginPage() {
               {submitting ? 'Verifying…' : 'Verify'}
             </button>
 
+            {twoFactorMethod === 'email' && (
+              <button
+                type="button"
+                className="link-button"
+                onClick={handleResendCode}
+                disabled={resending}
+                style={{ display: 'block', margin: '12px auto 0' }}
+              >
+                {resending ? 'Resending…' : "Didn't get it? Resend code"}
+              </button>
+            )}
+
             <p className="auth-switch">
               <button
                 type="button"
                 className="link-button"
                 onClick={() => {
                   setTwoFactorToken(null);
+                  setTwoFactorMethod(null);
+                  setDevCode(null);
+                  setResendMessage(null);
                   setCode('');
                   setError(null);
                 }}

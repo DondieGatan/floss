@@ -10,6 +10,10 @@ vi.mock('../components/AppLayout', () => ({
   default: ({ children }) => <div>{children}</div>,
 }));
 
+vi.mock('../context/AuthContext', () => ({
+  useAuth: () => ({ user: { email: 'alex@example.com' } }),
+}));
+
 function renderSecurity() {
   return render(
     <MemoryRouter>
@@ -23,23 +27,25 @@ describe('SecurityPage', () => {
     vi.clearAllMocks();
   });
 
-  it('shows the enable button when 2FA is off', async () => {
-    api.get.mockResolvedValue({ enabled: false });
+  it('shows both method choices when 2FA is off', async () => {
+    api.get.mockResolvedValue({ enabled: false, method: null });
     renderSecurity();
 
     expect(await screen.findByText('Two-factor authentication is off')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Enable two-factor authentication/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Use an authenticator app/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Email me a code/ })).toBeInTheDocument();
   });
 
-  it('shows the disable button when 2FA is on', async () => {
-    api.get.mockResolvedValue({ enabled: true });
+  it('shows the disable button and current method when 2FA is on', async () => {
+    api.get.mockResolvedValue({ enabled: true, method: 'email' });
     renderSecurity();
 
     expect(await screen.findByText('Two-factor authentication is on')).toBeInTheDocument();
+    expect(screen.getByText(/protected with email codes/)).toBeInTheDocument();
   });
 
-  it('walks through setup: secret shown, code confirmed, recovery codes revealed', async () => {
-    api.get.mockResolvedValue({ enabled: false });
+  it('walks through authenticator-app setup: secret shown, code confirmed, recovery codes revealed', async () => {
+    api.get.mockResolvedValue({ enabled: false, method: null });
     api.post.mockImplementation((path) => {
       if (path === '/auth/2fa/setup') {
         return Promise.resolve({ secret: 'ABCDEFGHIJKLMNOP', otpauthUrl: 'otpauth://totp/x' });
@@ -51,7 +57,7 @@ describe('SecurityPage', () => {
     });
 
     renderSecurity();
-    fireEvent.click(await screen.findByRole('button', { name: /Enable two-factor authentication/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /Use an authenticator app/ }));
 
     expect(await screen.findByText('ABCDEFGHIJKLMNOP')).toBeInTheDocument();
 
@@ -63,8 +69,37 @@ describe('SecurityPage', () => {
     expect(api.post).toHaveBeenCalledWith('/auth/2fa/enable', { code: '654321' });
   });
 
+  it('walks through email setup: code sent, confirmed, recovery codes revealed', async () => {
+    api.get.mockResolvedValue({ enabled: false, method: null });
+    api.post.mockImplementation((path) => {
+      if (path === '/auth/2fa/email/setup') {
+        return Promise.resolve({ setupToken: 'setup-token-123', email: 'alex@example.com', devCode: '654321' });
+      }
+      if (path === '/auth/2fa/email/enable') {
+        return Promise.resolve({ recoveryCodes: ['cccc-3333', 'dddd-4444'] });
+      }
+      return Promise.reject(new Error(`unexpected path: ${path}`));
+    });
+
+    renderSecurity();
+    fireEvent.click(await screen.findByRole('button', { name: /Email me a code/ }));
+
+    expect(await screen.findByText(/sent a 6-digit code to/)).toBeInTheDocument();
+    expect(screen.getByText('alex@example.com')).toBeInTheDocument();
+    expect(screen.getByText('654321')).toBeInTheDocument(); // dev-only code hint
+
+    fireEvent.change(screen.getByLabelText('6-digit code'), { target: { value: '654321' } });
+    fireEvent.click(screen.getByRole('button', { name: /Confirm & enable/ }));
+
+    expect(await screen.findByText('cccc-3333')).toBeInTheDocument();
+    expect(api.post).toHaveBeenCalledWith('/auth/2fa/email/enable', {
+      setupToken: 'setup-token-123',
+      code: '654321',
+    });
+  });
+
   it('disabling requires a password and calls the disable endpoint', async () => {
-    api.get.mockResolvedValue({ enabled: true });
+    api.get.mockResolvedValue({ enabled: true, method: 'totp' });
     api.post.mockResolvedValue({ message: 'Two-factor authentication is now disabled.' });
 
     renderSecurity();

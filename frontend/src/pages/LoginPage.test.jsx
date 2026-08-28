@@ -116,4 +116,47 @@ describe('LoginPage', () => {
       code: '123456',
     });
   });
+
+  it('for the email 2FA method, prompts for an emailed code and offers a resend link', async () => {
+    api.post.mockResolvedValue({ requiresTwoFactor: true, twoFactorToken: 'pending-token', twoFactorMethod: 'email' });
+
+    renderLogin();
+    fillAndSubmit();
+
+    expect(await screen.findByText(/code we emailed you/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Resend code/ })).toBeInTheDocument();
+  });
+
+  it('resending an email code replaces the pending token', async () => {
+    api.post
+      .mockResolvedValueOnce({ requiresTwoFactor: true, twoFactorToken: 'pending-token', twoFactorMethod: 'email' })
+      .mockResolvedValueOnce({ twoFactorToken: 'new-pending-token' });
+
+    renderLogin();
+    fillAndSubmit();
+    fireEvent.click(await screen.findByRole('button', { name: /Resend code/ }));
+
+    expect(await screen.findByText(/new code is on its way/)).toBeInTheDocument();
+    expect(api.post).toHaveBeenCalledWith('/auth/2fa/resend-email-code', { twoFactorToken: 'pending-token' });
+
+    fireEvent.change(screen.getByLabelText('Authentication code'), { target: { value: '111111' } });
+    fireEvent.click(screen.getByRole('button', { name: /Verify/ }));
+
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith('/auth/2fa/verify-login', {
+        twoFactorToken: 'new-pending-token',
+        code: '111111',
+      })
+    );
+  });
+
+  it('for the authenticator-app method, shows no resend link', async () => {
+    api.post.mockResolvedValue({ requiresTwoFactor: true, twoFactorToken: 'pending-token', twoFactorMethod: 'totp' });
+
+    renderLogin();
+    fillAndSubmit();
+    await screen.findByText(/Two-factor verification/);
+
+    expect(screen.queryByRole('button', { name: /Resend code/ })).not.toBeInTheDocument();
+  });
 });

@@ -22,6 +22,11 @@ class User(db.Model):
     # alone (e.g. abandoned mid-setup) must never gate login.
     totp_secret = db.Column(db.String(32), nullable=True)
     totp_enabled = db.Column(db.Boolean, nullable=False, default=False, server_default="0")
+    # The email alternative to TOTP — no persistent secret needed, each
+    # login mints and emails a fresh code (see app/auth/routes.py). Mutually
+    # exclusive with totp_enabled: a user has one active 2FA method at a
+    # time, enforced in the setup routes, not at the DB level.
+    email_otp_enabled = db.Column(db.Boolean, nullable=False, default=False, server_default="0")
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -35,7 +40,8 @@ class User(db.Model):
             "fullName": self.full_name,
             "email": self.email,
             "role": self.role,
-            "twoFactorEnabled": self.totp_enabled,
+            "twoFactorEnabled": self.totp_enabled or self.email_otp_enabled,
+            "twoFactorMethod": "totp" if self.totp_enabled else ("email" if self.email_otp_enabled else None),
         }
 
 

@@ -35,8 +35,16 @@ export function AuthProvider({ children }) {
     if (data.requiresTwoFactor) {
       // Password was correct but that's not enough on its own — hand back
       // the pending token so the caller can prompt for a second factor
-      // instead of ending up "logged in" here.
-      return { requiresTwoFactor: true, twoFactorToken: data.twoFactorToken };
+      // instead of ending up "logged in" here. twoFactorMethod ('totp' or
+      // 'email') tells the caller which prompt to show; devCode only ever
+      // arrives when no real email provider is configured (see
+      // app/auth/routes.py's login()), so the flow stays testable without one.
+      return {
+        requiresTwoFactor: true,
+        twoFactorToken: data.twoFactorToken,
+        twoFactorMethod: data.twoFactorMethod,
+        devCode: data.devCode,
+      };
     }
     setTokens(data);
     setUser(data.user);
@@ -47,6 +55,14 @@ export function AuthProvider({ children }) {
     const data = await api.post('/auth/2fa/verify-login', { twoFactorToken, code });
     setTokens(data);
     setUser(data.user);
+  }, []);
+
+  // Only meaningful for the email method — issues a fresh code/token pair
+  // (the old one still works too until it expires; see the resend route's
+  // own docstring) when the first email didn't arrive or the user waited
+  // too long to check their inbox.
+  const resendTwoFactorEmailCode = useCallback(async (twoFactorToken) => {
+    return api.post('/auth/2fa/resend-email-code', { twoFactorToken });
   }, []);
 
   const logout = useCallback(async () => {
@@ -60,7 +76,9 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, register, login, completeTwoFactorLogin, logout }}>
+    <AuthContext.Provider
+      value={{ user, loading, register, login, completeTwoFactorLogin, resendTwoFactorEmailCode, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
