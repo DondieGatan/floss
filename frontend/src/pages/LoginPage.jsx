@@ -58,8 +58,8 @@ export default function LoginPage() {
             Back.
           </h2>
           <p className="auth-visual-sub">
-            Welcome back to Floss Clinic. Sign in to manage your appointments, stay connected with your
-            care team, and get clear answers whenever you need them.
+            Sign in to manage your appointments, connect with your care team, and get clear answers
+            whenever you need them.
           </p>
         </div>
       </div>
@@ -118,7 +118,7 @@ export default function LoginPage() {
               Floss Clinic
             </h1>
             <h2 className="auth-card-title">Sign In</h2>
-            <p className="brand-sub">Welcome back — sign in to continue managing your care.</p>
+            <p className="brand-sub">Sign in to continue managing your care.</p>
 
             {error && (
               <div className="form-error" role="alert">

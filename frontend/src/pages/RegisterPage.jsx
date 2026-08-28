@@ -51,8 +51,7 @@ export default function RegisterPage() {
             Floss Clinic.
           </h2>
           <p className="auth-visual-sub">
-            Whether it's your first visit or you're coming back for more, we're happy to have you. Create
-            an account to schedule appointments, connect with our dental team, and get friendly, reliable
+            Create an account to schedule appointments, connect with our dental team, and get reliable
             answers whenever you need them.
           </p>
         </div>
@@ -65,7 +64,7 @@ export default function RegisterPage() {
             Floss Clinic
           </h1>
           <h2 className="auth-card-title">Create Account</h2>
-          <p className="brand-sub">New here or coming back? Either way, we're glad you're here — create your account to get started.</p>
+          <p className="brand-sub">Create your account to get started.</p>
 
           {error && (
             <div className="form-error" role="alert">
