@@ -128,7 +128,7 @@ describe('LandingPage', () => {
     it('every other CTA on the page also points somewhere real instead of the register dead end', async () => {
       await renderLoggedIn({ id: 1, fullName: 'Jordan Ellis', role: 'patient' });
 
-      expect(screen.getByRole('link', { name: 'Learn More' })).toHaveAttribute('href', '/dashboard');
+      expect(screen.getByRole('link', { name: 'Learn More' })).toHaveAttribute('href', '/doctors');
       expect(screen.getByRole('link', { name: 'Explore All Services' })).toHaveAttribute('href', '/doctors');
       for (const link of screen.getAllByRole('link', { name: 'Learn more →' })) {
         expect(link).toHaveAttribute('href', '/doctors');

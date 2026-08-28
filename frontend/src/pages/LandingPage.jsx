@@ -115,7 +115,6 @@ export default function LandingPage() {
   // /doctors has no role gate, so it's a safe real destination for any
   // logged-in role, not just patients.
   const bookingHref = user ? '/doctors' : '/register';
-  const learnMoreHref = user ? '/dashboard' : '/register';
 
   return (
     <div className="landing">
@@ -196,7 +195,7 @@ export default function LandingPage() {
                 <span className="check-mark" aria-hidden="true">✓</span> Dedicated portals for patients and staff
               </li>
             </ul>
-            <a className="l-btn l-btn-primary" href={learnMoreHref}>
+            <a className="l-btn l-btn-primary" href={bookingHref}>
               Learn More
             </a>
           </div>
