@@ -1,5 +1,7 @@
-"""Populate a fresh dev database with demo data for Floss Clinic: a staff and an
-admin account, a handful of specialty areas/dentists with weekly
+"""Populate a fresh dev database with demo data for Floss Clinic: 11 staff
+accounts and 2 admin accounts (one of each is the primary staff@/admin@
+demo login, the rest exist to give staff-scoped pages more than one row
+to demonstrate against), a handful of specialty areas/dentists with weekly
 availability, a couple of treatment rooms with chairs, and one sample
 patient with an upcoming appointment. Safe to re-run — skips anything that
 already exists by name.
@@ -28,6 +30,27 @@ DEPARTMENTS = [
     ("Periodontics", "Gum disease treatment and gum health."),
     ("Oral & Maxillofacial Surgery", "Extractions, wisdom teeth, and jaw surgery."),
     ("Pediatric Dentistry", "Dental care for infants, children, and teens."),
+]
+
+# Additional staff/admin accounts beyond the primary staff@/admin@ demo
+# logins — same password for all, purely so the Team & Roles page and
+# staff-scoped features (schedule, directory, treatment rooms) have more
+# than one row to demonstrate against.
+EXTRA_STAFF = [
+    ("staff2@floss.demo", "Emily Carter"),
+    ("staff3@floss.demo", "Daniel Brooks"),
+    ("staff4@floss.demo", "Sophia Martinez"),
+    ("staff5@floss.demo", "Ethan Walsh"),
+    ("staff6@floss.demo", "Olivia Kim"),
+    ("staff7@floss.demo", "Ryan Fitzgerald"),
+    ("staff8@floss.demo", "Ava Thompson"),
+    ("staff9@floss.demo", "Nathan Cole"),
+    ("staff10@floss.demo", "Isabella Reyes"),
+    ("staff11@floss.demo", "Jacob Sullivan"),
+]
+
+EXTRA_ADMINS = [
+    ("admin2@floss.demo", "Victoria Hale"),
 ]
 
 DOCTORS = [
@@ -79,6 +102,11 @@ def seed():
         staff = get_or_create_user("staff@floss.demo", "Nora Bennett", "password123", "staff")
         admin = get_or_create_user("admin@floss.demo", "Admin Rivera", "password123", "admin")
 
+        for email, full_name in EXTRA_STAFF:
+            get_or_create_user(email, full_name, "password123", "staff")
+        for email, full_name in EXTRA_ADMINS:
+            get_or_create_user(email, full_name, "password123", "admin")
+
         dept_by_name = {}
         for name, description in DEPARTMENTS:
             dept = Department.query.filter_by(name=name).first()
@@ -119,8 +147,8 @@ def seed():
         regenerate_directory_digest(staff.id)
 
         print("Seeded demo data:")
-        print("  staff@floss.demo / password123")
-        print("  admin@floss.demo / password123")
+        print("  staff@floss.demo / password123  (+ 10 more staffN@floss.demo)")
+        print("  admin@floss.demo / password123  (+ admin2@floss.demo)")
         print("  patient@floss.demo / password123")
 
 
