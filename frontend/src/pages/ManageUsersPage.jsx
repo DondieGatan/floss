@@ -5,12 +5,15 @@ import AppLayout from '../components/AppLayout';
 
 const SENSITIVE_ROLES = new Set(['admin', 'owner']);
 const ALL_ROLES = ['staff', 'admin', 'owner'];
+// Kept in sync with App.jsx's own copy — staff/admin/owner require 2FA.
+const TWO_FACTOR_REQUIRED_ROLES = new Set(['staff', 'admin', 'owner']);
 
 export default function ManageUsersPage() {
   const { user: me } = useAuth();
   const [users, setUsers] = useState(null);
   const [auditLog, setAuditLog] = useState(null);
   const [error, setError] = useState(null);
+  const [roleChangeNotice, setRoleChangeNotice] = useState(null);
   const [pendingId, setPendingId] = useState(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -47,11 +50,22 @@ export default function ManageUsersPage() {
 
   async function handleRoleChange(userId, role) {
     setError(null);
+    setRoleChangeNotice(null);
     setPendingId(userId);
     try {
       const data = await api.patch(`/users/${userId}/role`, { role });
       setUsers((prev) => prev.map((u) => (u.id === userId ? data.user : u)));
       loadAuditLog();
+      // 2FA enforcement (see App.jsx) reads the role off their JWT, which
+      // doesn't pick up this change until their session refreshes (up to
+      // ~30 minutes) or they sign in again — so a promotion doesn't wall
+      // them into the mandatory Security setup right away on its own.
+      if (TWO_FACTOR_REQUIRED_ROLES.has(role)) {
+        setRoleChangeNotice(
+          `${data.user.fullName} is now ${role}. Two-factor authentication is required for that role, but ` +
+            "won't be enforced until they log out and back in — let them know."
+        );
+      }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Something went wrong.');
     } finally {
@@ -75,6 +89,11 @@ export default function ManageUsersPage() {
         {error && (
           <div className="form-error" role="alert" style={{ marginBottom: 16 }}>
             {error}
+          </div>
+        )}
+        {roleChangeNotice && (
+          <div className="form-notice" role="status" style={{ marginBottom: 16 }}>
+            {roleChangeNotice}
           </div>
         )}
 
