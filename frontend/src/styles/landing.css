@@ -1057,3 +1057,97 @@
     font-size: 38px;
   }
 }
+
+/* Dark mode
+   The landing page used to hardcode a permanent light palette (see the
+   --l-* tokens at the top) regardless of the app's own dark theme. A
+   visitor whose OS/browser prefers dark (including via a Chrome dark-mode
+   extension) still got that dark preference applied to <html data-theme>,
+   which flipped the plain body behind this page dark while every section
+   band here stayed hardcoded light — a jarring mismatch, and exactly the
+   kind of page a forced-dark extension tends to repaint badly since it
+   never declared a real dark palette of its own. Giving every band an
+   actual designed dark variant (reusing the same tokens the rest of the
+   app already uses) fixes both: the page looks intentional instead of
+   patched, and browsers/extensions that skip already-dark-aware sites
+   leave it alone. */
+:root[data-theme='dark'] .landing {
+  color-scheme: dark;
+  --l-bg: #0f141f;
+  --l-bg-soft: #1a2130;
+  --l-blue: #6b93ff;
+  --l-blue-dark: #4c74e0;
+  --l-blue-2: #2bbfb3;
+  --l-navy: #0b1020;
+  --l-text: #edf1f7;
+  --l-text-muted: #9aa6bb;
+  --l-border: #313c52;
+  --l-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.4);
+  --l-shadow-soft: 0 4px 10px rgba(0, 0, 0, 0.4), 0 16px 32px rgba(0, 0, 0, 0.45);
+
+  background:
+    radial-gradient(circle at 10% 0%, rgba(107, 147, 255, 0.12), transparent 40%),
+    radial-gradient(circle at 90% 10%, rgba(43, 191, 179, 0.1), transparent 42%),
+    var(--l-bg);
+}
+
+:root[data-theme='dark'] .quickbook-band {
+  background: linear-gradient(120deg, #16203a, #101a30);
+}
+
+:root[data-theme='dark'] .quickbook-band::before {
+  background: rgba(107, 147, 255, 0.22);
+}
+
+:root[data-theme='dark'] .quickbook-band::after {
+  background: rgba(43, 191, 179, 0.18);
+}
+
+:root[data-theme='dark'] .assistant-preview-card {
+  background: rgba(26, 33, 48, 0.6);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme='dark'] .assistant-preview-bubble-bot {
+  background: rgba(35, 43, 61, 0.85);
+}
+
+:root[data-theme='dark'] .about-band {
+  background: linear-gradient(135deg, #131b2f, #0f1626);
+}
+
+:root[data-theme='dark'] .about-circle-1 {
+  background: linear-gradient(150deg, #1a2130, #232b3d);
+}
+
+:root[data-theme='dark'] .ticker-strip {
+  background: linear-gradient(120deg, #131b2f, #0f1626);
+  border-top-color: rgba(107, 147, 255, 0.18);
+  border-bottom-color: rgba(107, 147, 255, 0.18);
+}
+
+:root[data-theme='dark'] .ticker-item {
+  color: var(--l-text);
+}
+
+:root[data-theme='dark'] .ticker-item-icon {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme='dark'] .services-band {
+  background: linear-gradient(180deg, #0f1420, #0c111c);
+}
+
+:root[data-theme='dark'] .service-card,
+:root[data-theme='dark'] .team-card {
+  background: rgba(26, 33, 48, 0.6);
+}
+
+:root[data-theme='dark'] .service-card-art,
+:root[data-theme='dark'] .team-card-photo {
+  background: linear-gradient(150deg, var(--l-bg-soft), #232b3d);
+}
+
+:root[data-theme='dark'] .team-band {
+  background: linear-gradient(135deg, #101d24, #0d151d);
+}
