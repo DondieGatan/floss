@@ -103,3 +103,44 @@ def test_no_documents_is_low_confidence(app):
     results = retrieve(None, query_vector)
     assert results == []
     assert is_low_confidence(results)
+
+
+def test_directory_digest_finds_a_specific_doctor_among_several(client, staff_headers, app):
+    """Regression test: the directory digest used to render the whole
+    directory as one blob and run it through the generic prose chunker,
+    which packed several unrelated doctors into a single ~900-char chunk.
+    Embedding that chunk diluted it enough that a query naming one specific
+    dentist scored well under SIMILARITY_THRESHOLD even though their info
+    was right there (confirmed manually: the same sentence scored 0.71
+    alone vs. 0.16 packed into its original multi-doctor chunk). The fix
+    chunks the digest one entity (department or doctor) at a time — this
+    seeds enough doctors to have reproduced the dilution, then confirms the
+    right one is still found with confidence."""
+    dept_id = client.post(
+        "/api/departments", headers=staff_headers, json={"name": "General Dentistry"}
+    ).get_json()["department"]["id"]
+
+    doctors = [
+        ("Dr. Amara Osei", "General & Preventive Dentistry", "15 years helping patients keep healthy smiles."),
+        ("Dr. Noah Bergstrom", "Family & Cosmetic Dentistry", "Believes a healthy smile starts with a comfortable visit."),
+        ("Dr. Priya Nair", "Root Canal Therapy", "Focused on pain-free root canal treatment."),
+        ("Dr. Thomas Okafor", "Microscopic Root Canal Therapy", "Uses precision tools to make root canals fast and comfortable."),
+    ]
+    for full_name, specialty, bio in doctors:
+        client.post(
+            "/api/doctors",
+            headers=staff_headers,
+            json={"fullName": full_name, "departmentId": dept_id, "specialty": specialty, "bio": bio},
+        )
+
+    query_vector = embed_query("Who is Dr. Amara Osei and what does she specialize in?")
+    results = retrieve(None, query_vector)
+
+    assert results
+    top_chunk, top_score = results[0]
+    assert "Amara Osei" in top_chunk.text
+    assert not is_low_confidence(results), (
+        f"top score {top_score} fell below the confidence threshold for a query "
+        "naming a specific dentist who is in the digest — likely means chunks are "
+        "packing multiple doctors together and diluting the embedding again"
+    )
