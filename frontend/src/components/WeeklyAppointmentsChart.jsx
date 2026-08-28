@@ -1,11 +1,15 @@
 const WIDTH = 700;
 const HEIGHT = 180;
 const BAR_WIDTH = 48;
+// Room reserved above the tallest bar for its count label — without this,
+// a day at (or near) the week's max count pushes its label's baseline so
+// close to y=0 that the digit's ascender gets clipped by the viewBox.
+const LABEL_SPACE = 16;
 
 // data: [{ label, count, isToday }, ...] — one entry per day, Monday first.
 export default function WeeklyAppointmentsChart({ data }) {
   const max = Math.max(1, ...data.map((d) => d.count));
-  const plotHeight = HEIGHT - 40;
+  const plotHeight = HEIGHT - 40 - LABEL_SPACE;
   const gap = (WIDTH - data.length * BAR_WIDTH) / (data.length + 1);
 
   return (
