@@ -945,6 +945,14 @@ textarea {
   align-items: center;
   justify-content: center;
   padding: 24px;
+  /* .auth-split centers grid items rather than stretching them, so
+     without this the gradient below only wraps the card's own height and
+     floats mid-row — a hard-edged rectangle with the plain --bg showing
+     above and below it. min-height keeps the gradient filling the full
+     column edge-to-edge; the card stays centered inside it via the flex
+     rules above. */
+  min-height: 100vh;
+  align-self: stretch;
   /* A flat --bg reads as plain, especially once the photo panel drops out
      at narrow widths (@media 900px below) and this becomes the whole
      page. Two soft, diffuse glows over an icy gradient give the glass
