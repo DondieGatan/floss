@@ -116,7 +116,7 @@ describe('LandingPage', () => {
       await renderLoggedIn({ id: 1, fullName: 'Jordan Ellis', role: 'patient' });
 
       expect(screen.getByText('Floss Assistant')).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: 'Ask a Question' })).toHaveAttribute('href', '/dashboard');
+      expect(screen.getByRole('link', { name: 'Ask a Question' })).toHaveAttribute('href', '/dashboard?askQuestion=1');
     });
 
     it('sends staff to the Knowledge Base instead of the patient dashboard widget', async () => {

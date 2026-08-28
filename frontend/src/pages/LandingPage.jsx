@@ -65,7 +65,10 @@ function AssistantPreviewCard({ user }) {
   // Chat itself always requires an account — for patients it lives on the
   // dashboard (a floating widget, not its own page); for staff/admin it's
   // the Knowledge Base page. Anonymous visitors go create that account.
-  const ctaHref = !user ? '/register' : isStaff ? '/knowledge-base' : '/dashboard';
+  // The askQuestion param tells the dashboard's FloatingChatWidget to pop
+  // itself open on arrival, so this CTA actually lands on an open chat
+  // instead of just the dashboard with a FAB the patient has to notice.
+  const ctaHref = !user ? '/register' : isStaff ? '/knowledge-base' : '/dashboard?askQuestion=1';
   const ctaLabel = user ? 'Ask a Question' : 'Create a Free Account';
 
   return (

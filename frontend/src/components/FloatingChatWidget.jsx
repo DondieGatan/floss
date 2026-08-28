@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
 import ChatWindow from './ChatWindow';
 import AssistantAvatar from './AssistantAvatar';
@@ -24,9 +25,11 @@ export default function FloatingChatWidget() {
   const [conversationId, setConversationId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
   const panelRef = useRef(null);
   const fabRef = useRef(null);
   const previouslyFocusedRef = useRef(null);
+  const askQuestionHandledRef = useRef(false);
 
   async function startConversation() {
     setLoading(true);
@@ -54,6 +57,26 @@ export default function FloatingChatWidget() {
     if (conversationId || loading) return;
     startConversation();
   }
+
+  // A link elsewhere (the landing page's "Ask a Question" CTA) can land a
+  // patient here with ?askQuestion=1 to pop the widget straight open,
+  // instead of leaving them to notice and click the FAB themselves. Guarded
+  // by a ref (not just clearing the param) because StrictMode double-fires
+  // this effect in dev, which would otherwise start two conversations.
+  useEffect(() => {
+    if (askQuestionHandledRef.current || searchParams.get('askQuestion') !== '1') return;
+    askQuestionHandledRef.current = true;
+    setSearchParams(
+      (params) => {
+        params.delete('askQuestion');
+        return params;
+      },
+      { replace: true }
+    );
+    setOpen(true);
+    startConversation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // Move focus into the dialog on open and back to the FAB on close, and
   // let Escape close it — without this, a keyboard/screen-reader user gets
