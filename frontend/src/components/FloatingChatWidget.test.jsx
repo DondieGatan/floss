@@ -1,9 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import FloatingChatWidget from './FloatingChatWidget';
-import { api, downloadFile } from '../api/client';
+import { api } from '../api/client';
 
-vi.mock('../api/client', () => ({ api: { post: vi.fn(), del: vi.fn() }, downloadFile: vi.fn() }));
+vi.mock('../api/client', () => ({ api: { post: vi.fn() } }));
 
 vi.mock('./ChatWindow', () => ({
   default: ({ conversationId }) => <div>Chat window for {conversationId}</div>,
@@ -36,41 +36,12 @@ describe('FloatingChatWidget', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'Ask Floss Clinic' })).toHaveFocus());
   });
 
-  it('deleting the conversation calls the API and starts a fresh one', async () => {
+  it('does not offer export or delete controls', async () => {
     render(<FloatingChatWidget />);
     fireEvent.click(screen.getByRole('button', { name: 'Ask Floss Clinic' }));
     await screen.findByText('Chat window for 1');
 
-    api.del.mockResolvedValue(undefined);
-    api.post.mockResolvedValueOnce({ conversation: { id: 2 } });
-    fireEvent.click(screen.getByRole('button', { name: 'Delete this conversation' }));
-
-    await waitFor(() => expect(api.del).toHaveBeenCalledWith('/chat/conversations/1'));
-    expect(await screen.findByText('Chat window for 2')).toBeInTheDocument();
-  });
-
-  it('exporting the conversation calls downloadFile without resetting it', async () => {
-    render(<FloatingChatWidget />);
-    fireEvent.click(screen.getByRole('button', { name: 'Ask Floss Clinic' }));
-    await screen.findByText('Chat window for 1');
-
-    downloadFile.mockResolvedValue(undefined);
-    fireEvent.click(screen.getByRole('button', { name: 'Export this conversation' }));
-
-    await waitFor(() =>
-      expect(downloadFile).toHaveBeenCalledWith('/chat/conversations/1/export', 'floss-conversation-1.txt')
-    );
-    expect(screen.getByText('Chat window for 1')).toBeInTheDocument();
-  });
-
-  it('shows an error if exporting fails', async () => {
-    render(<FloatingChatWidget />);
-    fireEvent.click(screen.getByRole('button', { name: 'Ask Floss Clinic' }));
-    await screen.findByText('Chat window for 1');
-
-    downloadFile.mockRejectedValue(new Error('network error'));
-    fireEvent.click(screen.getByRole('button', { name: 'Export this conversation' }));
-
-    expect(await screen.findByText('Could not export this conversation. Please try again.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Delete this conversation' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Export this conversation' })).not.toBeInTheDocument();
   });
 });

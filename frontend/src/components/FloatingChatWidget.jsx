@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { api, downloadFile } from '../api/client';
+import { api } from '../api/client';
 import ChatWindow from './ChatWindow';
 import AssistantAvatar from './AssistantAvatar';
 
@@ -19,32 +19,10 @@ function CloseIcon() {
   );
 }
 
-function TrashIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 7h16" />
-      <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-      <path d="M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13" />
-    </svg>
-  );
-}
-
-function DownloadIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 4v11" />
-      <path d="M7.5 11.5 12 16l4.5-4.5" />
-      <path d="M5 19h14" />
-    </svg>
-  );
-}
-
 export default function FloatingChatWidget() {
   const [open, setOpen] = useState(false);
   const [conversationId, setConversationId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [exporting, setExporting] = useState(false);
   const [error, setError] = useState(null);
   const panelRef = useRef(null);
   const fabRef = useRef(null);
@@ -75,30 +53,6 @@ export default function FloatingChatWidget() {
     setOpen(true);
     if (conversationId || loading) return;
     startConversation();
-  }
-
-  async function handleDeleteConversation() {
-    if (!conversationId) return;
-    setDeleting(true);
-    try {
-      await api.del(`/chat/conversations/${conversationId}`);
-      setConversationId(null);
-      await startConversation();
-    } finally {
-      setDeleting(false);
-    }
-  }
-
-  async function handleExportConversation() {
-    if (!conversationId) return;
-    setExporting(true);
-    try {
-      await downloadFile(`/chat/conversations/${conversationId}/export`, `floss-conversation-${conversationId}.txt`);
-    } catch {
-      setError('Could not export this conversation. Please try again.');
-    } finally {
-      setExporting(false);
-    }
   }
 
   // Move focus into the dialog on open and back to the FAB on close, and
@@ -145,28 +99,6 @@ export default function FloatingChatWidget() {
               </div>
             </div>
             <div className="floating-chat-header-actions">
-              {conversationId && (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleExportConversation}
-                    disabled={exporting}
-                    aria-label="Export this conversation"
-                    title="Export this conversation"
-                  >
-                    <DownloadIcon />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleDeleteConversation}
-                    disabled={deleting}
-                    aria-label="Delete this conversation"
-                    title="Delete this conversation"
-                  >
-                    <TrashIcon />
-                  </button>
-                </>
-              )}
               <button type="button" onClick={handleClose} aria-label="Close chat">
                 <CloseIcon />
               </button>
@@ -177,9 +109,9 @@ export default function FloatingChatWidget() {
               <p className="form-error" role="alert" style={{ margin: 16 }}>
                 {error}
               </p>
-            ) : loading || deleting || !conversationId ? (
+            ) : loading || !conversationId ? (
               <p className="page-loading" role="status" aria-live="polite">
-                {deleting ? 'Starting a fresh conversation…' : 'Loading…'}
+                Loading…
               </p>
             ) : (
               <ChatWindow key={conversationId} conversationId={conversationId} initialMessages={[]} />
