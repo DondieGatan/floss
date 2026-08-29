@@ -1,5 +1,7 @@
 # Floss Clinic — Dental Clinic Management Platform
 
+[![CI](https://github.com/DondieGatan/floss/actions/workflows/ci.yml/badge.svg)](https://github.com/DondieGatan/floss/actions/workflows/ci.yml)
+
 Appointment booking with real conflict detection, a staff-managed doctor directory, patient records, and a
 RAG chatbot that cites its answers when they come from your clinic's own documents and falls back to
 general dental knowledge — clearly uncited — when they don't. Built as a full-stack portfolio project:
