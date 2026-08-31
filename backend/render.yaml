@@ -8,7 +8,21 @@ services:
     # Generous safety margin on top of gunicorn's 30s default — a slow
     # Gemini response or a cold Hugging Face Inference API call (see
     # app/ml.py) shouldn't turn into a 500.
-    startCommand: "gunicorn run:app --timeout 120"
+    #
+    # --worker-class gthread --threads 4: this app deliberately runs a
+    # single gunicorn *process* (see _start_reminder_scheduler()'s docstring
+    # in app/__init__.py — more than one would each start its own reminder
+    # scheduler and could double-send reminders), but with the plain sync
+    # worker that single process can only handle one request at a time.
+    # Confirmed directly in production: a slow outbound call (SendGrid,
+    # Resend, Gemini, HF) blocked the one worker long enough that Render's
+    # own health check — queued behind it on that same worker — timed out
+    # waiting >5s for its turn, which Render read as the instance being
+    # unhealthy and restarted it, sometimes mid-request. Threads share the
+    # one process (so the "one scheduler" invariant still holds) while
+    # letting it actually serve the health check concurrently with a slow
+    # request instead of queuing behind it.
+    startCommand: "gunicorn run:app --timeout 120 --worker-class gthread --threads 4"
     healthCheckPath: /api/health
     envVars:
       - key: PYTHON_VERSION
@@ -24,6 +38,10 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: CORS_ORIGINS
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: SENDGRID_FROM
         sync: false
       - key: RESEND_API_KEY
         sync: false
