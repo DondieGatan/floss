@@ -37,6 +37,15 @@ class Config:
     # Same lazy-config pattern for outbound email (see app/email.py) — no
     # key means send_email() logs instead of sending, so password reset and
     # appointment reminders stay fully usable without a real account.
+    # SendGrid is preferred over Resend when set — Resend's free tier can
+    # only deliver to the email address the Resend account itself was
+    # signed up with until a full domain is verified (confirmed directly:
+    # sending to any other address 403s with "You can only send testing
+    # emails to your own email address"). SendGrid's free tier only needs
+    # one sender email verified (no domain/DNS) and then delivers to any
+    # recipient.
+    SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
+    SENDGRID_FROM = os.environ.get("SENDGRID_FROM", "")
     RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
     EMAIL_FROM_ADDRESS = os.environ.get("EMAIL_FROM_ADDRESS", "Floss Clinic <onboarding@resend.dev>")
     # Used to build links inside outbound emails (e.g. the password-reset
@@ -73,6 +82,7 @@ class TestConfig(Config):
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     # Tests must stay deterministic regardless of what's in a developer's
     # local .env — test_email.py in particular asserts on "no provider
-    # configured" being the default, which a real local RESEND_API_KEY
-    # would otherwise silently violate.
+    # configured" being the default, which a real local RESEND_API_KEY or
+    # SENDGRID_API_KEY would otherwise silently violate.
     RESEND_API_KEY = None
+    SENDGRID_API_KEY = None

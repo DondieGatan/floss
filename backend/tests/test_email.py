@@ -52,3 +52,70 @@ def test_returns_false_without_raising_when_resend_call_fails(app, monkeypatch):
     sent = send_email("alex@example.com", "Subject", "<p>Body</p>")
 
     assert sent is False
+
+
+def test_sends_via_sendgrid_when_configured(app, monkeypatch):
+    app.config["SENDGRID_API_KEY"] = "test-key"
+    app.config["SENDGRID_FROM"] = "clinic@example.com"
+    assert is_configured() is True
+
+    captured = {}
+
+    class _FakeResponse:
+        def raise_for_status(self):
+            pass
+
+    def _fake_post(url, headers, json, timeout):
+        captured["url"] = url
+        captured["headers"] = headers
+        captured["json"] = json
+        return _FakeResponse()
+
+    monkeypatch.setattr(httpx, "post", _fake_post)
+
+    sent = send_email("alex@example.com", "Subject", "<p>Body</p>")
+
+    assert sent is True
+    assert captured["url"] == "https://api.sendgrid.com/v3/mail/send"
+    assert captured["headers"]["Authorization"] == "Bearer test-key"
+    assert captured["json"]["personalizations"] == [{"to": [{"email": "alex@example.com"}]}]
+    assert captured["json"]["from"] == {"email": "clinic@example.com"}
+    assert captured["json"]["subject"] == "Subject"
+    assert captured["json"]["content"] == [{"type": "text/html", "value": "<p>Body</p>"}]
+
+
+def test_prefers_sendgrid_over_resend_when_both_configured(app, monkeypatch):
+    app.config["SENDGRID_API_KEY"] = "sg-key"
+    app.config["SENDGRID_FROM"] = "clinic@example.com"
+    app.config["RESEND_API_KEY"] = "resend-key"
+
+    captured = {}
+
+    class _FakeResponse:
+        def raise_for_status(self):
+            pass
+
+    def _fake_post(url, **kwargs):
+        captured["url"] = url
+        return _FakeResponse()
+
+    monkeypatch.setattr(httpx, "post", _fake_post)
+
+    sent = send_email("alex@example.com", "Subject", "<p>Body</p>")
+
+    assert sent is True
+    assert captured["url"] == "https://api.sendgrid.com/v3/mail/send"
+
+
+def test_returns_false_without_raising_when_sendgrid_call_fails(app, monkeypatch):
+    app.config["SENDGRID_API_KEY"] = "test-key"
+    app.config["SENDGRID_FROM"] = "clinic@example.com"
+
+    def _fake_post(*args, **kwargs):
+        raise httpx.ConnectError("boom")
+
+    monkeypatch.setattr(httpx, "post", _fake_post)
+
+    sent = send_email("alex@example.com", "Subject", "<p>Body</p>")
+
+    assert sent is False
