@@ -484,6 +484,9 @@ textarea {
 }
 
 .app-sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   border-top: 1px solid var(--border);
   padding-top: 12px;
   margin-top: 12px;
@@ -498,7 +501,6 @@ textarea {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 8px 12px;
-  margin-bottom: 12px;
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
