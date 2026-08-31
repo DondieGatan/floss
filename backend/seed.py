@@ -70,9 +70,14 @@ DOCTORS = [
 AVAILABILITY_WINDOWS = [
     (0, time(9, 0), time(13, 0)),
     (0, time(14, 0), time(17, 0)),
+    (1, time(9, 0), time(13, 0)),
+    (1, time(14, 0), time(17, 0)),
     (2, time(9, 0), time(13, 0)),
     (2, time(14, 0), time(17, 0)),
+    (3, time(9, 0), time(13, 0)),
+    (3, time(14, 0), time(17, 0)),
     (4, time(9, 0), time(13, 0)),
+    (4, time(14, 0), time(17, 0)),
 ]
 
 # Ward/Bed model reused as "treatment room / chair" — same occupancy-tracking
@@ -127,8 +132,18 @@ def seed():
                 )
                 db.session.add(doctor)
                 db.session.flush()
-                for weekday, start, end in AVAILABILITY_WINDOWS:
-                    db.session.add(DoctorAvailability(doctor_id=doctor.id, weekday=weekday, start_time=start, end_time=end))
+            # Checked per-window (not just per-doctor) so re-running this
+            # against a database seeded before a AVAILABILITY_WINDOWS change
+            # backfills whatever's missing for already-existing doctors too,
+            # instead of only ever applying to newly-created ones.
+            for weekday, start, end in AVAILABILITY_WINDOWS:
+                window = DoctorAvailability.query.filter_by(
+                    doctor_id=doctor.id, weekday=weekday, start_time=start, end_time=end
+                ).first()
+                if window is None:
+                    db.session.add(
+                        DoctorAvailability(doctor_id=doctor.id, weekday=weekday, start_time=start, end_time=end)
+                    )
 
         for room_name, room_type, floor, chair_numbers in ROOMS:
             room = Ward.query.filter_by(name=room_name).first()
