@@ -15,6 +15,19 @@ class ConflictError(Exception):
     """Requested slot overlaps an existing non-cancelled appointment."""
 
 
+class PastSlotError(Exception):
+    """Requested slot's start time has already passed."""
+
+
+def check_not_in_past(start):
+    """Naive `datetime.now()`, matching scheduled_start's own naive
+    storage (see Appointment.scheduled_start) and reminders.py's identical
+    convention — this app has no multi-timezone concept, so comparing
+    naive-to-naive is correct here, not an oversight."""
+    if start < datetime.now():
+        raise PastSlotError("This time has already passed.")
+
+
 def check_availability(doctor_id, start, end):
     """The requested [start, end) window must fit inside a SINGLE
     DoctorAvailability row for that weekday. Deliberate limitation: this
@@ -69,6 +82,7 @@ def compute_open_slots(doctor_id, date_, duration_minutes):
         Appointment.scheduled_start < datetime.combine(date_, datetime.min.time()) + timedelta(days=1),
     ).all()
 
+    now = datetime.now()
     slots = []
     step = timedelta(minutes=duration_minutes)
     for window in windows:
@@ -79,7 +93,7 @@ def compute_open_slots(doctor_id, date_, duration_minutes):
             overlaps = any(
                 appt.scheduled_start < slot_end and slot_start < appt.scheduled_end for appt in existing
             )
-            if not overlaps:
+            if not overlaps and slot_start >= now:
                 slots.append(slot_start)
             slot_start += step
 

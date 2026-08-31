@@ -53,6 +53,41 @@ def second_doctor_with_monday_availability(client, staff_headers):
     return doctor_id
 
 
+@pytest.fixture()
+def doctor_with_todays_availability(client, staff_headers):
+    """Availability window spans from 2 hours before to 2 hours after right
+    now (clamped to stay within today, so this doesn't wrap into a
+    different weekday's DoctorAvailability row when run close to
+    midnight), on today's weekday — lets tests exercise "this slot has
+    already passed" without needing to freeze time. Matches this suite's
+    existing convention (see tests/test_reminders.py) of using offsets from
+    the real clock rather than a time-freezing library."""
+    now = datetime.now()
+    day_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    day_end = now.replace(hour=23, minute=59, second=0, microsecond=0)
+    window_start = max(now - timedelta(hours=2), day_start)
+    window_end = min(now + timedelta(hours=2), day_end)
+
+    dept_id = client.post(
+        "/api/departments", headers=staff_headers, json={"name": "General Medicine"}
+    ).get_json()["department"]["id"]
+    doctor_id = client.post(
+        "/api/doctors",
+        headers=staff_headers,
+        json={"fullName": "Dr. Present Day", "departmentId": dept_id, "specialty": "General"},
+    ).get_json()["doctor"]["id"]
+    client.post(
+        f"/api/doctors/{doctor_id}/availability",
+        headers=staff_headers,
+        json={
+            "weekday": now.weekday(),
+            "startTime": window_start.strftime("%H:%M"),
+            "endTime": window_end.strftime("%H:%M"),
+        },
+    )
+    return doctor_id
+
+
 def _book(client, headers, doctor_id, start, duration_minutes=30, reason="Checkup"):
     return client.post(
         "/api/appointments",
@@ -74,6 +109,19 @@ def test_patient_can_book_appointment_for_self(client, auth_headers, doctor_with
     assert data["status"] == "scheduled"
     assert data["doctorId"] == doctor_with_monday_availability
     assert data["reason"] == "Checkup"
+
+
+def test_booking_sends_a_confirmation_email(client, auth_headers, doctor_with_monday_availability, caplog):
+    # TestConfig has no SENDGRID_API_KEY/RESEND_API_KEY configured, so
+    # send_email() logs the message instead of actually calling out — see
+    # app/email.py. That log line is what this asserts on, matching the
+    # pattern already used for reminders in tests/test_reminders.py.
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    with caplog.at_level(logging.INFO):
+        resp = _book(client, auth_headers, doctor_with_monday_availability, start)
+    assert resp.status_code == 201
+    assert "Booking confirmation" in caplog.text
+    assert "confirmed for" in caplog.text
 
 
 def test_booking_rejects_outside_availability_window(client, auth_headers, doctor_with_monday_availability):
@@ -235,6 +283,54 @@ def test_get_availability_excludes_booked_slots(client, auth_headers, doctor_wit
     slots = resp.get_json()["slots"]
     assert start.isoformat() not in slots
     assert len(slots) == 7
+
+
+def test_booking_rejects_a_time_that_has_already_passed(
+    client, auth_headers, doctor_with_todays_availability
+):
+    # Within the doctor's declared window (now-2h..now+2h) but before "now"
+    # itself — must be rejected for being in the past, not for falling
+    # outside availability.
+    past_start = datetime.now() - timedelta(hours=1)
+    resp = _book(client, auth_headers, doctor_with_todays_availability, past_start)
+    assert resp.status_code == 422
+    assert "already passed" in resp.get_json()["error"]
+
+
+def test_get_availability_excludes_past_slots_for_today(
+    client, auth_headers, doctor_with_todays_availability
+):
+    resp = client.get(
+        f"/api/appointments/availability?doctorId={doctor_with_todays_availability}&date={date.today().isoformat()}",
+        headers=auth_headers,
+    )
+    assert resp.status_code == 200
+    now = datetime.now()
+    slots = [datetime.fromisoformat(s) for s in resp.get_json()["slots"]]
+    # Not asserting len(slots) > 0: the availability window is clamped to
+    # stay within today (see doctor_with_todays_availability), so when this
+    # suite happens to run in the last half hour of the window there may
+    # legitimately be zero slots left — the invariant that actually matters
+    # is that none of whatever comes back is in the past.
+    assert all(slot >= now for slot in slots)
+
+
+def test_reschedule_rejects_a_time_that_has_already_passed(
+    client, auth_headers, doctor_with_todays_availability
+):
+    future_start = datetime.now() + timedelta(minutes=15)
+    appointment_id = _book(
+        client, auth_headers, doctor_with_todays_availability, future_start
+    ).get_json()["appointment"]["id"]
+
+    past_start = datetime.now() - timedelta(hours=1)
+    resp = client.patch(
+        f"/api/appointments/{appointment_id}/reschedule",
+        headers=auth_headers,
+        json={"scheduledStart": past_start.isoformat()},
+    )
+    assert resp.status_code == 422
+    assert "already passed" in resp.get_json()["error"]
 
 
 def test_booking_with_injection_like_reason_still_succeeds_but_logs(

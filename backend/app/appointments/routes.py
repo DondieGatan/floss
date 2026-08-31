@@ -4,15 +4,18 @@ from flask import request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt
 
 from app.appointments import appointments_bp
+from app.appointments.confirmations import send_booking_confirmation_email
 from app.extensions import db, limiter
 from app.models import Appointment, Doctor, PatientProfile
 from app.utils import current_user_id
 from app.appointments.conflicts import (
     check_availability,
     check_no_overlap,
+    check_not_in_past,
     compute_open_slots,
     AvailabilityError,
     ConflictError,
+    PastSlotError,
 )
 from app.chat.injection_guard import log_if_suspicious
 from app.pagination import paginate
@@ -102,8 +105,12 @@ def create_appointment():
     # accepted limitation at this app's demo/portfolio scale, not a
     # silently-missing feature.
     try:
+        check_not_in_past(scheduled_start)
         check_availability(doctor.id, scheduled_start, scheduled_end)
         check_no_overlap(doctor.id, scheduled_start, scheduled_end)
+    except PastSlotError as exc:
+        db.session.rollback()
+        return jsonify({"error": str(exc)}), 422
     except AvailabilityError as exc:
         db.session.rollback()
         return jsonify({"error": str(exc)}), 422
@@ -120,6 +127,7 @@ def create_appointment():
     )
     db.session.add(appointment)
     db.session.commit()
+    send_booking_confirmation_email(appointment)
     return jsonify({"appointment": appointment.to_dict()}), 201
 
 
@@ -209,11 +217,15 @@ def reschedule_appointment(appointment_id):
     new_end = new_start + duration
 
     try:
+        check_not_in_past(new_start)
         check_availability(doctor_id, new_start, new_end)
         # exclude_appointment_id keeps this appointment's own current slot
         # from being reported as a conflict with itself — irrelevant once
         # the doctor actually changes, but harmless either way.
         check_no_overlap(doctor_id, new_start, new_end, exclude_appointment_id=appointment.id)
+    except PastSlotError as exc:
+        db.session.rollback()
+        return jsonify({"error": str(exc)}), 422
     except AvailabilityError as exc:
         db.session.rollback()
         return jsonify({"error": str(exc)}), 422
