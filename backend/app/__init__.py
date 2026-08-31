@@ -3,6 +3,7 @@ import sys
 
 from flask import Flask, jsonify, request
 from flask_jwt_extended import verify_jwt_in_request, get_jwt, get_jwt_identity
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from config import Config
 from app.extensions import db, migrate, jwt, cors, limiter
@@ -61,6 +62,19 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
+    # Render sits one reverse-proxy hop in front of this app. Without this,
+    # every request — from real users behind Render's proxy, from Render's
+    # own health-check pinger, from anything — looks like it's coming from
+    # the same internal address to Flask-Limiter's IP-based rate limiting
+    # (get_remote_address reads request.remote_addr, which without ProxyFix
+    # is the proxy's own address, not X-Forwarded-For). That single shared
+    # bucket then fills up from ordinary traffic alone, and once it does,
+    # even /api/health starts getting 429'd — which is exactly what tripped
+    # Render's "server failure" / health-check-timeout alerts and put this
+    # service into a restart loop. x_for=1 trusts exactly the one hop
+    # Render's own proxy adds.
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
+
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
@@ -99,6 +113,7 @@ def create_app(config_class=Config):
     app.register_blueprint(users_bp)
 
     @app.route("/api/health")
+    @limiter.exempt
     def health():
         return jsonify({"status": "ok"}), 200
 
