@@ -40,7 +40,7 @@
   border-radius: 4px;
 }
 
-.skip-link {
+.landing .skip-link {
   position: absolute;
   top: -48px;
   left: 16px;
@@ -172,7 +172,7 @@
   transform: scale(0.97);
 }
 
-.l-btn-primary {
+.landing .l-btn-primary {
   background: var(--l-blue);
   color: #fff;
   box-shadow: 0 8px 20px rgba(47, 95, 224, 0.3);
@@ -184,7 +184,7 @@
   box-shadow: 0 12px 26px rgba(47, 95, 224, 0.4);
 }
 
-.l-btn-ghost {
+.landing .l-btn-ghost {
   background: transparent;
   color: var(--l-blue-dark);
   border: 1px solid var(--l-border);
@@ -306,7 +306,7 @@
   }
 }
 
-.hero-cta {
+.landing .hero-cta {
   display: inline-flex;
   align-items: center;
   gap: 20px;
@@ -734,7 +734,7 @@
   margin: 0 0 14px;
 }
 
-.service-card-link {
+.landing .service-card-link {
   color: var(--l-blue);
   font-weight: 700;
   font-size: 13px;
