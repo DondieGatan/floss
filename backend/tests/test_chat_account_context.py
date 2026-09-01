@@ -1,3 +1,4 @@
+import re
 from datetime import date, datetime, timedelta
 
 from app.chat.account_context import build_account_context, is_personal_query
@@ -62,6 +63,25 @@ def test_account_context_none_for_staff_without_patient_profile(app, register_st
     _headers, user_id = register_staff()
     with app.app_context():
         assert build_account_context(user_id, "what's my next appointment?") is None
+
+
+def test_account_context_reports_naive_current_time_not_utc(app, register_user):
+    """Must stay directly comparable to the naive appointment times listed
+    right below it in the same block (see conflicts.py/reminders.py's
+    identical naive convention) — datetime.now(timezone.utc) would silently
+    disagree with them by the server's UTC offset on any server not
+    actually running in UTC, which is exactly the bug this guards
+    against."""
+    _headers, user_id = register_user()
+    before = datetime.now()
+    with app.app_context():
+        context = build_account_context(user_id, "what's my next appointment?")
+    after = datetime.now()
+
+    match = re.search(r"Current date and time: (.+?)\.", context)
+    assert match is not None
+    reported = datetime.strptime(match.group(1), "%A, %B %d, %Y %I:%M %p")
+    assert before - timedelta(minutes=1) <= reported <= after + timedelta(minutes=1)
 
 
 def test_account_context_reports_no_appointments(app, register_user):

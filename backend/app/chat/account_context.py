@@ -9,7 +9,7 @@ app (Conversation.owner_id, Appointment cancel/reschedule, etc.) — there is
 no code path here that can pull another patient's data. Returns None for
 staff/admin, who have no PatientProfile.
 """
-from datetime import datetime, timezone
+from datetime import datetime
 
 from app.models import Appointment, PatientProfile
 
@@ -50,8 +50,14 @@ def build_account_context(user_id, query):
     if patient is None:
         return None
 
-    now = datetime.now(timezone.utc)
-    lines = [f"Current date and time: {now.strftime('%A, %B %d, %Y %I:%M %p')} UTC."]
+    # Naive, matching scheduled_start (see appointments/conflicts.py and
+    # reminders.py's identical convention) — this whole subsystem has no
+    # tz-aware concept, so this needs to be directly comparable in spirit
+    # (and readable by the model alongside) the naive appointment times
+    # listed below, not a UTC instant that only lines up with them by
+    # coincidence of the server's own OS timezone.
+    now = datetime.now()
+    lines = [f"Current date and time: {now.strftime('%A, %B %d, %Y %I:%M %p')}."]
 
     appointments = (
         Appointment.query.filter_by(patient_id=patient.id)
