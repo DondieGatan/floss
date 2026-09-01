@@ -73,6 +73,26 @@ describe('BookAppointmentPage', () => {
     );
   });
 
+  it('the success screen\'s primary action goes to the dashboard, where the new booking actually shows up (not history, which excludes upcoming appointments by design)', async () => {
+    api.post.mockResolvedValue({ appointment: { scheduledStart: mockSlots[0] } });
+    render(
+      <MemoryRouter initialEntries={['/doctors/1/book']}>
+        <Routes>
+          <Route path="/doctors/:doctorId/book" element={<BookAppointmentPage />} />
+          <Route path="/dashboard" element={<div>Dashboard page</div>} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    const slotButtons = await screen.findAllByRole('button', { name: /AM|PM/ });
+    fireEvent.click(slotButtons[0]);
+    fireEvent.click(screen.getByRole('button', { name: /Confirm/ }));
+    await screen.findByText('Appointment booked');
+
+    fireEvent.click(screen.getByRole('button', { name: /Go to dashboard/ }));
+    expect(await screen.findByText('Dashboard page')).toBeInTheDocument();
+  });
+
   it('shows an empty state when the doctor has no open slots that day', async () => {
     api.get.mockImplementation((path) => {
       if (path.startsWith('/doctors/')) return Promise.resolve({ doctor: mockDoctor });

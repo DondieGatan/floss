@@ -81,8 +81,8 @@ export default function BookAppointmentPage() {
               .
             </p>
             <div className="quick-actions" style={{ justifyContent: 'center' }}>
-              <button className="btn btn-primary" onClick={() => navigate('/appointments')}>
-                View my appointments
+              <button className="btn btn-primary" onClick={() => navigate('/dashboard')}>
+                Go to dashboard
               </button>
               <button className="btn btn-secondary" onClick={() => navigate('/doctors')}>
                 Back to dentists
