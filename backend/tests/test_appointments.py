@@ -285,6 +285,35 @@ def test_get_availability_excludes_booked_slots(client, auth_headers, doctor_wit
     assert len(slots) == 7
 
 
+def test_get_availability_excludeAppointmentId_offers_back_the_appointments_own_slot(
+    client, auth_headers, doctor_with_monday_availability
+):
+    # The reschedule modal defaults to the appointment's own current
+    # date/doctor — without excludeAppointmentId, compute_open_slots would
+    # count this appointment's own row as a conflict with itself, so a
+    # patient could never see (or re-select) their own current time while
+    # rescheduling, even though the actual PATCH .../reschedule endpoint
+    # accepts rescheduling to that exact same slot (see
+    # test_rescheduling_to_its_own_current_slot_does_not_conflict_with_itself).
+    start = datetime.combine(MONDAY, datetime.min.time()).replace(hour=9, minute=0)
+    appointment_id = _book(client, auth_headers, doctor_with_monday_availability, start).get_json()["appointment"][
+        "id"
+    ]
+
+    without_exclude = client.get(
+        f"/api/appointments/availability?doctorId={doctor_with_monday_availability}&date={MONDAY.isoformat()}",
+        headers=auth_headers,
+    ).get_json()["slots"]
+    assert start.isoformat() not in without_exclude
+
+    with_exclude = client.get(
+        f"/api/appointments/availability?doctorId={doctor_with_monday_availability}&date={MONDAY.isoformat()}"
+        f"&excludeAppointmentId={appointment_id}",
+        headers=auth_headers,
+    ).get_json()["slots"]
+    assert start.isoformat() in with_exclude
+
+
 def test_booking_rejects_a_time_that_has_already_passed(
     client, auth_headers, doctor_with_todays_availability
 ):

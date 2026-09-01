@@ -64,23 +64,32 @@ def check_no_overlap(doctor_id, start, end, exclude_appointment_id=None):
         raise ConflictError("This doctor already has an appointment at that time.")
 
 
-def compute_open_slots(doctor_id, date_, duration_minutes):
+def compute_open_slots(doctor_id, date_, duration_minutes, exclude_appointment_id=None):
     """Returns a list of open slot-start datetimes for one calendar date,
     stepping through the doctor's availability windows at
     `duration_minutes` granularity and dropping any slot that overlaps an
     existing non-cancelled appointment. Lets the frontend only ever offer
-    times that would actually pass check_availability/check_no_overlap."""
+    times that would actually pass check_availability/check_no_overlap.
+
+    exclude_appointment_id mirrors check_no_overlap's own parameter of the
+    same name — pass the appointment being rescheduled so its own current
+    slot doesn't get counted as a conflict with itself. Without it, the
+    reschedule UI couldn't offer a patient's own current time back as an
+    option, even though the actual reschedule endpoint would accept it."""
     weekday = date_.weekday()
     windows = DoctorAvailability.query.filter_by(doctor_id=doctor_id, weekday=weekday).all()
     if not windows:
         return []
 
-    existing = Appointment.query.filter(
+    existing_query = Appointment.query.filter(
         Appointment.doctor_id == doctor_id,
         Appointment.status != "cancelled",
         Appointment.scheduled_start >= datetime.combine(date_, datetime.min.time()),
         Appointment.scheduled_start < datetime.combine(date_, datetime.min.time()) + timedelta(days=1),
-    ).all()
+    )
+    if exclude_appointment_id is not None:
+        existing_query = existing_query.filter(Appointment.id != exclude_appointment_id)
+    existing = existing_query.all()
 
     now = datetime.now()
     slots = []

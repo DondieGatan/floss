@@ -40,7 +40,9 @@ describe('RescheduleModal', () => {
     render(<RescheduleModal appointment={appointment} onClose={vi.fn()} onRescheduled={vi.fn()} />);
 
     await waitFor(() =>
-      expect(api.get).toHaveBeenCalledWith('/appointments/availability?doctorId=3&date=2026-08-20&durationMinutes=30')
+      expect(api.get).toHaveBeenCalledWith(
+        '/appointments/availability?doctorId=3&date=2026-08-20&durationMinutes=30&excludeAppointmentId=7'
+      )
     );
     expect(await screen.findByRole('button', { name: /10:00/ })).toBeInTheDocument();
   });
@@ -78,7 +80,9 @@ describe('RescheduleModal', () => {
     fireEvent.change(screen.getByLabelText('Dentist'), { target: { value: '4' } });
 
     await waitFor(() =>
-      expect(api.get).toHaveBeenCalledWith('/appointments/availability?doctorId=4&date=2026-08-20&durationMinutes=30')
+      expect(api.get).toHaveBeenCalledWith(
+        '/appointments/availability?doctorId=4&date=2026-08-20&durationMinutes=30&excludeAppointmentId=7'
+      )
     );
 
     const slotBtn = await screen.findByRole('button', { name: /11:00/ });

@@ -38,6 +38,7 @@ def get_availability():
     doctor_id = request.args.get("doctorId", type=int)
     date_raw = request.args.get("date")
     duration_minutes = request.args.get("durationMinutes", DEFAULT_DURATION_MINUTES, type=int)
+    exclude_appointment_id = request.args.get("excludeAppointmentId", type=int)
 
     doctor = db.session.get(Doctor, doctor_id) if doctor_id else None
     if doctor is None:
@@ -49,7 +50,7 @@ def get_availability():
     if requested_date < date.today():
         return jsonify({"slots": []}), 200
 
-    slots = compute_open_slots(doctor.id, requested_date, duration_minutes)
+    slots = compute_open_slots(doctor.id, requested_date, duration_minutes, exclude_appointment_id=exclude_appointment_id)
     return jsonify({"slots": [s.isoformat() for s in slots]}), 200
 
 

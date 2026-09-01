@@ -38,7 +38,10 @@ export default function RescheduleModal({ appointment, onClose, onRescheduled })
     setSlots(null);
     setSelectedSlot(null);
     api
-      .get(`/appointments/availability?doctorId=${doctorId}&date=${date}&durationMinutes=${durationMinutes}`)
+      .get(
+        `/appointments/availability?doctorId=${doctorId}&date=${date}&durationMinutes=${durationMinutes}` +
+          `&excludeAppointmentId=${appointment.id}`
+      )
       .then((data) => setSlots(data.slots));
   }, [doctorId, date, durationMinutes]);
 
