@@ -228,11 +228,16 @@ class Appointment(db.Model):
         # its slot for rebooking, and a plain unique constraint on
         # (doctor_id, scheduled_start) can't tell a cancelled row from a
         # live one.
+        # sqlite_where and postgresql_where are both needed — each
+        # dialect-prefixed kwarg only takes effect for its own dialect (see
+        # migration d2a98fbd91ad for the bug this fixes: sqlite_where alone
+        # left the live Postgres index with no WHERE clause at all).
         db.Index(
             "uq_appointments_doctor_start_active",
             "doctor_id", "scheduled_start",
             unique=True,
             sqlite_where=db.text("status != 'cancelled'"),
+            postgresql_where=db.text("status != 'cancelled'"),
         ),
     )
 
@@ -322,11 +327,19 @@ class Admission(db.Model):
         # currently occupied" is a plain equality condition, so a partial
         # unique index enforces it exactly — a real DB guarantee, not just
         # app-layer discipline.
+        # sqlite_where and postgresql_where are both needed — each
+        # dialect-prefixed kwarg only takes effect for its own dialect (see
+        # migration d2a98fbd91ad for the identical bug this exact pattern
+        # caused on Appointment's own partial index: sqlite_where alone
+        # left the live Postgres index with no WHERE clause, making it a
+        # blanket unique constraint on bed_id — permanently blocking any
+        # bed from ever having a second admission, discharged or not).
         db.Index(
             "uq_admissions_bed_active",
             "bed_id",
             unique=True,
             sqlite_where=db.text("discharged_at IS NULL"),
+            postgresql_where=db.text("discharged_at IS NULL"),
         ),
     )
 
