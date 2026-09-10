@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import ChatWindow from './ChatWindow';
 import AssistantAvatar from './AssistantAvatar';
 
@@ -21,8 +22,14 @@ function CloseIcon() {
 }
 
 export default function FloatingChatWidget() {
+  const { user } = useAuth();
+  // Scoped per user, not just per browser — a shared/family device
+  // shouldn't hand one patient's conversation to whoever logs in next.
+  const convKey = user?.id ? `floss_chat_conversation_id_${user.id}` : null;
+
   const [open, setOpen] = useState(false);
   const [conversationId, setConversationId] = useState(null);
+  const [initialMessages, setInitialMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -31,12 +38,32 @@ export default function FloatingChatWidget() {
   const previouslyFocusedRef = useRef(null);
   const askQuestionHandledRef = useRef(false);
 
-  async function startConversation() {
+  // Reuses the last conversation (and refetches its history) instead of
+  // always starting fresh — the panel unmounts ChatWindow on close, which
+  // would otherwise drop the in-memory message list every time it reopens,
+  // even though the conversation and its messages are still sitting in the
+  // database. Falls back to creating a new conversation if there's no saved
+  // id, or the saved one is gone/not ours (e.g. a different patient shares
+  // this device, or the conversation was deleted).
+  async function openConversation() {
     setLoading(true);
     setError(null);
     try {
+      const savedId = convKey ? localStorage.getItem(convKey) : null;
+      if (savedId) {
+        try {
+          const data = await api.get(`/chat/conversations/${savedId}/messages`);
+          setConversationId(Number(savedId));
+          setInitialMessages(data.messages);
+          return;
+        } catch {
+          if (convKey) localStorage.removeItem(convKey);
+        }
+      }
       const data = await api.post('/chat/conversations', {});
       setConversationId(data.conversation.id);
+      setInitialMessages([]);
+      if (convKey) localStorage.setItem(convKey, String(data.conversation.id));
     } catch {
       setError('Could not start a conversation. Please try again.');
     } finally {
@@ -54,8 +81,8 @@ export default function FloatingChatWidget() {
       return;
     }
     setOpen(true);
-    if (conversationId || loading) return;
-    startConversation();
+    if (loading) return;
+    openConversation();
   }
 
   // A link elsewhere (the landing page's "Ask a Question" CTA) can land a
@@ -74,7 +101,7 @@ export default function FloatingChatWidget() {
       { replace: true }
     );
     setOpen(true);
-    startConversation();
+    openConversation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
@@ -137,7 +164,7 @@ export default function FloatingChatWidget() {
                 Loading…
               </p>
             ) : (
-              <ChatWindow key={conversationId} conversationId={conversationId} initialMessages={[]} />
+              <ChatWindow key={conversationId} conversationId={conversationId} initialMessages={initialMessages} />
             )}
           </div>
         </div>
