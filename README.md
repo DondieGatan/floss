@@ -7,11 +7,22 @@ RAG chatbot that cites its answers when they come from your clinic's own documen
 general dental knowledge — clearly uncited — when they don't. Built as a full-stack portfolio project:
 Flask + SQLAlchemy backend, React + Vite frontend.
 
-**Live**: [floss-beta.vercel.app](https://floss-beta.vercel.app) (frontend, Vercel) ·
-[floss-backend.onrender.com](https://floss-backend.onrender.com) (API, Render free tier)
+[![Floss Clinic](https://dondiegatan.github.io/dondiegatan-portfolio/assets/covers/floss-clinic.webp)](https://dondiegatan.github.io/dondiegatan-portfolio/projects.html#floss-clinic)
 
-**Demo logins** (seeded via `backend/seed.py`): `patient@floss.demo` / `staff@floss.demo` / `admin@floss.demo`,
-all with password `password123`.
+**Live**: [floss-beta.vercel.app](https://floss-beta.vercel.app) (frontend, Vercel) ·
+[floss-backend.onrender.com](https://floss-backend.onrender.com) (API, Render free tier) ·
+[Demo video on my portfolio](https://dondiegatan.github.io/dondiegatan-portfolio/projects.html#floss-clinic) · built by
+[Dondie Godwin Gatan](https://dondiegatan.github.io/dondiegatan-portfolio/)
+
+**Try it in a minute:** open the live app and sign in as the demo patient, `patient@floss.demo` / `password123`
+(or create your own account from *Sign up*). Browse the dentists, pick one, choose a date on a weekday, and book a
+slot. Try booking the same slot again to see the conflict check reject it, then reschedule or cancel from the
+dashboard. The chat button in the corner opens the clinic assistant.
+
+**Other demo logins** (seeded via `backend/seed.py`, same password): `staff@floss.demo` and `admin@floss.demo`.
+Staff and admin roles require **two-factor authentication**, so those accounts need an authenticator app (or the
+emailed one-time code) before they can sign in. The patient account has no two-factor step, which makes it the easy
+way in.
 
 > The backend is on Render's free tier, which spins down after inactivity — the first request after a while
 > can take up to ~50s to wake it back up. The frontend surfaces a "waking up the server" notice on sign-in/
@@ -122,7 +133,7 @@ across the same route set on purpose.
 | **Backend** | Flask (app-factory + blueprints), SQLAlchemy, Alembic, Flask-JWT-Extended, Flask-Limiter, SQLite |
 | **RAG** | Hugging Face Inference API (`all-MiniLM-L6-v2` embeddings, called remotely), Google Gemini (`gemini-2.5-flash`, generation), brute-force cosine retrieval |
 | **Frontend** | React 19, Vite, react-router-dom, fetch + ReadableStream SSE (not EventSource — it can't carry auth headers) |
-| **Testing** | pytest (222 tests, backend), Vitest + React Testing Library (92 tests, frontend) |
+| **Testing** | pytest (268 tests, backend), Vitest + React Testing Library (114 tests, frontend) |
 
 ## Project structure
 
@@ -141,7 +152,7 @@ backend/
     models.py       User, Department, Doctor, DoctorAvailability, PatientProfile,
                     Appointment, Ward, Bed, Admission, Document, Chunk, Conversation, Message, AuditLog
   migrations/       Alembic, one migration per schema change
-  tests/            222 tests across every blueprint + retrieval/generation
+  tests/            268 tests across every blueprint + retrieval/generation
   seed.py           demo departments, dentists, rooms/chairs, and login accounts
 
 frontend/
@@ -180,8 +191,8 @@ degrades gracefully to an "assistant temporarily unavailable" message rather tha
 ## Testing
 
 ```bash
-cd backend && pytest -q                 # 222 tests
-cd frontend && npm test                  # Vitest + React Testing Library, 92 tests
+cd backend && pytest -q                 # 268 tests
+cd frontend && npm test                  # Vitest + React Testing Library, 114 tests
 ```
 
 Backend coverage includes appointment boundary conditions (exact-duplicate rejection, partial-overlap
