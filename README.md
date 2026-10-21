@@ -97,6 +97,12 @@ index would be unjustified infrastructure). Retrieval sits behind a **similarity
 below it, the retrieved chunk is dropped from the prompt entirely rather than handed to the model as if it
 were an authoritative source.
 
+**If the embedding service is unavailable** (no Hugging Face credits, an outage, a missing token), the chat
+does not fail: ingestion still stores the chunks (without vectors) and a question falls back to **keyword
+retrieval** (`app/chat/keyword_search.py` — the idf-weighted share of the question's words found in each
+chunk, with its own confidence bar). Run `reembed_chunks.py` once the service is back to restore semantic
+search. Guarded by `tests/test_keyword_fallback.py`.
+
 The model (Google Gemini) is still consulted either way — it isn't gated behind retrieval succeeding. The
 system prompt draws the actual line: an answer grounded in a retrieved passage gets bracketed `[1]`/`[2]`
 citations back to the exact source chunk; a question that's on-topic but has no matching document gets
@@ -133,7 +139,7 @@ across the same route set on purpose.
 | **Backend** | Flask (app-factory + blueprints), SQLAlchemy, Alembic, Flask-JWT-Extended, Flask-Limiter, SQLite |
 | **RAG** | Hugging Face Inference API (`all-MiniLM-L6-v2` embeddings, called remotely), Google Gemini (`gemini-2.5-flash`, generation), brute-force cosine retrieval |
 | **Frontend** | React 19, Vite, react-router-dom, fetch + ReadableStream SSE (not EventSource — it can't carry auth headers) |
-| **Testing** | pytest (268 tests, backend), Vitest + React Testing Library (114 tests, frontend) |
+| **Testing** | pytest (275 tests, backend), Vitest + React Testing Library (114 tests, frontend) |
 
 ## Project structure
 
@@ -152,7 +158,7 @@ backend/
     models.py       User, Department, Doctor, DoctorAvailability, PatientProfile,
                     Appointment, Ward, Bed, Admission, Document, Chunk, Conversation, Message, AuditLog
   migrations/       Alembic, one migration per schema change
-  tests/            268 tests across every blueprint + retrieval/generation
+  tests/            275 tests across every blueprint + retrieval/generation
   seed.py           demo departments, dentists, rooms/chairs, and login accounts
 
 frontend/
@@ -185,13 +191,13 @@ npm run dev           # http://localhost:5173
 
 **Environment variables** (backend, `.env` or shell): `GEMINI_API_KEY` (chat generation; without it, chat
 degrades gracefully to an "assistant temporarily unavailable" message rather than crashing), `HF_TOKEN`
-(embeddings via Hugging Face's Inference API — required for ingestion and retrieval to work at all),
+(embeddings via Hugging Face's Inference API; without it, or when its credits run out, chat falls back to keyword retrieval),
 `JWT_SECRET_KEY`, `SECRET_KEY`, `DATABASE_URL` (defaults to a local SQLite file).
 
 ## Testing
 
 ```bash
-cd backend && pytest -q                 # 268 tests
+cd backend && pytest -q                 # 275 tests (6 need a funded HF_TOKEN and skip without one)
 cd frontend && npm test                  # Vitest + React Testing Library, 114 tests
 ```
 

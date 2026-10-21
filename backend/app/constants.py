@@ -20,6 +20,9 @@ TOP_K = 5
 # genuinely related content typically score ~0.3-0.6+, unrelated content
 # usually falls below ~0.2-0.3.
 SIMILARITY_THRESHOLD = 0.35
+# Keyword fallback (app/chat/keyword_search.py) scores differently: the share of the
+# question's content words found in the chunk, so "most of the question's words" is the bar.
+KEYWORD_MIN_SCORE = 0.5
 
 # Uploads
 ALLOWED_EXTENSIONS = {"pdf", "txt"}

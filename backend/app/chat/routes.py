@@ -8,7 +8,8 @@ from app.extensions import db, limiter
 from app.models import Document, Conversation, Message, Chunk
 from app.utils import current_user_id
 from app.ml import embed_query
-from app.chat.retrieval import retrieve, is_low_confidence
+from app.chat.retrieval import retrieve, retrieve_keyword, is_low_confidence
+from app.constants import KEYWORD_MIN_SCORE
 from app.chat.generation import build_prompt, stream_answer
 from app.chat.account_context import build_account_context
 from app.chat.greetings import is_pure_greeting, GREETING_RESPONSE
@@ -150,9 +151,17 @@ def post_message(conversation_id):
         doc_results = []
         account_context = None
     else:
-        query_vector = embed_query(query)
-        results = retrieve(conversation.document_id, query_vector)
-        low_confidence = is_low_confidence(results)
+        try:
+            query_vector = embed_query(query)
+            results = retrieve(conversation.document_id, query_vector)
+            low_confidence = is_low_confidence(results)
+        except Exception:  # noqa: BLE001 - embedding service down (no credits, outage): degrade, don't 500
+            # The query embedding comes from a remote API (see app/ml.py). If
+            # it fails, answer from keyword matches over the same chunks
+            # rather than failing the whole chat request.
+            current_app.logger.warning("Embedding unavailable; falling back to keyword retrieval", exc_info=True)
+            results = retrieve_keyword(conversation.document_id, query)
+            low_confidence = is_low_confidence(results, KEYWORD_MIN_SCORE)
         # Live per-user data (this user's own appointments) — see
         # app/chat/account_context.py. None for staff/admin (no PatientProfile),
         # so their behavior is unchanged.

@@ -114,7 +114,7 @@ def ingest_document(document, file_bytes, filename):
     rather than stuck `processing`."""
     from app.extensions import db
     from app.models import Chunk
-    from app.ml import embed_texts
+    from app.ml import embed_texts_or_none
 
     document.status = "processing"
     db.session.commit()
@@ -131,15 +131,17 @@ def ingest_document(document, file_bytes, filename):
             return
 
         texts = [c["text"] for c in chunk_dicts]
-        vectors = embed_texts(texts)
+        # None when the embedding service is unavailable: the chunks are still
+        # stored (empty embedding) so the document is searchable by keyword.
+        vectors = embed_texts_or_none(texts)
 
-        for chunk_dict, vector in zip(chunk_dicts, vectors):
+        for i, chunk_dict in enumerate(chunk_dicts):
             db.session.add(Chunk(
                 document_id=document.id,
                 page_number=chunk_dict["page_number"],
                 chunk_index=chunk_dict["chunk_index"],
                 text=chunk_dict["text"],
-                embedding=vector.tobytes(),
+                embedding=vectors[i].tobytes() if vectors is not None else b"",
             ))
 
         document.status = "ready"

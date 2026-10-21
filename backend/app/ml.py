@@ -3,6 +3,7 @@ no torch/transformers/sentence-transformers dependency. See
 app/constants.py:EMBEDDING_MODEL_NAME for why this is a remote call rather
 than an in-process one.
 """
+import logging
 import os
 
 import httpx
@@ -41,3 +42,17 @@ def embed_query(text):
     """Embed a single query string. Returns a (EMBEDDING_DIM,) float32 vector."""
     vectors = _call_api([text])
     return np.array(vectors[0], dtype=np.float32)
+
+
+def embed_texts_or_none(texts):
+    """Like embed_texts, but returns None instead of raising when the
+    embedding service is unavailable (no credits, outage, missing token).
+    Callers store the chunks without vectors so the text is still searchable
+    by keyword; run reembed_chunks.py once the service is back."""
+    try:
+        return embed_texts(texts)
+    except Exception:  # noqa: BLE001 - any failure of the remote service must degrade, not crash
+        logging.getLogger(__name__).warning(
+            "Embedding service unavailable; storing %d chunk(s) without vectors", len(texts), exc_info=True
+        )
+        return None

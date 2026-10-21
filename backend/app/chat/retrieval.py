@@ -1,7 +1,8 @@
 import numpy as np
 
 from app.models import Chunk, Document
-from app.constants import TOP_K, SIMILARITY_THRESHOLD
+from app.constants import TOP_K, SIMILARITY_THRESHOLD, EMBEDDING_DIM
+from app.chat.keyword_search import score_chunks
 
 
 def retrieve(document_id, query_vector, top_k=TOP_K):
@@ -24,7 +25,10 @@ def retrieve(document_id, query_vector, top_k=TOP_K):
     if document_id is not None:
         query = query.filter(Chunk.document_id == document_id)
 
-    chunks = query.all()
+    # Chunks ingested while the embedding service was unavailable are stored
+    # with an empty embedding (see app/ml.py:embed_texts_or_none); they are
+    # reachable through retrieve_keyword() but invisible to vector search.
+    chunks = [c for c in query.all() if len(c.embedding or b"") == EMBEDDING_DIM * 4]
     if not chunks:
         return []
 
@@ -36,7 +40,18 @@ def retrieve(document_id, query_vector, top_k=TOP_K):
     return [(chunks[i], float(scores[i])) for i in order]
 
 
-def is_low_confidence(results):
+def retrieve_keyword(document_id, query_text, top_k=TOP_K):
+    """Fallback retrieval by keyword overlap, used when the query can't be
+    embedded. Same shape as retrieve(): [(Chunk, score), ...], best first."""
+    query = Chunk.query.join(Document, Chunk.document_id == Document.id).filter(
+        Document.status == "ready",
+    )
+    if document_id is not None:
+        query = query.filter(Chunk.document_id == document_id)
+    return score_chunks(query_text, query.all())[:top_k]
+
+
+def is_low_confidence(results, threshold=SIMILARITY_THRESHOLD):
     """True if there's nothing to search, or the best match isn't good
     enough to trust — keeps a probably-irrelevant chunk from being handed
     to the model as if it were an authoritative, citable numbered source.
@@ -45,4 +60,4 @@ def is_low_confidence(results):
     if not results:
         return True
     top_score = results[0][1]
-    return top_score < SIMILARITY_THRESHOLD
+    return top_score < threshold

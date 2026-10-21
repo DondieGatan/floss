@@ -64,7 +64,7 @@ def regenerate_directory_digest(triggered_by_user_id):
     broad except for the same reason."""
     from app.extensions import db
     from app.models import Document, Chunk
-    from app.ml import embed_texts
+    from app.ml import embed_texts_or_none
 
     document = Document.query.filter_by(document_type="directory_digest").first()
     if document is None:
@@ -92,9 +92,10 @@ def regenerate_directory_digest(triggered_by_user_id):
             db.session.commit()
             return document
 
-        vectors = embed_texts(chunks)
-        for idx, (chunk, vector) in enumerate(zip(chunks, vectors)):
-            db.session.add(Chunk(document_id=document.id, page_number=1, chunk_index=idx, text=chunk, embedding=vector.tobytes()))
+        vectors = embed_texts_or_none(chunks)  # None => stored without vectors, keyword-searchable
+        for idx, chunk in enumerate(chunks):
+            embedding = vectors[idx].tobytes() if vectors is not None else b""
+            db.session.add(Chunk(document_id=document.id, page_number=1, chunk_index=idx, text=chunk, embedding=embedding))
 
         document.status = "ready"
         document.page_count = 1

@@ -26,6 +26,18 @@ pytestmark = [
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), "fixtures", "sample.txt")
 
 
+@pytest.fixture(autouse=True)
+def _require_working_embedding_service():
+    """These tests measure real semantic retrieval, so they need the real
+    Hugging Face API to answer. If it can't (no credits -> 402, outage,
+    network), skip instead of failing: that's an environment condition, and
+    the keyword fallback is covered by tests/test_keyword_fallback.py."""
+    try:
+        embed_query("availability check")
+    except Exception as exc:  # noqa: BLE001
+        pytest.skip(f"embedding service unavailable: {type(exc).__name__}")
+
+
 @pytest.fixture()
 def ingested_sample_doc(app, register_staff):
     headers, user_id = register_staff()
