@@ -1,29 +1,43 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useChatStream } from '../hooks/useChatStream';
+import { useBookingAssistant } from '../hooks/useBookingAssistant';
 import MessageBubble from './MessageBubble';
 import AssistantAvatar from './AssistantAvatar';
+import BookingActionCard from './BookingActionCard';
 
 export default function ChatWindow({ conversationId, initialMessages }) {
-  const { messages, sending, error, sendMessage } = useChatStream(conversationId, initialMessages);
+  const chat = useChatStream(conversationId, initialMessages);
+  const booking = useBookingAssistant(conversationId, chat.setMessages);
   const [input, setInput] = useState('');
   const bottomRef = useRef(null);
 
+  const sending = chat.sending || booking.sending;
+  const error = chat.error || booking.error;
+  const inBookingMode = booking.enabled && booking.bookingMode;
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [chat.messages, booking.actions]);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     const content = input.trim();
     if (!content || sending) return;
     setInput('');
-    sendMessage(content);
+    if (inBookingMode) {
+      const delivered = await booking.sendBookingMessage(content);
+      // Not delivered (assistant busy or down): put the message back so it isn't lost.
+      if (delivered === false) setInput((current) => current || content);
+    } else {
+      chat.sendMessage(content);
+    }
   }
 
   return (
     <div className="chat-window">
       <div className="chat-messages" aria-live="polite">
-        {messages.length === 0 && (
+        {chat.messages.length === 0 && (
           <div className="chat-empty-state">
             <AssistantAvatar size="lg" />
             <p className="chat-empty-title">Hi, I'm the Floss Assistant</p>
@@ -32,8 +46,16 @@ export default function ChatWindow({ conversationId, initialMessages }) {
             </p>
           </div>
         )}
-        {messages.map((m) => (
+        {chat.messages.map((m) => (
           <MessageBubble key={m.id} message={m} />
+        ))}
+        {booking.actions.map((action) => (
+          <BookingActionCard
+            key={action.id}
+            action={action}
+            onConfirm={(id) => booking.resolveAction(id, 'confirm')}
+            onReject={(id) => booking.resolveAction(id, 'reject')}
+          />
         ))}
         <div ref={bottomRef} />
       </div>
@@ -42,6 +64,27 @@ export default function ChatWindow({ conversationId, initialMessages }) {
         <div className="form-error chat-error" role="alert">
           {error}
         </div>
+      )}
+
+      {inBookingMode && booking.busy && (
+        <div className="chat-busy-notice" role="status">
+          <p>{booking.busy}</p>
+          <Link className="btn btn-secondary" to="/doctors">
+            Choose a dentist and book
+          </Link>
+        </div>
+      )}
+
+      {booking.enabled && (
+        <label className="booking-toggle">
+          <input
+            type="checkbox"
+            role="switch"
+            checked={booking.bookingMode}
+            onChange={(e) => booking.setBookingMode(e.target.checked)}
+          />
+          <span>Let the assistant help me book</span>
+        </label>
       )}
 
       <form className="chat-input-row" onSubmit={handleSubmit}>
@@ -53,7 +96,7 @@ export default function ChatWindow({ conversationId, initialMessages }) {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask a question…"
+          placeholder={inBookingMode ? "Tell me when you'd like to come in…" : 'Ask a question…'}
           disabled={sending}
         />
         <button className="btn btn-primary" type="submit" disabled={sending || !input.trim()}>

@@ -22,9 +22,12 @@ export function clearTokens() {
 }
 
 export class ApiError extends Error {
-  constructor(message, status) {
+  // `data` is the parsed JSON error body when there was one, so callers can
+  // read fields beyond the message (e.g. a machine-readable `code`).
+  constructor(message, status, data = null) {
     super(message);
     this.status = status;
+    this.data = data;
   }
 }
 
@@ -67,13 +70,14 @@ async function request(path, options = {}, { retry = true, raw = false } = {}) {
 
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
+    let data = null;
     try {
-      const data = await res.json();
+      data = await res.json();
       if (data.error) message = data.error;
     } catch {
       // response wasn't JSON — keep the generic message
     }
-    throw new ApiError(message, res.status);
+    throw new ApiError(message, res.status, data);
   }
 
   if (res.status === 204) return null;
