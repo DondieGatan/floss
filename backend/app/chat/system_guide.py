@@ -18,6 +18,7 @@ What it is: Floss Clinic's web app for a dental clinic. Patients browse dentists
 Roles: patient (anyone can create a patient account with Sign up), staff, admin, owner (staff, admin and owner accounts are granted by an admin or the owner, not by signing up). The sidebar shows only the pages that role can use, and the role is shown as a badge. There is a Light mode / Dark mode switch and a Logout button at the bottom of the sidebar.
 
 Patients:
+- There is NO page called "My Appointments". Upcoming appointments (Edit, Cancel) live on the Dashboard and past visits on the History page; if a document says "My Appointments", it means the Dashboard, so say Dashboard.
 - Dashboard: shows upcoming appointments, counts of upcoming and past visits, a reminder banner for an appointment coming up, and a "Book an appointment" button.
 - Dentists page: browse dentists, filter by department, and press "Book appointment" on a dentist.
 - Booking: pick a date, then an open 30-minute time slot, optionally add a reason, and confirm. Times in the past can't be booked, a slot someone else already has is refused (pick another), and back-to-back appointments are fine. Dentists only have slots on the days and hours they work.
