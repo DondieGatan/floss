@@ -117,6 +117,17 @@ book an appointment instead. Both lines are guarded by tests (`test_system_promp
 `test_system_prompt_allows_general_dental_knowledge_uncited`,
 `test_system_prompt_declines_fully_unrelated_questions`) so neither can silently regress.
 
+**It answers questions about the app itself, and has guardrails that don't depend on the model behaving.**
+The assistant carries a short, reviewed guide to the app (`app/chat/system_guide.py`: pages, what each role can
+do, how booking and the assistant work), so "how do I reschedule?" or "what can staff do?" is answered from facts,
+tailored to the asker's role, instead of being refused as off-topic. How the system is secured is deliberately
+off-limits, and that is enforced in code (`app/chat/guardrails.py`), not just asked of the model: unambiguous
+attempts to probe security, extract the assistant's instructions, or reach other people's data get a fixed reply
+and never reach the model; an output guard cuts off a reply that would contain a key, token, database URL or the
+prompt itself before it is shown; messages are length-capped; and the booking assistant uses the same screen.
+Tests cover both directions: the blocked phrasings, a list of ordinary questions that must *not* be blocked, a
+check that the guide stays in step with the real sidebar pages, and that it says nothing about how security works.
+
 ### A booking assistant that proposes — a person decides
 
 Switch on **"Let the assistant help me book"** in the chat and the assistant can book, move or cancel a
@@ -176,7 +187,7 @@ across the same route set on purpose.
 | **RAG** | Hugging Face Inference API (`all-MiniLM-L6-v2` embeddings, called remotely), Google Gemini (`gemini-2.5-flash`, generation), brute-force cosine retrieval |
 | **Agent** | Tool-calling booking assistant (propose → confirm); Gemini, Groq or Azure OpenAI behind one adapter interface, with rate-limit failover |
 | **Frontend** | React 19, Vite, react-router-dom, fetch + ReadableStream SSE (not EventSource — it can't carry auth headers) |
-| **Testing** | pytest (365 tests, backend), Vitest + React Testing Library (139 tests, frontend) |
+| **Testing** | pytest (431 tests, backend), Vitest + React Testing Library (139 tests, frontend) |
 
 ## Project structure
 
@@ -197,7 +208,7 @@ backend/
     models.py       User, Department, Doctor, DoctorAvailability, PatientProfile,
                     Appointment, Ward, Bed, Admission, Document, Chunk, Conversation, Message, AuditLog, AgentAction
   migrations/       Alembic, one migration per schema change
-  tests/            365 tests across every blueprint + retrieval/generation + the booking agent
+  tests/            431 tests across every blueprint + retrieval/generation + the booking agent
   api/index.py      Vercel serverless entrypoint (the same create_app() as everywhere else)
   seed.py           demo departments, dentists, rooms/chairs, and login accounts
 
@@ -269,7 +280,7 @@ the function runs in UTC, as the Render deployment always did.
 ## Testing
 
 ```bash
-cd backend && pytest -q                 # 365 tests (6 need a funded HF_TOKEN and skip without one)
+cd backend && pytest -q                 # 431 tests (6 need a funded HF_TOKEN and skip without one)
 cd frontend && npm test                  # Vitest + React Testing Library, 139 tests
 ```
 
