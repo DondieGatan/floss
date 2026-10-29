@@ -6,6 +6,10 @@ import MessageBubble from './MessageBubble';
 import AssistantAvatar from './AssistantAvatar';
 import BookingActionCard from './BookingActionCard';
 
+// The server refuses longer messages (see app/chat/guardrails.py); stop the box
+// from accepting them in the first place.
+const MAX_MESSAGE_CHARS = 1000;
+
 export default function ChatWindow({ conversationId, initialMessages }) {
   const chat = useChatStream(conversationId, initialMessages);
   const booking = useBookingAssistant(conversationId, chat.setMessages);
@@ -94,6 +98,7 @@ export default function ChatWindow({ conversationId, initialMessages }) {
         <input
           id="chat-message-input"
           type="text"
+          maxLength={MAX_MESSAGE_CHARS}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={inBookingMode ? "Tell me when you'd like to come in…" : 'Ask a question…'}

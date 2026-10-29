@@ -354,6 +354,28 @@ def reset_cooldowns():
         _COOLDOWNS.clear()
 
 
+def cooldown_remaining(key, clock=time.monotonic):
+    """(seconds left, was_busy) for a provider/model key; (0.0, False) when free."""
+    with _COOLDOWN_LOCK:
+        entry = _COOLDOWNS.get(key)
+    if entry is None:
+        return 0.0, False
+    return max(0.0, entry["until"] - clock()), entry["busy"]
+
+
+def start_cooldown(key, busy, retry_after, clock=time.monotonic):
+    """Parks a provider/model after a failure; returns how many seconds. Shared
+    by the booking assistant and the chat, so one model's exhausted quota is
+    remembered by both."""
+    seconds = BUSY_COOLDOWN_SECONDS if busy else ERROR_COOLDOWN_SECONDS
+    if busy and retry_after:
+        seconds = retry_after
+    seconds = min(max(seconds, 1), MAX_COOLDOWN_SECONDS)
+    with _COOLDOWN_LOCK:
+        _COOLDOWNS[key] = {"until": clock() + seconds, "busy": busy}
+    return seconds
+
+
 class FallbackProvider:
     """Tries providers in order, skipping any that failed recently.
 
@@ -396,20 +418,10 @@ class FallbackProvider:
         return self._waited
 
     def _remaining(self, provider):
-        with _COOLDOWN_LOCK:
-            entry = _COOLDOWNS.get(self._key(provider))
-        if entry is None:
-            return 0.0, False
-        return max(0.0, entry["until"] - self._clock()), entry["busy"]
+        return cooldown_remaining(self._key(provider), self._clock)
 
     def _start_cooldown(self, provider, busy, retry_after):
-        seconds = BUSY_COOLDOWN_SECONDS if busy else ERROR_COOLDOWN_SECONDS
-        if busy and retry_after:
-            seconds = retry_after
-        seconds = min(max(seconds, 1), MAX_COOLDOWN_SECONDS)
-        with _COOLDOWN_LOCK:
-            _COOLDOWNS[self._key(provider)] = {"until": self._clock() + seconds, "busy": busy}
-        return seconds
+        return start_cooldown(self._key(provider), busy, retry_after, self._clock)
 
     def available(self):
         """False when every provider is cooling down — the frontend can then
@@ -453,7 +465,7 @@ class FallbackProvider:
             self._waited += wait
 
 
-def _gemini_fallback_models(config):
+def gemini_fallback_models(config):
     """Extra Gemini models tried after the main one (each has its own free
     quota). GEMINI_FALLBACK_MODELS is a comma-separated list; set it empty to
     turn the extras off."""
@@ -492,6 +504,6 @@ def get_provider(config):
     # (flash-lite tends to ask for an appointment id instead of looking it up),
     # so they are the last resort before the patient sees "busy".
     if forced in ("", "gemini") and config.get("GEMINI_API_KEY"):
-        for model in _gemini_fallback_models(config):
+        for model in gemini_fallback_models(config):
             chain.append(GeminiProvider(api_key=config["GEMINI_API_KEY"], model=model))
     return FallbackProvider(chain) if chain else None

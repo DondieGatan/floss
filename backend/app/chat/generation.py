@@ -1,9 +1,22 @@
+import logging
 import re
+from functools import partial
 
+from app.agent.providers import (
+    GROQ_BASE_URL,
+    GROQ_DEFAULT_MODEL,
+    REQUEST_TIMEOUT_SECONDS,
+    classify_failure,
+    cooldown_remaining,
+    gemini_fallback_models,
+    start_cooldown,
+)
 from app.chat.guardrails import CANARY
 from app.chat.system_guide import SYSTEM_GUIDE
 
 GEMINI_MODEL = "gemini-2.5-flash"
+
+logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = (
     "You are Floss Assistant, Floss Clinic's dental clinic assistant. You help with appointments, "
@@ -123,30 +136,23 @@ def build_prompt(query, results, account_context=None, role=None):
     }
 
 
-def _client():
+def _gemini_stream(model, prompt):
+    """One streaming Gemini call. Yields answer text incrementally; `prompt` is
+    build_prompt()'s return value."""
     from flask import current_app
     from google import genai
-
-    api_key = current_app.config["GEMINI_API_KEY"]
-    if not api_key:
-        raise RuntimeError("GEMINI_API_KEY is not configured.")
-    return genai.Client(api_key=api_key)
-
-
-def stream_answer(prompt):
-    """Streaming generator — yields answer text incrementally. `prompt` is
-    build_prompt()'s return value."""
     from google.genai import types
 
+    api_key = current_app.config["GEMINI_API_KEY"]
     # Held in a local (not chained inline) so it stays alive for the whole
     # generator, not just this call — genai.Client owns the underlying httpx
     # client, and an inline `_client().models...` temporary gets garbage
     # collected (closing that httpx client) before the `for` loop below
     # actually starts pulling chunks, since generate_content_stream()
     # doesn't send the request until first iterated.
-    client = _client()
+    client = genai.Client(api_key=api_key)
     stream = client.models.generate_content_stream(
-        model=GEMINI_MODEL,
+        model=model,
         contents=prompt["contents"],
         config=types.GenerateContentConfig(
             system_instruction=prompt["system_instruction"],
@@ -157,3 +163,83 @@ def stream_answer(prompt):
     for chunk in stream:
         if chunk.text:
             yield chunk.text
+
+
+def _groq_stream(prompt):
+    """The same question to Groq's free OpenAI-compatible API (last resort)."""
+    from flask import current_app
+    from openai import OpenAI
+
+    client = OpenAI(
+        base_url=GROQ_BASE_URL,
+        api_key=current_app.config["GROQ_API_KEY"],
+        max_retries=0,
+        timeout=REQUEST_TIMEOUT_SECONDS,
+    )
+    stream = client.chat.completions.create(
+        model=current_app.config.get("GROQ_MODEL") or GROQ_DEFAULT_MODEL,
+        messages=[
+            {"role": "system", "content": prompt["system_instruction"]},
+            {"role": "user", "content": prompt["contents"]},
+        ],
+        temperature=0.3,
+        max_tokens=1024,
+        stream=True,
+    )
+    for chunk in stream:
+        if chunk.choices and chunk.choices[0].delta.content:
+            yield chunk.choices[0].delta.content
+
+
+def _targets():
+    """The models to try, best first, as (cooldown key, function(prompt)).
+    Free tiers run out (Gemini flash: a daily quota), so one exhausted model
+    must not take the whole assistant down."""
+    from flask import current_app
+
+    config = current_app.config
+    targets = []
+    if config.get("GEMINI_API_KEY"):
+        for model in [GEMINI_MODEL, *gemini_fallback_models(config)]:
+            targets.append((f"gemini:{model}", partial(_gemini_stream, model)))
+    if config.get("GROQ_API_KEY"):
+        targets.append((f"groq:{config.get('GROQ_MODEL') or GROQ_DEFAULT_MODEL}", _groq_stream))
+    return targets
+
+
+def stream_answer(prompt):
+    """Streaming generator — yields answer text incrementally. `prompt` is
+    build_prompt()'s return value.
+
+    Tries each configured model in turn. A model that is rate-limited, out of
+    quota or failing is skipped for a while (shared with the booking
+    assistant's memory of the same model), and the next one answers. Only a
+    failure BEFORE the first token falls through: once text has started
+    streaming to the patient, a failure ends the reply as an error instead of
+    splicing two models' answers together."""
+    targets = _targets()
+    if not targets:
+        raise RuntimeError("No chat model is configured (set GEMINI_API_KEY or GROQ_API_KEY).")
+
+    last_error = None
+    for key, open_stream in targets:
+        if cooldown_remaining(key)[0] > 0:
+            continue
+        stream = open_stream(prompt)
+        try:
+            first = next(stream, None)  # the request is sent here; failures surface here
+        except Exception as exc:  # noqa: BLE001 - any model failure means "try the next one"
+            busy, retry_after = classify_failure(exc)
+            seconds = start_cooldown(key, busy, retry_after)
+            logger.warning(
+                "Chat: %s %s (%s), skipping it for %.0fs: %s",
+                key, "is busy" if busy else "failed", type(exc).__name__, seconds, str(exc)[:300],
+            )
+            last_error = exc
+            continue
+        logger.info("Chat answered by %s", key)
+        if first is not None:
+            yield first
+        yield from stream
+        return
+    raise last_error or RuntimeError("Every chat model is cooling down.")

@@ -50,6 +50,13 @@ describe('ChatWindow', () => {
     expect(screen.queryByText('Show sources (1)')).not.toBeInTheDocument();
   });
 
+  it('stops the box at the 1000 characters the server accepts', () => {
+    useChatStream.mockReturnValue({ messages: [], sending: false, error: null, sendMessage: vi.fn() });
+    render(<ChatWindow conversationId="1" initialMessages={[]} />);
+
+    expect(screen.getByLabelText('Ask a question')).toHaveAttribute('maxlength', '1000');
+  });
+
   it('submits the typed question and clears the input', () => {
     const sendMessage = vi.fn();
     useChatStream.mockReturnValue({ messages: [], sending: false, error: null, sendMessage });
