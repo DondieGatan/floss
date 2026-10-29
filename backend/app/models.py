@@ -258,6 +258,47 @@ class Appointment(db.Model):
         }
 
 
+class AgentAction(db.Model):
+    """A booking change the assistant has *proposed* but not yet made.
+
+    The assistant never writes to appointments itself: its propose_* tools
+    only validate the request and create one of these rows. The patient
+    then confirms or rejects it explicitly (app/agent/routes.py), and only a
+    confirm runs the real booking/reschedule/cancel — re-validated at that
+    moment, since the slot may have been taken in between.
+    """
+    __tablename__ = "agent_actions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    conversation_id = db.Column(db.Integer, db.ForeignKey("conversations.id"), nullable=True, index=True)
+    # book | reschedule | cancel
+    kind = db.Column(db.String(20), nullable=False)
+    params = db.Column(db.JSON, nullable=False)
+    summary = db.Column(db.String(300), nullable=False)
+    # pending | confirmed | rejected | expired | failed
+    status = db.Column(db.String(20), nullable=False, default="pending", index=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    # Naive local time, like Appointment.scheduled_start (this app has no
+    # multi-timezone concept — see app/appointments/conflicts.py).
+    expires_at = db.Column(db.DateTime, nullable=False)
+    resolved_at = db.Column(db.DateTime, nullable=True)
+    result_message = db.Column(db.String(300), nullable=True)
+    appointment_id = db.Column(db.Integer, db.ForeignKey("appointments.id"), nullable=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "conversationId": self.conversation_id,
+            "kind": self.kind,
+            "summary": self.summary,
+            "status": self.status,
+            "expiresAt": self.expires_at.isoformat(),
+            "resultMessage": self.result_message,
+            "appointmentId": self.appointment_id,
+        }
+
+
 class Ward(db.Model):
     __tablename__ = "wards"
 
