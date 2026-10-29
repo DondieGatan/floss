@@ -117,6 +117,40 @@ book an appointment instead. Both lines are guarded by tests (`test_system_promp
 `test_system_prompt_allows_general_dental_knowledge_uncited`,
 `test_system_prompt_declines_fully_unrelated_questions`) so neither can silently regress.
 
+### A booking assistant that proposes — a person decides
+
+Switch on **"Let the assistant help me book"** in the chat and the assistant can book, move or cancel a
+patient's own appointments from plain language ("Dr. Chen next Monday around 10, it's a check-up"). Under the
+hood it's a tool-calling loop (`app/agent/`): the model looks up dentists, checks open slots, and proposes a
+change; it never writes anything itself.
+
+- **It can only propose.** `propose_booking` / `propose_reschedule` / `propose_cancel` validate the request
+  against the same availability and overlap rules as the booking form, then store an `AgentAction`. The chat
+  shows a card — *"Book Dr. Liam Chen on Monday, November 02 at 10:00 AM"* — and **nothing changes until the
+  patient presses Confirm.** Confirm re-runs every check at that moment (the slot may have been taken since),
+  and an unanswered request expires after 15 minutes.
+- **Identity comes from the login token, never the model.** No tool takes a patient id; another patient's
+  appointment is as unreachable as one that doesn't exist (the same 404-style idiom as the rest of the app).
+- **Bad calls are recoverable, not fatal.** A wrong id, a past time or a taken slot comes back to the model as
+  an error it can fix; the loop is capped at six rounds and withholds the tools on the last one, so it always
+  ends in words. A model outage is a clean 502 that stores nothing.
+- **Hostile text stays data.** A patient's free-text note is logged if it looks like a prompt injection and
+  is fenced as data in the system prompt; confirmed changes are written to the audit log.
+- **Built for free-tier limits.** The loop speaks one neutral transcript format, with adapters for **Gemini**,
+  **Groq** (OpenAI-compatible) and **Azure OpenAI**. Every configured provider is tried in order: one that is
+  rate-limited or overloaded is skipped for the time it asked for (or a minute) and the next takes over, so a
+  free tier running out doesn't end the chat. If *all* of them are out of capacity the patient gets a plain
+  "the assistant is busy" notice with a button to the normal booking page (which uses no model, so it always
+  works), their message goes back in the box, and nothing is stored. A real outage or a bad key is kept
+  distinct from "busy". With no provider configured, booking mode is simply off, and the regular cited chat
+  is untouched either way. Normal Q&A (hours, insurance, dental education) keeps its citations because
+  booking is an explicit mode, not a replacement for the retrieval path.
+
+The tests drive the loop with a scripted fake model, so every rule above is checked with no API key and no
+network — including the ones that matter most (a proposal creates no appointment; a confirm re-checks the
+slot; another patient can't resolve your request). The Gemini path was also exercised end to end against the
+real API and in the browser.
+
 ### An auto-updating knowledge base, not a stale one
 
 Staff don't maintain two sources of truth. Creating, updating, or deactivating a department/dentist/
@@ -138,8 +172,9 @@ across the same route set on purpose.
 |---|---|
 | **Backend** | Flask (app-factory + blueprints), SQLAlchemy, Alembic, Flask-JWT-Extended, Flask-Limiter, SQLite |
 | **RAG** | Hugging Face Inference API (`all-MiniLM-L6-v2` embeddings, called remotely), Google Gemini (`gemini-2.5-flash`, generation), brute-force cosine retrieval |
+| **Agent** | Tool-calling booking assistant (propose → confirm); Gemini, Groq or Azure OpenAI behind one adapter interface, with rate-limit failover |
 | **Frontend** | React 19, Vite, react-router-dom, fetch + ReadableStream SSE (not EventSource — it can't carry auth headers) |
-| **Testing** | pytest (275 tests, backend), Vitest + React Testing Library (114 tests, frontend) |
+| **Testing** | pytest (328 tests, backend), Vitest + React Testing Library (139 tests, frontend) |
 
 ## Project structure
 
@@ -154,11 +189,12 @@ backend/
     admissions/     treatment rooms & chairs (ward/bed model, relabeled)
     documents/      knowledge-base uploads + the auto-regenerating directory digest
     chat/           retrieval, citation-grounded generation, SSE streaming
+    agent/          booking assistant: tool-calling loop, propose/confirm actions, Gemini/Groq/Azure adapters + failover
     users/          Team & Roles — grant/revoke staff/admin/owner access, audit log
     models.py       User, Department, Doctor, DoctorAvailability, PatientProfile,
-                    Appointment, Ward, Bed, Admission, Document, Chunk, Conversation, Message, AuditLog
+                    Appointment, Ward, Bed, Admission, Document, Chunk, Conversation, Message, AuditLog, AgentAction
   migrations/       Alembic, one migration per schema change
-  tests/            275 tests across every blueprint + retrieval/generation
+  tests/            328 tests across every blueprint + retrieval/generation + the booking agent
   seed.py           demo departments, dentists, rooms/chairs, and login accounts
 
 frontend/
@@ -166,7 +202,7 @@ frontend/
     pages/          route-level screens (patient + staff), LandingPage.jsx (public)
     components/     AppLayout (role-aware nav), AppointmentCard, RescheduleModal, chat components
     context/        AuthContext (JWT storage, refresh-on-401)
-    hooks/          useChatStream (SSE parsing), useReveal (scroll animations)
+    hooks/          useChatStream (SSE parsing), useBookingAssistant (booking mode + confirm cards), useReveal
     api/client.js   fetch wrapper with automatic access-token refresh
 ```
 
@@ -192,13 +228,17 @@ npm run dev           # http://localhost:5173
 **Environment variables** (backend, `.env` or shell): `GEMINI_API_KEY` (chat generation; without it, chat
 degrades gracefully to an "assistant temporarily unavailable" message rather than crashing), `HF_TOKEN`
 (embeddings via Hugging Face's Inference API; without it, or when its credits run out, chat falls back to keyword retrieval),
-`JWT_SECRET_KEY`, `SECRET_KEY`, `DATABASE_URL` (defaults to a local SQLite file).
+`JWT_SECRET_KEY`, `SECRET_KEY`, `DATABASE_URL` (defaults to a local SQLite file). The booking assistant uses `GEMINI_API_KEY` and, as a free fallback when Gemini's limit is
+reached, `GROQ_API_KEY` (a free key from console.groq.com; `GROQ_MODEL` overrides the default, `openai/gpt-oss-120b`).
+Optionally `AZURE_OPENAI_ENDPOINT` + `AZURE_OPENAI_API_KEY` + `AZURE_OPENAI_DEPLOYMENT` (a function-calling chat
+deployment). Every configured provider is tried in the order azure, gemini, groq; `AGENT_PROVIDER=gemini|groq|azure`
+forces one. With none, booking mode is off and the rest of the app is unaffected.
 
 ## Testing
 
 ```bash
-cd backend && pytest -q                 # 275 tests (6 need a funded HF_TOKEN and skip without one)
-cd frontend && npm test                  # Vitest + React Testing Library, 114 tests
+cd backend && pytest -q                 # 328 tests (6 need a funded HF_TOKEN and skip without one)
+cd frontend && npm test                  # Vitest + React Testing Library, 139 tests
 ```
 
 Backend coverage includes appointment boundary conditions (exact-duplicate rejection, partial-overlap

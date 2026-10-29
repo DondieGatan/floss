@@ -34,6 +34,23 @@ class Config:
     # Gemini. Uses Google AI Studio's free tier — no billing required.
     GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
+    # Booking assistant (app/agent/): a tool-calling model that can propose
+    # appointment changes for the patient to confirm. Same lazy pattern as
+    # above — with none of these set the assistant's booking mode is simply
+    # off (GET /api/agent/status says so) and the plain chat is unaffected.
+    # AGENT_PROVIDER forces "azure" or "gemini"; left empty, Azure OpenAI is
+    # used when all three AZURE_OPENAI_* values are set, else Gemini.
+    AGENT_PROVIDER = os.environ.get("AGENT_PROVIDER", "")
+    # Free tiers have rate limits, so set more than one: every configured
+    # provider is tried in turn (azure, gemini, groq) and a rate-limited one
+    # falls back to the next. GROQ_API_KEY is a free key from console.groq.com.
+    GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+    GROQ_MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
+    AZURE_OPENAI_ENDPOINT = os.environ.get("AZURE_OPENAI_ENDPOINT")
+    AZURE_OPENAI_API_KEY = os.environ.get("AZURE_OPENAI_API_KEY")
+    AZURE_OPENAI_DEPLOYMENT = os.environ.get("AZURE_OPENAI_DEPLOYMENT")
+    AZURE_OPENAI_API_VERSION = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-10-21")
+
     # Same lazy-config pattern for outbound email (see app/email.py) — no
     # key means send_email() logs instead of sending, so password reset and
     # appointment reminders stay fully usable without a real account.
@@ -86,3 +103,11 @@ class TestConfig(Config):
     # SENDGRID_API_KEY would otherwise silently violate.
     RESEND_API_KEY = None
     SENDGRID_API_KEY = None
+    # Same reasoning for the model providers: a real local key must never
+    # make a test hit (or silently enable) a live model.
+    GEMINI_API_KEY = None
+    GROQ_API_KEY = None
+    AGENT_PROVIDER = ""
+    AZURE_OPENAI_ENDPOINT = None
+    AZURE_OPENAI_API_KEY = None
+    AZURE_OPENAI_DEPLOYMENT = None

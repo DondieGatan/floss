@@ -99,6 +99,7 @@ def create_app(config_class=Config):
     from app.appointments import appointments_bp
     from app.admissions import admissions_bp, wards_bp
     from app.users import users_bp
+    from app.agent import agent_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(documents_bp)
@@ -111,6 +112,7 @@ def create_app(config_class=Config):
     app.register_blueprint(admissions_bp)
     app.register_blueprint(wards_bp)
     app.register_blueprint(users_bp)
+    app.register_blueprint(agent_bp)
 
     @app.route("/api/health")
     @limiter.exempt
