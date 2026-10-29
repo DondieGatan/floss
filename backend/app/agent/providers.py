@@ -26,6 +26,8 @@ import uuid
 from dataclasses import dataclass, field
 
 GEMINI_AGENT_MODEL = "gemini-2.5-flash"
+# Free-tier quotas are per model, so each extra Gemini model is more capacity.
+GEMINI_FALLBACK_MODELS = ("gemini-2.5-flash-lite",)
 GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 GROQ_DEFAULT_MODEL = "openai/gpt-oss-120b"
 
@@ -35,6 +37,13 @@ BUSY_COOLDOWN_SECONDS = 60
 ERROR_COOLDOWN_SECONDS = 15
 MAX_COOLDOWN_SECONDS = 600
 REQUEST_TIMEOUT_SECONDS = 20
+# A per-minute limit (Groq's free tier allows 8,000 tokens a minute) clears in
+# about ten seconds. When that is the only thing in the way, wait it out inside the
+# request instead of failing the patient's message, but never more than
+# MAX_WAIT_PER_REQUEST_SECONDS in total (the serverless function has a hard
+# time limit).
+SHORT_WAIT_SECONDS = 12
+MAX_WAIT_PER_REQUEST_SECONDS = 24
 
 logger = logging.getLogger(__name__)
 
@@ -90,6 +99,19 @@ def _retry_after_from_gemini(exc):
     return float(match.group(1)) if match else None
 
 
+def _retry_after_from_message(exc):
+    """Groq's 429 text says e.g. "Please try again in 2.827s" (or "1m30.5s",
+    "340ms") and not every reply carries a Retry-After header."""
+    match = re.search(
+        r"try again in\s+(?:(\d+)m)?\s*(\d+(?:\.\d+)?)(ms|s)", str(getattr(exc, "message", "") or exc), re.IGNORECASE
+    )
+    if not match:
+        return None
+    minutes, amount, unit = match.groups()
+    seconds = float(amount) / 1000 if unit.lower() == "ms" else float(amount)
+    return seconds + 60 * int(minutes or 0)
+
+
 def classify_failure(exc):
     """Returns (busy, retry_after_seconds_or_None). `busy` means the provider
     is rate-limited, overloaded or timing out — worth falling back from and
@@ -99,7 +121,8 @@ def classify_failure(exc):
         import openai
 
         if isinstance(exc, openai.RateLimitError):
-            return True, _retry_after_from_headers(getattr(exc, "response", None))
+            retry_after = _retry_after_from_headers(getattr(exc, "response", None))
+            return True, retry_after if retry_after is not None else _retry_after_from_message(exc)
         if isinstance(exc, (openai.InternalServerError, openai.APITimeoutError, openai.APIConnectionError)):
             return True, None
     except ImportError:
@@ -122,6 +145,10 @@ class _OpenAIChatProvider:
 
     name = "openai"
     model = ""
+
+    @property
+    def key(self):
+        return f"{self.name}:{self.model}"
 
     def _client(self):
         raise NotImplementedError
@@ -231,6 +258,10 @@ class GeminiProvider:
         self.api_key = api_key
         self.model = model
 
+    @property
+    def key(self):
+        return f"{self.name}:{self.model}"
+
     @staticmethod
     def to_contents(transcript):
         from google.genai import types
@@ -332,19 +363,41 @@ class FallbackProvider:
     message down. If every provider is unavailable it raises
     ProviderBusyError when at least one was merely busy, else a plain
     RuntimeError (a real outage or misconfiguration).
+
+    Cooldowns are kept per provider *and model* (provider.key), so two Gemini
+    models, each with its own free quota, can be in different states. When
+    the shortest wait is only a few seconds it is waited out here, within a
+    small per-request budget, rather than failing the message.
     """
 
-    def __init__(self, providers, clock=time.monotonic):
+    def __init__(self, providers, clock=time.monotonic, sleep=time.sleep):
         self.providers = list(providers)
         self._clock = clock
+        self._sleep = sleep
+        self._waited = 0.0
+        # Which provider answered the last call, and how long this request
+        # spent waiting out a rate limit — for the request log line.
+        self.served = None
 
     @property
     def name(self):
-        return "+".join(p.name for p in self.providers)
+        names = []
+        for provider in self.providers:
+            if provider.name not in names:
+                names.append(provider.name)
+        return "+".join(names)
+
+    @staticmethod
+    def _key(provider):
+        return getattr(provider, "key", provider.name)
+
+    @property
+    def waited(self):
+        return self._waited
 
     def _remaining(self, provider):
         with _COOLDOWN_LOCK:
-            entry = _COOLDOWNS.get(provider.name)
+            entry = _COOLDOWNS.get(self._key(provider))
         if entry is None:
             return 0.0, False
         return max(0.0, entry["until"] - self._clock()), entry["busy"]
@@ -355,7 +408,8 @@ class FallbackProvider:
             seconds = retry_after
         seconds = min(max(seconds, 1), MAX_COOLDOWN_SECONDS)
         with _COOLDOWN_LOCK:
-            _COOLDOWNS[provider.name] = {"until": self._clock() + seconds, "busy": busy}
+            _COOLDOWNS[self._key(provider)] = {"until": self._clock() + seconds, "busy": busy}
+        return seconds
 
     def available(self):
         """False when every provider is cooling down — the frontend can then
@@ -363,29 +417,50 @@ class FallbackProvider:
         return any(self._remaining(p)[0] == 0 for p in self.providers)
 
     def generate(self, system, transcript, tools):
-        busy_waits = []
-        for provider in self.providers:
-            remaining, was_busy = self._remaining(provider)
-            if remaining > 0:
-                if was_busy:
-                    busy_waits.append(remaining)
-                continue
-            try:
-                return provider.generate(system, transcript, tools)
-            except Exception as exc:  # noqa: BLE001 - any provider failure means "try the next one"
-                busy, retry_after = classify_failure(exc)
-                # The message names the exact limit that was hit (per minute vs
-                # per day), which is the only place that shows up.
-                logger.warning(
-                    "Booking assistant provider %s %s: %s",
-                    provider.name, "is busy" if busy else "failed", str(exc)[:300],
-                )
-                self._start_cooldown(provider, busy, retry_after)
-                if busy:
-                    busy_waits.append(retry_after or BUSY_COOLDOWN_SECONDS)
-        if busy_waits:
-            raise ProviderBusyError("Every model provider is busy right now.", retry_after=min(busy_waits))
-        raise RuntimeError("No model provider is available.")
+        while True:
+            busy_waits = []
+            for provider in self.providers:
+                remaining, was_busy = self._remaining(provider)
+                if remaining > 0:
+                    if was_busy:
+                        busy_waits.append(remaining)
+                    continue
+                try:
+                    turn = provider.generate(system, transcript, tools)
+                except Exception as exc:  # noqa: BLE001 - any provider failure means "try the next one"
+                    busy, retry_after = classify_failure(exc)
+                    cooldown = self._start_cooldown(provider, busy, retry_after)
+                    # The message names the exact limit that was hit (per minute
+                    # vs per day), which is the only place that shows up.
+                    logger.warning(
+                        "Booking assistant: %s %s (%s), skipping it for %.0fs: %s",
+                        self._key(provider), "is busy" if busy else "failed", type(exc).__name__,
+                        cooldown, str(exc)[:300],
+                    )
+                    if busy:
+                        busy_waits.append(cooldown)
+                    continue
+                self.served = self._key(provider)
+                return turn
+            if not busy_waits:
+                raise RuntimeError("No model provider is available.")
+            wait = min(busy_waits)
+            if wait > SHORT_WAIT_SECONDS or self._waited + wait > MAX_WAIT_PER_REQUEST_SECONDS:
+                raise ProviderBusyError("Every model provider is busy right now.", retry_after=wait)
+            # Only a few seconds (a per-minute limit): wait it out and go round again.
+            logger.info("Booking assistant: every model is rate-limited; waiting %.1fs", wait)
+            self._sleep(wait + 0.05)
+            self._waited += wait
+
+
+def _gemini_fallback_models(config):
+    """Extra Gemini models tried after the main one (each has its own free
+    quota). GEMINI_FALLBACK_MODELS is a comma-separated list; set it empty to
+    turn the extras off."""
+    configured = config.get("GEMINI_FALLBACK_MODELS")
+    if configured is None:
+        return list(GEMINI_FALLBACK_MODELS)
+    return [m.strip() for m in configured.split(",") if m.strip() and m.strip() != GEMINI_AGENT_MODEL]
 
 
 def get_provider(config):
@@ -413,4 +488,10 @@ def get_provider(config):
         chain.append(GeminiProvider(api_key=config["GEMINI_API_KEY"]))
     if forced in ("", "groq") and config.get("GROQ_API_KEY"):
         chain.append(GroqProvider(api_key=config["GROQ_API_KEY"], model=config.get("GROQ_MODEL") or GROQ_DEFAULT_MODEL))
+    # The extra Gemini models go last: they are the weakest at using tools
+    # (flash-lite tends to ask for an appointment id instead of looking it up),
+    # so they are the last resort before the patient sees "busy".
+    if forced in ("", "gemini") and config.get("GEMINI_API_KEY"):
+        for model in _gemini_fallback_models(config):
+            chain.append(GeminiProvider(api_key=config["GEMINI_API_KEY"], model=model))
     return FallbackProvider(chain) if chain else None

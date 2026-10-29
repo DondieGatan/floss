@@ -139,7 +139,9 @@ change; it never writes anything itself.
 - **Built for free-tier limits.** The loop speaks one neutral transcript format, with adapters for **Gemini**,
   **Groq** (OpenAI-compatible) and **Azure OpenAI**. Every configured provider is tried in order: one that is
   rate-limited or overloaded is skipped for the time it asked for (or a minute) and the next takes over, so a
-  free tier running out doesn't end the chat. If *all* of them are out of capacity the patient gets a plain
+  free tier running out doesn't end the chat. A limit that clears in seconds (Groq's free tier meters 8,000 tokens a
+  minute) is waited out inside the request, up to 24 seconds, instead of failing it; earlier chat sent to the model
+  is capped (6 messages, 400 characters each) to stay inside those budgets. If *all* of them are out of capacity the patient gets a plain
   "the assistant is busy" notice with a button to the normal booking page (which uses no model, so it always
   works), their message goes back in the box, and nothing is stored. A real outage or a bad key is kept
   distinct from "busy". With no provider configured, booking mode is simply off, and the regular cited chat
@@ -174,7 +176,7 @@ across the same route set on purpose.
 | **RAG** | Hugging Face Inference API (`all-MiniLM-L6-v2` embeddings, called remotely), Google Gemini (`gemini-2.5-flash`, generation), brute-force cosine retrieval |
 | **Agent** | Tool-calling booking assistant (propose → confirm); Gemini, Groq or Azure OpenAI behind one adapter interface, with rate-limit failover |
 | **Frontend** | React 19, Vite, react-router-dom, fetch + ReadableStream SSE (not EventSource — it can't carry auth headers) |
-| **Testing** | pytest (347 tests, backend), Vitest + React Testing Library (139 tests, frontend) |
+| **Testing** | pytest (365 tests, backend), Vitest + React Testing Library (139 tests, frontend) |
 
 ## Project structure
 
@@ -195,7 +197,7 @@ backend/
     models.py       User, Department, Doctor, DoctorAvailability, PatientProfile,
                     Appointment, Ward, Bed, Admission, Document, Chunk, Conversation, Message, AuditLog, AgentAction
   migrations/       Alembic, one migration per schema change
-  tests/            347 tests across every blueprint + retrieval/generation + the booking agent
+  tests/            365 tests across every blueprint + retrieval/generation + the booking agent
   api/index.py      Vercel serverless entrypoint (the same create_app() as everywhere else)
   seed.py           demo departments, dentists, rooms/chairs, and login accounts
 
@@ -232,8 +234,10 @@ degrades gracefully to an "assistant temporarily unavailable" message rather tha
 (embeddings via Hugging Face's Inference API; without it, or when its credits run out, chat falls back to keyword retrieval),
 `JWT_SECRET_KEY`, `SECRET_KEY`, `DATABASE_URL` (defaults to a local SQLite file). The booking assistant uses `GEMINI_API_KEY` and, as a free fallback when Gemini's limit is
 reached, `GROQ_API_KEY` (a free key from console.groq.com; `GROQ_MODEL` overrides the default, `openai/gpt-oss-120b`).
+`GEMINI_FALLBACK_MODELS` (default `gemini-2.5-flash-lite`, comma-separated, empty to disable) adds Gemini models that are
+tried last, since each model has its own free daily quota.
 Optionally `AZURE_OPENAI_ENDPOINT` + `AZURE_OPENAI_API_KEY` + `AZURE_OPENAI_DEPLOYMENT` (a function-calling chat
-deployment). Every configured provider is tried in the order azure, gemini, groq; `AGENT_PROVIDER=gemini|groq|azure`
+deployment). Every configured provider is tried in the order azure, gemini, groq (then the extra Gemini models); `AGENT_PROVIDER=gemini|groq|azure`
 forces one. With none, booking mode is off and the rest of the app is unaffected.
 
 ## Deploying (Vercel + Neon: free, never sleeps)
@@ -265,7 +269,7 @@ the function runs in UTC, as the Render deployment always did.
 ## Testing
 
 ```bash
-cd backend && pytest -q                 # 347 tests (6 need a funded HF_TOKEN and skip without one)
+cd backend && pytest -q                 # 365 tests (6 need a funded HF_TOKEN and skip without one)
 cd frontend && npm test                  # Vitest + React Testing Library, 139 tests
 ```
 

@@ -46,6 +46,9 @@ class Config:
     # falls back to the next. GROQ_API_KEY is a free key from console.groq.com.
     GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
     GROQ_MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
+    # Comma-separated extra Gemini models for the booking assistant to fall
+    # back to (separate free quota each). Empty turns them off.
+    GEMINI_FALLBACK_MODELS = os.environ.get("GEMINI_FALLBACK_MODELS", "gemini-2.5-flash-lite")
     AZURE_OPENAI_ENDPOINT = os.environ.get("AZURE_OPENAI_ENDPOINT")
     AZURE_OPENAI_API_KEY = os.environ.get("AZURE_OPENAI_API_KEY")
     AZURE_OPENAI_DEPLOYMENT = os.environ.get("AZURE_OPENAI_DEPLOYMENT")

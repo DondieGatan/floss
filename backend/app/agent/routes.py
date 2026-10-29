@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 
 from flask import current_app, jsonify, request
@@ -5,7 +6,7 @@ from flask_jwt_extended import jwt_required
 
 from app.agent import agent_bp
 from app.agent.actions import ActionError, confirm_action, get_own_action, reject_action
-from app.agent.limits import HISTORY_MESSAGES
+from app.agent.limits import HISTORY_MESSAGE_CHARS, HISTORY_MESSAGES
 from app.agent.loop import run_agent
 from app.agent.providers import ProviderBusyError, get_provider
 from app.agent.tools import ToolContext
@@ -19,6 +20,11 @@ BUSY_MESSAGE = (
     "The booking assistant is busy right now. You can book directly from the Dentists page "
     "(choose a dentist and pick a time), or try again in a few minutes."
 )
+
+
+def _shorten(text):
+    text = text or ""
+    return text if len(text) <= HISTORY_MESSAGE_CHARS else text[: HISTORY_MESSAGE_CHARS - 1].rstrip() + "…"
 
 
 def _patient():
@@ -79,7 +85,7 @@ def post_message(conversation_id):
 
     # Earlier turns as plain text; tool traffic is never replayed from storage.
     history = [
-        {"role": m.role, "text": m.content}
+        {"role": m.role, "text": _shorten(m.content)}
         for m in conversation.messages[-HISTORY_MESSAGES:]
         if m.role in ("user", "assistant")
     ]
@@ -90,12 +96,17 @@ def post_message(conversation_id):
         logger=current_app.logger,
     )
 
+    started = time.monotonic()
     try:
         result = run_agent(provider, ctx, history, text)
     except ProviderBusyError as exc:
         # Rate-limited, not broken: say so plainly and point at the normal
         # booking page, which needs no model and always works. Nothing stored,
         # so the patient can simply resend.
+        current_app.logger.warning(
+            "Booking assistant busy after %.1fs: every model is rate-limited (shortest wait %.0fs)",
+            time.monotonic() - started, exc.retry_after or 0,
+        )
         db.session.rollback()
         return (
             jsonify(
@@ -112,6 +123,11 @@ def post_message(conversation_id):
         db.session.rollback()
         return jsonify({"error": "The assistant is temporarily unavailable. Please try again shortly."}), 502
 
+    current_app.logger.info(
+        "Booking assistant answered in %.1fs: %d model call(s), served by %s, waited %.1fs on rate limits",
+        time.monotonic() - started, result.steps, getattr(provider, "served", None) or provider.name,
+        getattr(provider, "waited", 0.0),
+    )
     db.session.add(Message(conversation_id=conversation.id, role="user", content=text))
     reply = Message(conversation_id=conversation.id, role="assistant", content=result.text, cited_chunk_ids=[])
     db.session.add(reply)

@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 
@@ -63,9 +64,23 @@ def _start_reminder_scheduler(app):
     scheduler.start()
 
 
+def _configure_logging():
+    """Makes the app's own log lines (INFO and up) reach the host's log view.
+    Python's default drops everything below WARNING and, where nothing set up
+    a handler (Vercel's function runtime), formats nothing at all, so the
+    booking assistant's "model X was rate-limited" lines were easy to miss.
+    Third-party libraries stay at WARNING so their request chatter doesn't
+    drown these. Skipped when a handler already exists (gunicorn, pytest)."""
+    root = logging.getLogger()
+    if not root.handlers:
+        logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s: %(message)s")
+    logging.getLogger("app").setLevel(logging.INFO)
+
+
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+    _configure_logging()
 
     # Render sits one reverse-proxy hop in front of this app. Without this,
     # every request — from real users behind Render's proxy, from Render's
