@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+tests/
+*.log
+*.db
+.pytest_cache/
+.env
+.env.*
+Procfile
+render.yaml

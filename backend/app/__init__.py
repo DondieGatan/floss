@@ -39,6 +39,11 @@ def _start_reminder_scheduler(app):
     """
     if app.config.get("TESTING"):
         return
+    if os.environ.get("VERCEL"):
+        # A serverless function is frozen between requests, so a background
+        # timer can't run. Reminders come from the outside instead: see
+        # app/internal/routes.py (hit by Vercel Cron and a GitHub Actions schedule).
+        return
     argv0 = os.path.basename(sys.argv[0]).lower()
     if argv0 != "run.py" and "gunicorn" not in argv0:
         return
@@ -94,12 +99,13 @@ def create_app(config_class=Config):
     from app.chat import chat_bp
     from app.departments import departments_bp
     from app.doctors import doctors_bp
-    from app.public import public_bp
+    from app.catalog import public_bp
     from app.patients import patients_bp
     from app.appointments import appointments_bp
     from app.admissions import admissions_bp, wards_bp
     from app.users import users_bp
     from app.agent import agent_bp
+    from app.internal import internal_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(documents_bp)
@@ -113,6 +119,7 @@ def create_app(config_class=Config):
     app.register_blueprint(wards_bp)
     app.register_blueprint(users_bp)
     app.register_blueprint(agent_bp)
+    app.register_blueprint(internal_bp)
 
     @app.route("/api/health")
     @limiter.exempt

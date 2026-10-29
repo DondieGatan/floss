@@ -1,0 +1,39 @@
+name: Appointment reminders
+
+# The serverless backend (Vercel) can't run a background timer, so this calls
+# its reminders endpoint every 15 minutes instead — the job that
+# app/__init__.py's in-process scheduler does on a long-running server.
+#
+# Safe to run as often as you like: the endpoint marks each appointment once
+# it has been reminded, so repeat calls send nothing new. Vercel Cron (once a
+# day, see backend/vercel.json) is a backstop if this schedule ever pauses.
+#
+# Setup (repo Settings -> Secrets and variables -> Actions):
+#   secret   CRON_SECRET    the same value as the backend's CRON_SECRET env var
+#   variable FLOSS_API_URL  the backend's URL, e.g. https://floss-api.vercel.app
+# Without both it does nothing. Note: GitHub only runs schedules on the
+# default branch, and pauses them after about 60 days with no repo activity.
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  send-reminders:
+    name: Send due reminders
+    runs-on: ubuntu-latest
+    env:
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      API_URL: ${{ vars.FLOSS_API_URL }}
+    steps:
+      - name: Call the reminders endpoint
+        run: |
+          if [ -z "$CRON_SECRET" ] || [ -z "$API_URL" ]; then
+            echo "CRON_SECRET or FLOSS_API_URL is not set; nothing to do."
+            exit 0
+          fi
+          curl --fail --silent --show-error --max-time 60 \
+            -X POST -H "Authorization: Bearer $CRON_SECRET" \
+            "$API_URL/api/internal/send-reminders"
+          echo
