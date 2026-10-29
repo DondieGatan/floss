@@ -150,7 +150,7 @@ change; it never writes anything itself.
 - **Built for free-tier limits.** The loop speaks one neutral transcript format, with adapters for **Gemini**,
   **Groq** (OpenAI-compatible) and **Azure OpenAI**. Every configured provider is tried in order: one that is
   rate-limited or overloaded is skipped for the time it asked for (or a minute) and the next takes over, so a
-  free tier running out doesn't end the chat. A limit that clears in seconds (Groq's free tier meters 8,000 tokens a
+  free tier running out doesn't end the chat. The plain Q&A chat uses the same idea: Gemini flash, then flash-lite, then Groq, so one model's daily quota running out doesn't take the assistant down. A limit that clears in seconds (Groq's free tier meters 8,000 tokens a
   minute) is waited out inside the request, up to 24 seconds, instead of failing it; earlier chat sent to the model
   is capped (6 messages, 400 characters each) to stay inside those budgets. If *all* of them are out of capacity the patient gets a plain
   "the assistant is busy" notice with a button to the normal booking page (which uses no model, so it always
@@ -187,7 +187,7 @@ across the same route set on purpose.
 | **RAG** | Hugging Face Inference API (`all-MiniLM-L6-v2` embeddings, called remotely), Google Gemini (`gemini-2.5-flash`, generation), brute-force cosine retrieval |
 | **Agent** | Tool-calling booking assistant (propose → confirm); Gemini, Groq or Azure OpenAI behind one adapter interface, with rate-limit failover |
 | **Frontend** | React 19, Vite, react-router-dom, fetch + ReadableStream SSE (not EventSource — it can't carry auth headers) |
-| **Testing** | pytest (431 tests, backend), Vitest + React Testing Library (139 tests, frontend) |
+| **Testing** | pytest (443 tests, backend), Vitest + React Testing Library (143 tests, frontend) |
 
 ## Project structure
 
@@ -208,7 +208,7 @@ backend/
     models.py       User, Department, Doctor, DoctorAvailability, PatientProfile,
                     Appointment, Ward, Bed, Admission, Document, Chunk, Conversation, Message, AuditLog, AgentAction
   migrations/       Alembic, one migration per schema change
-  tests/            431 tests across every blueprint + retrieval/generation + the booking agent
+  tests/            443 tests across every blueprint + retrieval/generation + the booking agent
   api/index.py      Vercel serverless entrypoint (the same create_app() as everywhere else)
   seed.py           demo departments, dentists, rooms/chairs, and login accounts
 
@@ -280,8 +280,8 @@ the function runs in UTC, as the Render deployment always did.
 ## Testing
 
 ```bash
-cd backend && pytest -q                 # 431 tests (6 need a funded HF_TOKEN and skip without one)
-cd frontend && npm test                  # Vitest + React Testing Library, 139 tests
+cd backend && pytest -q                 # 443 tests (6 need a funded HF_TOKEN and skip without one)
+cd frontend && npm test                  # Vitest + React Testing Library, 143 tests
 ```
 
 Backend coverage includes appointment boundary conditions (exact-duplicate rejection, partial-overlap

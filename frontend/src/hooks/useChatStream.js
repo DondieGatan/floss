@@ -45,7 +45,9 @@ export function useChatStream(conversationId, initialMessages = []) {
         } catch {
           // non-JSON error body — keep the generic message
         }
-        throw new Error(message);
+        const serverError = new Error(message);
+        serverError.fromServer = true; // a reason the server chose to show, e.g. "keep messages under 1000 characters"
+        throw serverError;
       }
 
       const reader = res.body.getReader();
@@ -84,11 +86,13 @@ export function useChatStream(conversationId, initialMessages = []) {
           }
         }
       }
-    } catch {
-      // Covers network failures (fetch() throwing "Failed to fetch" on a
-      // dropped/refused connection) and non-OK HTTP responses alike —
-      // neither is something a client should see verbatim.
-      setError('Sorry, can you repeat that again?');
+    } catch (err) {
+      // A network failure (fetch() throwing "Failed to fetch" on a
+      // dropped/refused connection) is not something a client should see
+      // verbatim, so it gets a generic line. A non-OK response whose body
+      // carries an `error` (message too long, rate limited, ...) is the
+      // server's own plain-language reason, which is worth showing.
+      setError(err?.fromServer ? err.message : 'Sorry, can you repeat that again?');
       setMessages((prev) => prev.filter((m) => m.id !== assistantTempId));
     } finally {
       setSending(false);
