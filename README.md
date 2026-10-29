@@ -174,7 +174,7 @@ across the same route set on purpose.
 | **RAG** | Hugging Face Inference API (`all-MiniLM-L6-v2` embeddings, called remotely), Google Gemini (`gemini-2.5-flash`, generation), brute-force cosine retrieval |
 | **Agent** | Tool-calling booking assistant (propose → confirm); Gemini, Groq or Azure OpenAI behind one adapter interface, with rate-limit failover |
 | **Frontend** | React 19, Vite, react-router-dom, fetch + ReadableStream SSE (not EventSource — it can't carry auth headers) |
-| **Testing** | pytest (328 tests, backend), Vitest + React Testing Library (139 tests, frontend) |
+| **Testing** | pytest (347 tests, backend), Vitest + React Testing Library (139 tests, frontend) |
 
 ## Project structure
 
@@ -189,12 +189,14 @@ backend/
     admissions/     treatment rooms & chairs (ward/bed model, relabeled)
     documents/      knowledge-base uploads + the auto-regenerating directory digest
     chat/           retrieval, citation-grounded generation, SSE streaming
+    internal/       endpoints for the platform's own scheduled jobs (reminders), bearer-secret guarded
     agent/          booking assistant: tool-calling loop, propose/confirm actions, Gemini/Groq/Azure adapters + failover
     users/          Team & Roles — grant/revoke staff/admin/owner access, audit log
     models.py       User, Department, Doctor, DoctorAvailability, PatientProfile,
                     Appointment, Ward, Bed, Admission, Document, Chunk, Conversation, Message, AuditLog, AgentAction
   migrations/       Alembic, one migration per schema change
-  tests/            328 tests across every blueprint + retrieval/generation + the booking agent
+  tests/            347 tests across every blueprint + retrieval/generation + the booking agent
+  api/index.py      Vercel serverless entrypoint (the same create_app() as everywhere else)
   seed.py           demo departments, dentists, rooms/chairs, and login accounts
 
 frontend/
@@ -234,10 +236,36 @@ Optionally `AZURE_OPENAI_ENDPOINT` + `AZURE_OPENAI_API_KEY` + `AZURE_OPENAI_DEPL
 deployment). Every configured provider is tried in the order azure, gemini, groq; `AGENT_PROVIDER=gemini|groq|azure`
 forces one. With none, booking mode is off and the rest of the app is unaffected.
 
+## Deploying (Vercel + Neon: free, never sleeps)
+
+The backend runs as a Vercel Python function (`backend/api/index.py`) and the database is Neon Postgres, so
+there is no instance that spins down for hours, no monthly hour cap, and nothing that expires. (`render.yaml`
+still works as an always-on alternative.) The first request after a quiet spell is a second or two slower while
+Neon wakes; `pool_pre_ping` makes that request succeed instead of failing on a dead connection.
+
+1. **Database.** In Neon, copy the **pooled** connection string (the host contains `-pooler`) for `DATABASE_URL`.
+   Apply migrations once from your machine with the **direct** string (same host without `-pooler`):
+   `cd backend && DATABASE_URL="<direct string>" flask db upgrade`.
+2. **Backend.** In Vercel: *Add New Project* → import this repo → **Root Directory `backend`** → framework
+   *Other*. Environment variables: `DATABASE_URL`, `SECRET_KEY`, `JWT_SECRET_KEY`, `CORS_ORIGINS` (the frontend's
+   URL), `FRONTEND_URL`, `GEMINI_API_KEY`, `GROQ_API_KEY`, `HF_TOKEN`, `SENDGRID_API_KEY` + `SENDGRID_FROM`, and
+   `CRON_SECRET` (any long random string).
+3. **Frontend.** In the frontend's Vercel project set `VITE_API_BASE_URL` to `https://<backend>.vercel.app/api`
+   and redeploy.
+4. **Reminders.** A serverless function can't run a background timer, so appointment reminders are sent by
+   `POST /api/internal/send-reminders` (bearer `CRON_SECRET`; safe to call repeatedly because each appointment is
+   marked once reminded). `.github/workflows/reminders.yml` calls it every 15 minutes — add the repo secret
+   `CRON_SECRET` and the variable `FLOSS_API_URL` — and Vercel Cron calls it daily as a backstop.
+
+What differs on serverless, on purpose: no in-process scheduler; uploads are capped at 4 MB (Vercel rejects a
+larger request body before the app sees it); and the rate limiter counts per running instance rather than
+globally (point `RATELIMIT_STORAGE_URI` at a Redis to make it global). Appointment times are naive local times and
+the function runs in UTC, as the Render deployment always did.
+
 ## Testing
 
 ```bash
-cd backend && pytest -q                 # 328 tests (6 need a funded HF_TOKEN and skip without one)
+cd backend && pytest -q                 # 347 tests (6 need a funded HF_TOKEN and skip without one)
 cd frontend && npm test                  # Vitest + React Testing Library, 139 tests
 ```
 

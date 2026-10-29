@@ -83,14 +83,28 @@ class Config:
     # unique index on Appointment in app/models.py. `timeout` is a SQLite-only
     # DBAPI connect arg — psycopg2 rejects it outright, so it's only applied
     # when we're actually running on SQLite.
+    #
+    # On Postgres (Neon): pool_pre_ping tests a pooled connection before using
+    # it, and pool_recycle retires old ones. Neon suspends an idle database
+    # after a few minutes and a serverless function can sit frozen far longer
+    # than that, so a connection held from the last request is often dead by
+    # the next; without these the first request after a quiet spell fails.
     SQLALCHEMY_ENGINE_OPTIONS = (
-        {"connect_args": {"timeout": 10}} if SQLALCHEMY_DATABASE_URI.startswith("sqlite") else {}
+        {"connect_args": {"timeout": 10}}
+        if SQLALCHEMY_DATABASE_URI.startswith("sqlite")
+        else {"pool_pre_ping": True, "pool_recycle": 300}
     )
 
     # Ingestion tuning — kept here (not constants.py) since MAX_UPLOAD_MB in
     # particular is the kind of thing worth overriding per-environment.
-    MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "20"))
+    # Vercel rejects a request body over 4.5 MB before the app sees it, so a
+    # higher cap there would only turn into a confusing platform error.
+    MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "4" if os.environ.get("VERCEL") else "20"))
     MAX_CONTENT_LENGTH = MAX_UPLOAD_MB * 1024 * 1024
+
+    # Shared secret for the platform's own scheduled jobs (see app/internal/).
+    # Unset => those endpoints answer 404, i.e. switched off.
+    CRON_SECRET = os.environ.get("CRON_SECRET")
 
 
 class TestConfig(Config):
@@ -107,6 +121,7 @@ class TestConfig(Config):
     # make a test hit (or silently enable) a live model.
     GEMINI_API_KEY = None
     GROQ_API_KEY = None
+    CRON_SECRET = None
     AGENT_PROVIDER = ""
     AZURE_OPENAI_ENDPOINT = None
     AZURE_OPENAI_API_KEY = None
