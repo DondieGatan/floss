@@ -6,5 +6,10 @@ PENDING_TTL_MINUTES = 15
 MAX_PENDING_ACTIONS = 3
 # Model round trips per chat message before the loop forces a final answer.
 MAX_AGENT_STEPS = 6
-# Earlier chat messages given to the model for context.
-HISTORY_MESSAGES = 10
+# Earlier chat messages given to the model for context. Every tool round
+# resends them, and free tiers meter tokens per minute (Groq: 8,000), so keep
+# this short: booking only needs the last couple of exchanges.
+HISTORY_MESSAGES = 6
+# Longest earlier message sent as-is; longer ones (a cited knowledge-base
+# answer, say) are cut with an ellipsis.
+HISTORY_MESSAGE_CHARS = 400

@@ -560,16 +560,17 @@ def _chain(config):
 
 def test_get_provider_builds_a_chain_of_every_configured_provider_in_order():
     azure = {"AZURE_OPENAI_ENDPOINT": "https://x.openai.azure.com", "AZURE_OPENAI_API_KEY": "k", "AZURE_OPENAI_DEPLOYMENT": "d"}
-    assert _chain({**azure, "GEMINI_API_KEY": "g", "GROQ_API_KEY": "q"}) == [AzureOpenAIProvider, GeminiProvider, GroqProvider]
-    assert _chain({"GEMINI_API_KEY": "g", "GROQ_API_KEY": "q"}) == [GeminiProvider, GroqProvider]
+    no_extras = {"GEMINI_FALLBACK_MODELS": ""}
+    assert _chain({**azure, **no_extras, "GEMINI_API_KEY": "g", "GROQ_API_KEY": "q"}) == [AzureOpenAIProvider, GeminiProvider, GroqProvider]
+    assert _chain({**no_extras, "GEMINI_API_KEY": "g", "GROQ_API_KEY": "q"}) == [GeminiProvider, GroqProvider]
     assert _chain({"GROQ_API_KEY": "q"}) == [GroqProvider]
-    assert _chain({"GEMINI_API_KEY": "g"}) == [GeminiProvider]
+    assert _chain({**no_extras, "GEMINI_API_KEY": "g"}) == [GeminiProvider]
     assert get_provider({}) is None
     assert get_provider({"AZURE_OPENAI_ENDPOINT": "https://x"}) is None  # incomplete Azure config
 
 
 def test_agent_provider_forces_a_single_choice():
-    both = {"GEMINI_API_KEY": "g", "GROQ_API_KEY": "q"}
+    both = {"GEMINI_API_KEY": "g", "GROQ_API_KEY": "q", "GEMINI_FALLBACK_MODELS": ""}
     assert _chain({**both, "AGENT_PROVIDER": "gemini"}) == [GeminiProvider]
     assert _chain({**both, "AGENT_PROVIDER": "groq"}) == [GroqProvider]
     assert get_provider({"GEMINI_API_KEY": "g", "AGENT_PROVIDER": "azure"}) is None
@@ -877,3 +878,208 @@ def test_tool_schemas_declare_optional_arguments_as_nullable():
     required = {spec["name"]: spec["parameters"].get("required", []) for spec in TOOL_SPECS}
     assert "reason" not in required["propose_booking"] and "duration_minutes" not in required["propose_booking"]
     assert len(GeminiProvider.to_tools(TOOL_SPECS)[0].function_declarations) == len(TOOL_SPECS)
+
+
+# --- capacity: more free models, shorter prompts, short waits, visible logs --
+
+
+def test_flash_lite_is_the_last_resort_after_groq():
+    """It is the weakest at tool use, so Groq's model is tried before it."""
+    chain = get_provider({"GEMINI_API_KEY": "g", "GROQ_API_KEY": "q"}).providers
+    assert [(p.name, getattr(p, "model", None)) for p in chain] == [
+        ("gemini", "gemini-2.5-flash"),
+        ("groq", "openai/gpt-oss-120b"),
+        ("gemini", "gemini-2.5-flash-lite"),
+    ]
+
+
+def test_gemini_fallback_models_are_configurable_and_can_be_turned_off():
+    models = lambda cfg: [p.model for p in get_provider({"GEMINI_API_KEY": "g", **cfg}).providers]  # noqa: E731
+    assert models({"GEMINI_FALLBACK_MODELS": "gemini-2.5-flash-lite, gemini-2.0-flash"}) == [
+        "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash",
+    ]
+    assert models({"GEMINI_FALLBACK_MODELS": ""}) == ["gemini-2.5-flash"]
+    assert models({"GEMINI_FALLBACK_MODELS": "gemini-2.5-flash"}) == ["gemini-2.5-flash"]  # no duplicate of the main model
+
+
+def test_the_status_name_lists_each_provider_once():
+    assert get_provider({"GEMINI_API_KEY": "g", "GROQ_API_KEY": "q"}).name == "gemini+groq"
+
+
+def test_two_gemini_models_cool_down_independently():
+    """Each model has its own free quota: an exhausted flash must not block flash-lite."""
+    clock = Clock()
+    flash = GeminiProvider("g", model="gemini-2.5-flash")
+    lite = GeminiProvider("g", model="gemini-2.5-flash-lite")
+    flash.generate = lambda *a: (_ for _ in ()).throw(_gemini_error(429, details=[{"retryDelay": "35000s"}]))
+    lite.generate = lambda *a: say("from flash-lite")
+    provider = FallbackProvider([flash, lite], clock=clock)
+
+    assert provider.generate("sys", [], None).text == "from flash-lite"
+    assert provider.served == "gemini:gemini-2.5-flash-lite"
+    assert provider._remaining(flash)[0] > 0  # flash is parked (capped at the ten-minute maximum)
+    assert provider._remaining(lite)[0] == 0  # flash-lite is not
+
+
+@pytest.mark.parametrize(
+    "text, seconds",
+    [
+        ("Rate limit reached. Please try again in 2.827s. Need more tokens?", 2.827),
+        ("Please try again in 340ms.", 0.34),
+        ("Please try again in 1m30.5s.", 90.5),
+        ("something else entirely", None),
+    ],
+)
+def test_the_wait_is_read_from_the_error_text_when_there_is_no_header(text, seconds):
+    import openai
+
+    exc = _openai_error(openai.RateLimitError, 429)
+    exc.message = text
+    assert classify_failure(exc) == (True, seconds)
+
+
+def test_a_retry_after_header_wins_over_the_message():
+    import openai
+
+    exc = _openai_error(openai.RateLimitError, 429, {"retry-after": "7"})
+    exc.message = "Please try again in 2s."
+    assert classify_failure(exc) == (True, 7.0)
+
+
+class _FlakyThenFine:
+    """Busy for the first `failures` calls, then answers."""
+
+    name = "groq"
+
+    def __init__(self, failures, retry_after="3"):
+        import openai
+
+        self.failures = failures
+        self.error = _openai_error(openai.RateLimitError, 429, {"retry-after": retry_after})
+        self.calls = 0
+
+    def generate(self, system, transcript, tools):
+        self.calls += 1
+        if self.calls <= self.failures:
+            raise self.error
+        return say("made it")
+
+
+def _sleeper(clock):
+    slept = []
+
+    def sleep(seconds):
+        slept.append(seconds)
+        clock.now += seconds
+
+    sleep.slept = slept
+    return sleep
+
+
+def test_a_short_rate_limit_is_waited_out_instead_of_failing_the_message():
+    clock = Clock()
+    only = _FlakyThenFine(failures=1, retry_after="3")
+    sleep = _sleeper(clock)
+    provider = FallbackProvider([only], clock=clock, sleep=sleep)
+
+    assert provider.generate("sys", [], None).text == "made it"
+    assert only.calls == 2
+    assert len(sleep.slept) == 1 and 3 <= sleep.slept[0] < 3.5
+    assert provider.waited == 3
+
+
+def test_the_short_wait_prefers_another_model_over_sleeping():
+    clock = Clock()
+    groq = _FlakyThenFine(failures=5, retry_after="3")
+    backup = FakeProvider("gemini", turn=say("from backup"))
+    sleep = _sleeper(clock)
+    provider = FallbackProvider([groq, backup], clock=clock, sleep=sleep)
+
+    assert provider.generate("sys", [], None).text == "from backup"
+    assert sleep.slept == []  # no waiting when somebody else can answer now
+
+
+def test_a_long_wait_is_not_slept_through():
+    clock = Clock()
+    only = _FlakyThenFine(failures=5, retry_after="30")
+    sleep = _sleeper(clock)
+    provider = FallbackProvider([only], clock=clock, sleep=sleep)
+
+    with pytest.raises(ProviderBusyError) as caught:
+        provider.generate("sys", [], None)
+    assert caught.value.retry_after == 30.0
+    assert sleep.slept == []
+
+
+def test_waiting_is_capped_per_request():
+    """A model that keeps saying "wait 9s" can't hold a request past the budget."""
+    clock = Clock()
+    only = _FlakyThenFine(failures=99, retry_after="9")
+    sleep = _sleeper(clock)
+    provider = FallbackProvider([only], clock=clock, sleep=sleep)
+
+    with pytest.raises(ProviderBusyError):
+        provider.generate("sys", [], None)
+    assert 17 < sum(sleep.slept) < 20  # two waits of ~9s fit in the 24s budget; a third would not
+    assert only.calls == 3  # initial try, then two waited-out retries
+
+
+def test_groqs_ten_second_minute_limit_is_waited_out():
+    """What Groq's free tier actually asks for when the 8,000 tokens a minute run out."""
+    clock = Clock()
+    only = _FlakyThenFine(failures=1, retry_after="10")
+    provider = FallbackProvider([only], clock=clock, sleep=_sleeper(clock))
+    assert provider.generate("sys", [], None).text == "made it"
+
+
+def test_earlier_chat_is_shortened_before_it_reaches_the_model(client, patient, conversation, use_provider):
+    """Fixed ceilings on purpose (not the limits module's constants): this test
+    must fail if someone raises the limits enough to blow the free-tier
+    per-minute token budget again."""
+    long_answer = "x" * 5000
+    for index in range(14):
+        db.session.add(Message(conversation_id=conversation, role="user", content=f"question {index}"))
+        db.session.add(Message(conversation_id=conversation, role="assistant", content=long_answer, cited_chunk_ids=[]))
+    db.session.commit()
+
+    provider = use_provider(ScriptedProvider(say("ok")))
+    send(client, patient, conversation, "now this")
+
+    history = provider.calls[0]["transcript"][:-1]
+    assert 0 < len(history) <= 6
+    assert all(len(t["text"]) <= 500 for t in history)
+    assert any(t["text"].endswith("…") for t in history)
+    assert provider.calls[0]["transcript"][-1]["text"] == "now this"  # the new message itself is never cut
+
+
+def test_a_busy_model_is_named_in_the_log_with_its_reason(caplog):
+    clock = Clock()
+    flash = FakeProvider("gemini", error=_gemini_error(429, details=[{"retryDelay": "35000s"}]))
+    flash.key = "gemini:gemini-2.5-flash"
+    other = FakeProvider("groq", turn=say("ok"))
+    with caplog.at_level(logging.INFO, logger="app.agent.providers"):
+        FallbackProvider([flash, other], clock=clock).generate("sys", [], None)
+
+    line = next(r.getMessage() for r in caplog.records if "is busy" in r.getMessage())
+    assert "gemini:gemini-2.5-flash" in line and "APIError" in line and "skipping it for 600s" in line
+
+
+def test_the_route_logs_who_answered_and_when_everything_is_busy(client, patient, conversation, use_provider, caplog):
+    use_provider(FallbackProvider([FakeProvider("groq", turn=say("hello"))]))
+    with caplog.at_level(logging.INFO, logger="app"):
+        send(client, patient, conversation)
+    assert any("served by groq" in r.getMessage() for r in caplog.records)
+
+    reset_cooldowns()
+    caplog.clear()
+    use_provider(FallbackProvider([FakeProvider("groq", error=_gemini_error(429, details=[{"retryDelay": "30s"}]))]))
+    with caplog.at_level(logging.INFO, logger="app"):
+        resp = send(client, patient, conversation)
+    assert resp.status_code == 503
+    assert any("Booking assistant busy" in r.getMessage() for r in caplog.records)
+
+
+def test_the_prompt_tells_the_model_to_look_up_my_appointment_instead_of_asking_for_an_id():
+    from app.agent.loop import SYSTEM_PROMPT
+
+    assert "never knows an appointment id" in SYSTEM_PROMPT and "get_my_appointments" in SYSTEM_PROMPT
