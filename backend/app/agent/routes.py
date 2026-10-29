@@ -10,6 +10,7 @@ from app.agent.limits import HISTORY_MESSAGE_CHARS, HISTORY_MESSAGES
 from app.agent.loop import run_agent
 from app.agent.providers import ProviderBusyError, get_provider
 from app.agent.tools import ToolContext
+from app.chat.guardrails import screen_question
 from app.chat.injection_guard import log_if_suspicious
 from app.extensions import db, limiter
 from app.models import AgentAction, Conversation, Message, PatientProfile
@@ -82,6 +83,21 @@ def post_message(conversation_id):
         return jsonify({"error": f"Please keep messages under {MAX_MESSAGE_CHARS} characters."}), 400
 
     log_if_suspicious(current_app.logger, current_user_id(), "agent_message", text)
+
+    # Same fixed-reply guardrail as the chat (guardrails.py): probing the
+    # system's security, extracting instructions or asking for other people's
+    # data never reaches a model.
+    screened = screen_question(text)
+    if screened is not None:
+        current_app.logger.warning(
+            "Booking assistant guardrail blocked a %s request (user_id=%s): %r",
+            screened.category, current_user_id(), text[:200],
+        )
+        db.session.add(Message(conversation_id=conversation.id, role="user", content=text))
+        reply = Message(conversation_id=conversation.id, role="assistant", content=screened.reply, cited_chunk_ids=[])
+        db.session.add(reply)
+        db.session.commit()
+        return jsonify({"message": reply.to_dict(), "pendingActions": [], "steps": 0}), 200
 
     # Earlier turns as plain text; tool traffic is never replayed from storage.
     history = [

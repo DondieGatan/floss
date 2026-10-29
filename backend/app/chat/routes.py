@@ -1,7 +1,7 @@
 import json
 
 from flask import request, jsonify, Response, stream_with_context, current_app
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import get_jwt, jwt_required
 
 from app.chat import chat_bp
 from app.extensions import db, limiter
@@ -13,6 +13,13 @@ from app.constants import KEYWORD_MIN_SCORE
 from app.chat.generation import build_prompt, stream_answer
 from app.chat.account_context import build_account_context
 from app.chat.greetings import is_pure_greeting, GREETING_RESPONSE
+from app.chat.guardrails import (
+    MAX_QUESTION_CHARS,
+    OUTPUT_BLOCKED_REPLY,
+    TOO_LONG_TEMPLATE,
+    OutputGuard,
+    screen_question,
+)
 from app.chat.injection_guard import log_if_suspicious
 from app.pagination import paginate
 
@@ -135,19 +142,32 @@ def post_message(conversation_id):
     query = (data.get("content") or "").strip()
     if not query:
         return jsonify({"error": "A message is required."}), 400
+    if len(query) > MAX_QUESTION_CHARS:
+        return jsonify({"error": TOO_LONG_TEMPLATE.format(limit=MAX_QUESTION_CHARS)}), 400
 
     # Visibility only, never blocking — see injection_guard's docstring for
     # why this doesn't refuse the request.
     log_if_suspicious(current_app.logger, current_user_id(), "chat_query", query)
 
+    # The unambiguous cases (probing the system's security, extracting the
+    # assistant's instructions, asking for other people's data) are answered
+    # with a fixed reply and never reach the model — see guardrails.py.
+    screened = screen_question(query)
+    if screened is not None:
+        current_app.logger.warning(
+            "Chat guardrail blocked a %s request (user_id=%s): %r", screened.category, current_user_id(), query[:200]
+        )
+
     db.session.add(Message(conversation_id=conversation.id, role="user", content=query))
     db.session.commit()
 
     greeting = is_pure_greeting(query)
-    # Skip embedding/retrieval/account-lookup entirely for a bare "hi" —
-    # none of that work is needed to answer it, and the canned greeting
-    # reply is a better response than routing it through the model anyway.
-    if greeting:
+    role = get_jwt().get("role")
+    canned_reply = screened.reply if screened is not None else (GREETING_RESPONSE if greeting else None)
+    # Skip embedding/retrieval/account-lookup entirely for a bare "hi" or a
+    # screened request — none of that work is needed to answer them, and the
+    # canned reply is a better response than routing them through the model.
+    if canned_reply is not None:
         doc_results = []
         account_context = None
     else:
@@ -174,20 +194,31 @@ def post_message(conversation_id):
         # applies — see SYSTEM_PROMPT.
         doc_results = [] if low_confidence else results
     conversation_id_ = conversation.id  # captured for the generator, run after this request's own context
+    user_id_ = current_user_id()
 
     def generate():
         answer_parts = []
 
-        if greeting:
-            answer_parts.append(GREETING_RESPONSE)
-            yield _sse(None, GREETING_RESPONSE)
+        if canned_reply is not None:
+            answer_parts.append(canned_reply)
+            yield _sse(None, canned_reply)
             cited_ids = []
         else:
             cited_ids = [chunk.id for chunk, _score in doc_results]
+            guard = OutputGuard()
             try:
-                for token in stream_answer(build_prompt(query, doc_results, account_context)):
-                    answer_parts.append(token)
-                    yield _sse(None, token)
+                for token in stream_answer(build_prompt(query, doc_results, account_context, role)):
+                    safe = guard.feed(token)
+                    if guard.blocked:
+                        break
+                    if safe:
+                        answer_parts.append(safe)
+                        yield _sse(None, safe)
+                if not guard.blocked:
+                    tail = guard.flush()
+                    if tail:
+                        answer_parts.append(tail)
+                        yield _sse(None, tail)
             except Exception:
                 # Gemini unreachable/misconfigured/rate-limited mid-stream —
                 # tell the client and don't persist a half-formed reply. Log
@@ -197,6 +228,14 @@ def post_message(conversation_id):
                 db.session.rollback()
                 yield _sse("error", {"error": "The assistant is temporarily unavailable. Please try again shortly."})
                 return
+            if guard.blocked:
+                # The reply contained something that must never leave the
+                # server (a key, a token, the prompt itself). Whatever already
+                # streamed was safe; the stored/final message becomes a plain
+                # refusal, and the client replaces the bubble with it.
+                current_app.logger.warning("Chat output guard blocked a reply (user_id=%s)", user_id_)
+                answer_parts = [OUTPUT_BLOCKED_REPLY]
+                cited_ids = []
 
         assistant_message = Message(
             conversation_id=conversation_id_,
