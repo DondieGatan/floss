@@ -578,7 +578,7 @@ def test_agent_provider_forces_a_single_choice():
 def test_groq_uses_the_configured_model():
     provider = get_provider({"GROQ_API_KEY": "q", "GROQ_MODEL": "llama-3.1-8b-instant"}).providers[0]
     assert provider.model == "llama-3.1-8b-instant"
-    assert get_provider({"GROQ_API_KEY": "q"}).providers[0].model == "llama-3.3-70b-versatile"
+    assert get_provider({"GROQ_API_KEY": "q"}).providers[0].model == "openai/gpt-oss-120b"
 
 
 def _transcript():
@@ -800,3 +800,80 @@ def test_groq_translates_the_transcript_like_any_openai_compatible_api():
     messages = GroqProvider.to_messages("SYS", _transcript())
     assert [m["role"] for m in messages] == ["system", "user", "assistant", "tool", "tool", "assistant"]
     assert GroqProvider("k").name == "groq"
+
+
+# --- a model that claims a request it never created -------------------------
+
+
+def test_a_claimed_request_that_was_never_created_is_corrected(client, patient, conversation, doctor, use_provider):
+    provider = use_provider(
+        ScriptedProvider(
+            say("I can propose a booking with Dr. Chen on Monday at 10. Please press Confirm."),  # no tool called
+            tools_turn(call("propose_booking", doctor_id=doctor.id, start=_at(10), reason="check-up")),
+            say("Proposed. Press Confirm to go ahead."),
+        )
+    )
+
+    body = send(client, patient, conversation).get_json()
+    assert len(body["pendingActions"]) == 1  # the model was made to really propose it
+    assert AgentAction.query.count() == 1
+    nudge = provider.calls[1]["transcript"][-1]
+    assert nudge["role"] == "user" and "No request has been created" in nudge["text"]
+
+
+def test_a_model_that_keeps_claiming_a_missing_request_is_not_shown_to_the_patient(client, patient, conversation, use_provider):
+    claim = "I've proposed the booking, please press Confirm."
+    use_provider(ScriptedProvider(say(claim), say(claim)))
+
+    body = send(client, patient, conversation).get_json()
+    assert body["pendingActions"] == []
+    assert body["message"]["content"] == FALLBACK_TEXT
+    assert "Confirm" not in body["message"]["content"]
+
+
+def test_an_ordinary_answer_is_not_second_guessed(client, patient, conversation, use_provider):
+    provider = use_provider(ScriptedProvider(say("Which day works best for you?")))
+    body = send(client, patient, conversation).get_json()
+    assert body["message"]["content"] == "Which day works best for you?"
+    assert len(provider.calls) == 1
+
+
+def test_repeating_confirm_for_a_request_that_is_still_waiting_is_allowed(client, patient, conversation, doctor, use_provider):
+    use_provider(propose_script(doctor.id, _at(10)))
+    send(client, patient, conversation)  # leaves one pending request
+
+    provider = use_provider(ScriptedProvider(say("It's not booked yet. Please press Confirm on the card.")))
+    body = send(client, patient, conversation, "did you book it?").get_json()
+    assert body["message"]["content"].startswith("It's not booked yet")
+    assert len(provider.calls) == 1
+
+
+def test_optional_arguments_may_be_null(client, patient, conversation, doctor, use_provider):
+    """Strict providers (Groq) and some models send null for an optional argument."""
+    provider = use_provider(
+        ScriptedProvider(
+            tools_turn(
+                call("list_doctors", department=None),
+                call("get_open_slots", doctor_id=doctor.id, date=MONDAY.isoformat(), duration_minutes=None),
+                call("propose_booking", doctor_id=doctor.id, start=_at(10), duration_minutes=None, reason=None),
+            ),
+            say("Proposed. Press Confirm."),
+        )
+    )
+    send(client, patient, conversation)
+
+    results = _tool_results(provider)
+    assert [d["name"] for d in results["list_doctors"]["doctors"]] == ["Dr. Liam Chen"]
+    assert results["get_open_slots"]["durationMinutes"] == 30
+    assert "error" not in results["propose_booking"]
+    assert AgentAction.query.one().params["durationMinutes"] == 30
+
+
+def test_tool_schemas_declare_optional_arguments_as_nullable():
+    props = {spec["name"]: spec["parameters"]["properties"] for spec in TOOL_SPECS}
+    assert props["list_doctors"]["department"]["type"] == ["string", "null"]
+    assert props["propose_booking"]["reason"]["type"] == ["string", "null"]
+    assert props["propose_booking"]["duration_minutes"]["type"] == ["integer", "null"]
+    required = {spec["name"]: spec["parameters"].get("required", []) for spec in TOOL_SPECS}
+    assert "reason" not in required["propose_booking"] and "duration_minutes" not in required["propose_booking"]
+    assert len(GeminiProvider.to_tools(TOOL_SPECS)[0].function_declarations) == len(TOOL_SPECS)

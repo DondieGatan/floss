@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 
 GEMINI_AGENT_MODEL = "gemini-2.5-flash"
 GROQ_BASE_URL = "https://api.groq.com/openai/v1"
-GROQ_DEFAULT_MODEL = "llama-3.3-70b-versatile"
+GROQ_DEFAULT_MODEL = "openai/gpt-oss-120b"
 
 # Seconds to wait before trying a provider again after it fails. A rate-limit
 # reply that says how long to wait (Retry-After) overrides the first number.

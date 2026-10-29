@@ -45,7 +45,7 @@ class Config:
     # provider is tried in turn (azure, gemini, groq) and a rate-limited one
     # falls back to the next. GROQ_API_KEY is a free key from console.groq.com.
     GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-    GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
+    GROQ_MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
     AZURE_OPENAI_ENDPOINT = os.environ.get("AZURE_OPENAI_ENDPOINT")
     AZURE_OPENAI_API_KEY = os.environ.get("AZURE_OPENAI_API_KEY")
     AZURE_OPENAI_DEPLOYMENT = os.environ.get("AZURE_OPENAI_DEPLOYMENT")

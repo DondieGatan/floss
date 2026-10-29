@@ -229,7 +229,7 @@ npm run dev           # http://localhost:5173
 degrades gracefully to an "assistant temporarily unavailable" message rather than crashing), `HF_TOKEN`
 (embeddings via Hugging Face's Inference API; without it, or when its credits run out, chat falls back to keyword retrieval),
 `JWT_SECRET_KEY`, `SECRET_KEY`, `DATABASE_URL` (defaults to a local SQLite file). The booking assistant uses `GEMINI_API_KEY` and, as a free fallback when Gemini's limit is
-reached, `GROQ_API_KEY` (a free key from console.groq.com; `GROQ_MODEL` overrides the default Llama model).
+reached, `GROQ_API_KEY` (a free key from console.groq.com; `GROQ_MODEL` overrides the default, `openai/gpt-oss-120b`).
 Optionally `AZURE_OPENAI_ENDPOINT` + `AZURE_OPENAI_API_KEY` + `AZURE_OPENAI_DEPLOYMENT` (a function-calling chat
 deployment). Every configured provider is tried in the order azure, gemini, groq; `AGENT_PROVIDER=gemini|groq|azure`
 forces one. With none, booking mode is off and the rest of the app is unaffected.

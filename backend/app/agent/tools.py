@@ -50,6 +50,9 @@ class ToolError(Exception):
     back to the model as {"error": message}."""
 
 
+# Optional parameters are nullable on purpose: some models (and strict
+# providers like Groq) send an explicit null for an argument they have no
+# value for, and reject the call outright if the schema says "string only".
 TOOL_SPECS = [
     {
         "name": "list_doctors",
@@ -57,7 +60,7 @@ TOOL_SPECS = [
         "Optionally filter by department name.",
         "parameters": {
             "type": "object",
-            "properties": {"department": {"type": "string", "description": "Department name, e.g. Orthodontics."}},
+            "properties": {"department": {"type": ["string", "null"], "description": "Department name, e.g. Orthodontics."}},
         },
     },
     {
@@ -69,7 +72,7 @@ TOOL_SPECS = [
             "properties": {
                 "doctor_id": {"type": "integer"},
                 "date": {"type": "string", "description": "YYYY-MM-DD"},
-                "duration_minutes": {"type": "integer", "description": "Default 30."},
+                "duration_minutes": {"type": ["integer", "null"], "description": "Default 30."},
             },
             "required": ["doctor_id", "date"],
         },
@@ -88,8 +91,8 @@ TOOL_SPECS = [
             "properties": {
                 "doctor_id": {"type": "integer"},
                 "start": {"type": "string", "description": "Local start time, ISO format, e.g. 2026-11-02T10:00"},
-                "duration_minutes": {"type": "integer", "description": "Default 30."},
-                "reason": {"type": "string", "description": "Short reason for the visit, in the patient's words."},
+                "duration_minutes": {"type": ["integer", "null"], "description": "Default 30."},
+                "reason": {"type": ["string", "null"], "description": "Short reason for the visit, in the patient's words."},
             },
             "required": ["doctor_id", "start"],
         },
@@ -115,7 +118,7 @@ TOOL_SPECS = [
             "type": "object",
             "properties": {
                 "appointment_id": {"type": "integer"},
-                "reason": {"type": "string"},
+                "reason": {"type": ["string", "null"]},
             },
             "required": ["appointment_id"],
         },
@@ -141,7 +144,9 @@ def _parse_local_datetime(raw, key):
 
 
 def _duration(args):
-    value = args.get("duration_minutes", DEFAULT_DURATION_MINUTES)
+    value = args.get("duration_minutes")
+    if value is None:  # optional: models often send null instead of omitting it
+        value = DEFAULT_DURATION_MINUTES
     if isinstance(value, bool) or not isinstance(value, int) or not (MIN_DURATION_MINUTES <= value <= MAX_DURATION_MINUTES):
         raise ToolError(f"duration_minutes must be a whole number from {MIN_DURATION_MINUTES} to {MAX_DURATION_MINUTES}.")
     return value
