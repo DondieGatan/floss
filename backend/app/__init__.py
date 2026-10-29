@@ -99,7 +99,7 @@ def create_app(config_class=Config):
     from app.chat import chat_bp
     from app.departments import departments_bp
     from app.doctors import doctors_bp
-    from app.public import public_bp
+    from app.catalog import public_bp
     from app.patients import patients_bp
     from app.appointments import appointments_bp
     from app.admissions import admissions_bp, wards_bp

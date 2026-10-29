@@ -1,6 +1,6 @@
 from flask import jsonify
 
-from app.public import public_bp
+from app.catalog import public_bp
 from app.models import Doctor
 
 # No @jwt_required() anywhere in this file — these are the only doctor
