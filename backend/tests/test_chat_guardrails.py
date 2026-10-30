@@ -315,3 +315,30 @@ def test_the_hold_back_is_longer_than_any_leak_pattern_needs_to_complete():
                 break
         assert guard.blocked, leak
         assert leak[:6] not in released.replace("Here: ", ""), f"started releasing {leak!r}"
+
+
+def test_the_guide_wins_over_stale_knowledge_base_text_about_how_the_app_works():
+    """The seeded clinic documents once said "My Appointments page" for a page
+    that doesn't exist; the model followed the document over the guide."""
+    lowered = SYSTEM_PROMPT.lower()
+    assert "disagrees with the guide" in lowered
+    assert "the guide is right" in lowered and "out of date" in lowered
+    assert "only for clinic facts" in lowered
+
+
+def test_the_prompt_forbids_naming_the_guide_as_a_source():
+    lowered = SYSTEM_PROMPT.lower()
+    assert "never name it or refer to it as a source" in lowered
+    assert '"[system guide]"' in lowered
+
+
+def test_the_guide_corrects_the_my_appointments_page_name_the_clinic_documents_use():
+    """Prompt precedence alone did not stop the model repeating the documents'
+    'My Appointments page' (5 of 6 real-model runs still did); naming the
+    wrong page explicitly in the guide took it to 0 of 9."""
+    assert 'NO page called "My Appointments"' in SYSTEM_GUIDE
+    assert "it means the Dashboard" in SYSTEM_GUIDE
+    # and the page it points to really exists in the sidebar
+    if os.path.exists(FRONTEND_LAYOUT):
+        labels = re.findall(r"label: '([^']+)'", open(FRONTEND_LAYOUT, encoding="utf-8").read())
+        assert "Dashboard" in labels and "History" in labels and "My Appointments" not in labels

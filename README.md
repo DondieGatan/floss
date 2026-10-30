@@ -187,7 +187,7 @@ across the same route set on purpose.
 | **RAG** | Hugging Face Inference API (`all-MiniLM-L6-v2` embeddings, called remotely), Google Gemini (`gemini-2.5-flash`, generation), brute-force cosine retrieval |
 | **Agent** | Tool-calling booking assistant (propose → confirm); Gemini, Groq or Azure OpenAI behind one adapter interface, with rate-limit failover |
 | **Frontend** | React 19, Vite, react-router-dom, fetch + ReadableStream SSE (not EventSource — it can't carry auth headers) |
-| **Testing** | pytest (443 tests, backend), Vitest + React Testing Library (143 tests, frontend) |
+| **Testing** | pytest (446 tests, backend), Vitest + React Testing Library (143 tests, frontend) |
 
 ## Project structure
 
@@ -208,7 +208,7 @@ backend/
     models.py       User, Department, Doctor, DoctorAvailability, PatientProfile,
                     Appointment, Ward, Bed, Admission, Document, Chunk, Conversation, Message, AuditLog, AgentAction
   migrations/       Alembic, one migration per schema change
-  tests/            443 tests across every blueprint + retrieval/generation + the booking agent
+  tests/            446 tests across every blueprint + retrieval/generation + the booking agent
   api/index.py      Vercel serverless entrypoint (the same create_app() as everywhere else)
   seed.py           demo departments, dentists, rooms/chairs, and login accounts
 
@@ -280,7 +280,7 @@ the function runs in UTC, as the Render deployment always did.
 ## Testing
 
 ```bash
-cd backend && pytest -q                 # 443 tests (6 need a funded HF_TOKEN and skip without one)
+cd backend && pytest -q                 # 446 tests (6 need a funded HF_TOKEN and skip without one)
 cd frontend && npm test                  # Vitest + React Testing Library, 143 tests
 ```
 
