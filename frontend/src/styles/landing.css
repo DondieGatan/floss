@@ -1400,30 +1400,30 @@ html {
   background: linear-gradient(135deg, #0a2433, #0f3a4c);
 }
 
-/* ---- Dark theme: deep teal-ink, brighter copy ---- */
+/* ---- Dark theme: midnight blue with teal glow ---- */
 
 :root[data-theme='dark'] .landing {
-  --l-bg: #0a1319;
-  --l-bg-soft: #13232c;
-  --l-text: #eef6f7;
-  --l-text-muted: #aabdc3;
-  --l-border: #25363f;
-  --l-blue: #7aa2ff;
-  --l-blue-dark: #5b86ee;
+  --l-bg: #0f1c31;
+  --l-bg-soft: #1a2e4c;
+  --l-text: #f3f8fd;
+  --l-text-muted: #b9c9de;
+  --l-border: #2f4a70;
+  --l-blue: #8db6ff;
+  --l-blue-dark: #6a99f5;
   --l-grad: linear-gradient(135deg, #2f6fed 0%, #0b8379 100%);
-  --l-glow: 0 12px 28px rgba(43, 191, 179, 0.22);
-  --l-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 14px 34px rgba(0, 0, 0, 0.42);
-  --l-card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.45), 0 24px 48px rgba(0, 0, 0, 0.5);
+  --l-glow: 0 12px 28px rgba(43, 191, 179, 0.24);
+  --l-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 14px 34px rgba(3, 10, 24, 0.45);
+  --l-card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.4), 0 24px 48px rgba(3, 10, 24, 0.55);
 
   background:
-    radial-gradient(circle at 8% 0%, rgba(95, 140, 255, 0.13), transparent 40%),
-    radial-gradient(circle at 92% 8%, rgba(43, 191, 179, 0.12), transparent 42%),
+    radial-gradient(circle at 8% 0%, rgba(95, 140, 255, 0.2), transparent 42%),
+    radial-gradient(circle at 92% 8%, rgba(43, 191, 179, 0.16), transparent 44%),
     var(--l-bg);
 }
 
 :root[data-theme='dark'] .landing-nav {
-  background: rgba(10, 19, 25, 0.74);
-  border-bottom-color: rgba(255, 255, 255, 0.08);
+  background: rgba(15, 28, 49, 0.78);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
 :root[data-theme='dark'] .landing-nav .landing-brand {
@@ -1431,8 +1431,8 @@ html {
 }
 
 :root[data-theme='dark'] .landing-nav .l-btn-ghost {
-  color: #e4f0f2;
-  border-color: rgba(255, 255, 255, 0.22);
+  color: #e4f0fa;
+  border-color: rgba(255, 255, 255, 0.26);
 }
 
 :root[data-theme='dark'] .landing-nav .l-btn-ghost:hover {
@@ -1442,60 +1442,60 @@ html {
 }
 
 :root[data-theme='dark'] .quickbook-band {
-  background: linear-gradient(120deg, #0d1e28, #0a161e);
+  background: linear-gradient(120deg, #142846, #0f2038);
 }
 
 :root[data-theme='dark'] .quickbook-band::before {
-  background: rgba(95, 140, 255, 0.2);
+  background: rgba(95, 140, 255, 0.26);
 }
 
 :root[data-theme='dark'] .quickbook-band::after {
-  background: rgba(43, 191, 179, 0.2);
+  background: rgba(43, 191, 179, 0.24);
 }
 
 :root[data-theme='dark'] .assistant-preview-card {
-  background: rgba(19, 35, 44, 0.7);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(26, 46, 76, 0.74);
+  border-color: rgba(255, 255, 255, 0.14);
 }
 
 :root[data-theme='dark'] .assistant-preview-bubble-bot {
-  background: rgba(31, 52, 63, 0.9);
+  background: rgba(40, 66, 104, 0.92);
 }
 
 :root[data-theme='dark'] .about-band {
-  background: linear-gradient(135deg, #0d1d26, #0a151c);
+  background: linear-gradient(135deg, #132642, #0f2038);
 }
 
 :root[data-theme='dark'] .about-circle-1 {
-  background: linear-gradient(150deg, #13232c, #1b3340);
+  background: linear-gradient(150deg, #1a2e4c, #26426a);
 }
 
 :root[data-theme='dark'] .ticker-strip {
-  background: linear-gradient(120deg, #0d1d26, #0a151c);
-  border-top-color: rgba(43, 191, 179, 0.2);
-  border-bottom-color: rgba(43, 191, 179, 0.2);
+  background: linear-gradient(120deg, #142846, #102039);
+  border-top-color: rgba(43, 191, 179, 0.28);
+  border-bottom-color: rgba(43, 191, 179, 0.28);
 }
 
 :root[data-theme='dark'] .services-band {
-  background: linear-gradient(180deg, #0a1319, #081017);
+  background: linear-gradient(180deg, #0f1c31, #0c1729);
 }
 
 :root[data-theme='dark'] .service-card,
 :root[data-theme='dark'] .team-card {
-  background: rgba(19, 35, 44, 0.72);
+  background: rgba(26, 46, 76, 0.78);
 }
 
 :root[data-theme='dark'] .service-card-art,
 :root[data-theme='dark'] .team-card-photo {
-  background: linear-gradient(150deg, #13232c, #1b3340);
+  background: linear-gradient(150deg, #1a2e4c, #26426a);
 }
 
 :root[data-theme='dark'] .team-band {
-  background: linear-gradient(135deg, #0b1f24, #09161b);
+  background: linear-gradient(135deg, #0f2740, #0c1b30);
 }
 
 :root[data-theme='dark'] .benefits-band {
-  background: linear-gradient(135deg, #081a25, #0c2e3d);
+  background: linear-gradient(135deg, #0c2037, #0f3a52);
 }
 
 /* ---- Small screens ---- */

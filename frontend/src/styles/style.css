@@ -2352,21 +2352,23 @@ table.simple-table {
 }
 
 :root[data-theme='dark'] {
-  --bg: #0a1319;
-  --surface: rgba(19, 35, 44, 0.7);
-  --surface-solid: #13232c;
-  --surface-2: #1a2e39;
-  --border: #28404b;
-  --text: #eef6f7;
-  --text-muted: #a9bcc2;
-  --accent: #7aa2ff;
-  --accent-strong: #4f7cf0;
-  --accent-soft: rgba(122, 162, 255, 0.18);
-  --glass-surface: rgba(19, 35, 44, 0.6);
-  --glass-surface-hover: rgba(26, 46, 57, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --skeleton-highlight: #2a4350;
-  --brand-glow: 0 8px 22px rgba(14, 143, 133, 0.24);
+  /* midnight blue rather than near-black, so cards read as raised and the page feels lit */
+  --bg: #0f1c31;
+  --surface: rgba(26, 46, 76, 0.74);
+  --surface-solid: #1a2e4c;
+  --surface-2: #223a5d;
+  --border: #35517a;
+  --text: #f3f8fd;
+  --text-muted: #b9c9de;
+  --accent: #8db6ff;
+  --accent-strong: #5b8cf0;
+  --accent-soft: rgba(141, 182, 255, 0.2);
+  --accent-2-soft: rgba(43, 191, 179, 0.2);
+  --glass-surface: rgba(26, 46, 76, 0.62);
+  --glass-surface-hover: rgba(34, 58, 93, 0.88);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --skeleton-highlight: #36527c;
+  --brand-glow: 0 8px 22px rgba(14, 143, 133, 0.28);
 }
 
 /* Primary buttons */
@@ -2447,7 +2449,7 @@ table.simple-table {
   background:
     radial-gradient(circle at 12% 15%, rgba(95, 140, 255, 0.2), transparent 45%),
     radial-gradient(circle at 88% 85%, rgba(43, 191, 179, 0.16), transparent 50%),
-    linear-gradient(160deg, #0d1c25 0%, #091217 100%);
+    linear-gradient(160deg, #132642 0%, #0d1a2e 100%);
 }
 
 .auth-visual-col::before {
