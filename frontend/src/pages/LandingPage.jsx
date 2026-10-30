@@ -15,9 +15,9 @@ import pediatricPhoto from '../assets/Pediatric_Dentistry.jpg';
 import benefitsPhoto from '../assets/Second_Page.jpg';
 
 const SERVICES = [
-  { photo: generalPhoto, title: 'General Dentistry', text: 'Routine cleanings, restorative fillings, and preventive care to maintain a healthy smile year-round.' },
-  { photo: orthoPhoto, title: 'Orthodontics', text: 'Traditional braces and clear aligners for precise, lasting bite correction — for teens and adults.' },
-  { photo: pediatricPhoto, title: 'Pediatric Dentistry', text: 'Gentle, age-appropriate dental care designed specifically for children.' },
+  { icon: '🪥', photo: generalPhoto, title: 'General Dentistry', text: 'Routine cleanings, restorative fillings, and preventive care to maintain a healthy smile year-round.' },
+  { icon: '😁', photo: orthoPhoto, title: 'Orthodontics', text: 'Traditional braces and clear aligners for precise, lasting bite correction — for teens and adults.' },
+  { icon: '👶', photo: pediatricPhoto, title: 'Pediatric Dentistry', text: 'Gentle, age-appropriate dental care designed specifically for children.' },
 ];
 
 const TICKER_ITEMS = [
@@ -126,11 +126,8 @@ export default function LandingPage() {
 
       <main id="main-content">
         <header className="landing-section landing-hero">
-          <div
-            className="hero-photo"
-            style={{ backgroundImage: `url(${heroPhoto})` }}
-          >
-            <div className="hero-content">
+          <div className="hero-split">
+            <div className="hero-copy">
               <p className="hero-pill">
                 <span className="hero-pill-dot" aria-hidden="true" />
                 Online booking · Answers you can verify
@@ -143,13 +140,14 @@ export default function LandingPage() {
                 Floss Clinic's virtual assistant — all within a single, secure platform.
               </p>
               <div className="hero-actions">
-                <a className="hero-cta" href="#services">
+                <a className="l-btn l-btn-primary l-btn-large" href={bookingHref}>
+                  Book Your Visit
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M5 12h13.5M13 6l6.5 6-6.5 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </a>
+                <a className="l-btn l-btn-ghost l-btn-large" href="#services">
                   Explore Our Services
-                  <span className="hero-cta-arrow" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M5 12h13.5M13 6l6.5 6-6.5 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </span>
                 </a>
               </div>
               <ul className="hero-chips" aria-label="What you get">
@@ -157,6 +155,30 @@ export default function LandingPage() {
                 <li>No double-booking</li>
                 <li>Answers that cite their sources</li>
               </ul>
+            </div>
+
+            <div className="hero-visual" aria-hidden="true">
+              <div className="hero-frame">
+                <img src={heroPhoto} alt="" className="hero-img" />
+              </div>
+              <div className="hero-float hero-float-booked">
+                <span className="hero-float-icon">✓</span>
+                <div>
+                  <p className="hero-float-title">Slot confirmed</p>
+                  <p className="hero-float-sub">Conflict check passed</p>
+                </div>
+              </div>
+              <div className="hero-float hero-float-answer">
+                <span className="hero-float-icon hero-float-icon-alt">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M5 6.5h14v9H12l-4 3.5v-3.5H5z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                  </svg>
+                </span>
+                <div>
+                  <p className="hero-float-title">Clinic assistant</p>
+                  <p className="hero-float-sub">Every answer cites its source</p>
+                </div>
+              </div>
             </div>
           </div>
         </header>
@@ -233,6 +255,7 @@ export default function LandingPage() {
               <div className="service-card" key={s.title}>
                 <div className="service-card-art" aria-hidden="true">
                   <img src={s.photo} alt="" className="service-card-img" />
+                  <span className="service-card-badge">{s.icon}</span>
                 </div>
                 <div className="service-card-body">
                   <h3>{s.title}</h3>

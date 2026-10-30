@@ -1,18 +1,18 @@
 :root {
   color-scheme: light;
-  --bg: #f4f8fb;
+  --bg: #f4f8f8;
   --surface: rgba(255, 255, 255, 0.7);
   --surface-solid: #ffffff;
-  --surface-2: #eaf1f7;
-  --border: #dbe4ee;
-  --text: #1c2b2e;
+  --surface-2: #eaf1f2;
+  --border: #dbe5e6;
+  --text: #232a2c;
   --text-muted: #647275;
-  --accent: #2f6fed;
-  --accent-strong: #2354bd;
-  --accent-soft: rgba(47, 111, 237, 0.12);
-  --accent-2: #0f9d92;
-  --accent-2-strong: #0b7f76;
-  --accent-2-soft: rgba(15, 157, 146, 0.12);
+  --accent: #4d7d8e;
+  --accent-strong: #3b606d;
+  --accent-soft: rgba(77, 125, 142, 0.12);
+  --accent-2: #5d94a8;
+  --accent-2-strong: #497888;
+  --accent-2-soft: rgba(93, 148, 168, 0.12);
   --glass-blur: blur(16px);
   --danger: #d6534a;
   --danger-soft: rgba(214, 83, 74, 0.1);
@@ -20,9 +20,9 @@
   --success-soft: rgba(47, 158, 92, 0.12);
   --warning: #b9861f;
   --warning-soft: rgba(185, 134, 31, 0.12);
-  --shadow: 0 1px 2px rgba(15, 40, 45, 0.04), 0 8px 24px rgba(15, 40, 45, 0.06);
-  --shadow-hover: 0 4px 10px rgba(15, 40, 45, 0.06), 0 16px 32px rgba(15, 40, 45, 0.1);
-  --skeleton-highlight: #e2ecec;
+  --shadow: 0 1px 2px rgba(26, 38, 43, 0.04), 0 8px 24px rgba(26, 38, 43, 0.06);
+  --shadow-hover: 0 4px 10px rgba(26, 38, 43, 0.06), 0 16px 32px rgba(26, 38, 43, 0.1);
+  --skeleton-highlight: #e6ebeb;
   --glass-surface: rgba(255, 255, 255, 0.6);
   --glass-surface-hover: rgba(255, 255, 255, 0.82);
   --glass-border: rgba(255, 255, 255, 0.6);
@@ -32,19 +32,19 @@
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #0f141f;
-  --surface: rgba(26, 33, 48, 0.7);
-  --surface-solid: #1a2130;
-  --surface-2: #232b3d;
-  --border: #313c52;
-  --text: #edf1f7;
-  --text-muted: #9aa6bb;
-  --accent: #6b93ff;
-  --accent-strong: #4c74e0;
-  --accent-soft: rgba(107, 147, 255, 0.18);
-  --accent-2: #2bbfb3;
-  --accent-2-strong: #1a9d92;
-  --accent-2-soft: rgba(43, 191, 179, 0.18);
+  --bg: #101517;
+  --surface: rgba(27, 34, 37, 0.7);
+  --surface-solid: #1b2225;
+  --surface-2: #242c2f;
+  --border: #333e42;
+  --text: #ecf2f2;
+  --text-muted: #9aa8ac;
+  --accent: #6e9fb1;
+  --accent-strong: #4f8193;
+  --accent-soft: rgba(110, 159, 177, 0.18);
+  --accent-2: #8ab2c0;
+  --accent-2-strong: #5d94a8;
+  --accent-2-soft: rgba(138, 178, 192, 0.18);
   --danger: #ff6b6b;
   --danger-soft: rgba(255, 107, 107, 0.14);
   --success: #4ade80;
@@ -53,9 +53,9 @@
   --warning-soft: rgba(240, 185, 61, 0.16);
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
   --shadow-hover: 0 4px 10px rgba(0, 0, 0, 0.35), 0 16px 32px rgba(0, 0, 0, 0.4);
-  --skeleton-highlight: #3a4560;
-  --glass-surface: rgba(35, 43, 61, 0.6);
-  --glass-surface-hover: rgba(35, 43, 61, 0.85);
+  --skeleton-highlight: #3b474c;
+  --glass-surface: rgba(36, 44, 47, 0.6);
+  --glass-surface-hover: rgba(36, 44, 47, 0.85);
   --glass-border: rgba(255, 255, 255, 0.1);
 }
 
@@ -72,7 +72,7 @@ body {
     var(--bg);
   background-attachment: fixed;
   color: var(--text);
-  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -182,7 +182,7 @@ textarea {
 }
 
 .page-title {
-  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   font-size: 24px;
   font-weight: 700;
   margin: 0 0 4px;
@@ -409,7 +409,7 @@ textarea {
 }
 
 .app-sidebar-profile-name {
-  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   font-size: 14.5px;
   font-weight: 700;
   color: var(--text);
@@ -447,7 +447,7 @@ textarea {
   border-radius: 999px;
   color: var(--text-muted);
   text-decoration: none;
-  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   font-weight: 600;
   transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
@@ -601,7 +601,7 @@ textarea {
   padding: 12px 16px;
   background: linear-gradient(135deg, var(--accent), var(--accent-strong));
   color: #fff;
-  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   font-weight: 700;
   font-size: 14px;
   flex-shrink: 0;
@@ -960,16 +960,16 @@ textarea {
      page. Two soft, diffuse glows over an icy gradient give the glass
      card something worth blurring instead of a blank wash behind it. */
   background:
-    radial-gradient(circle at 12% 15%, rgba(130, 190, 255, 0.4), transparent 45%),
-    radial-gradient(circle at 88% 85%, rgba(160, 225, 255, 0.35), transparent 50%),
-    linear-gradient(160deg, #eef7ff 0%, #dcefff 100%);
+    radial-gradient(circle at 12% 15%, rgba(148, 194, 197, 0.4), transparent 45%),
+    radial-gradient(circle at 88% 85%, rgba(195, 221, 223, 0.35), transparent 50%),
+    linear-gradient(160deg, #f1f7f7 0%, #e3eff0 100%);
 }
 
 :root[data-theme='dark'] .auth-form-col {
   background:
-    radial-gradient(circle at 12% 15%, rgba(107, 147, 255, 0.22), transparent 45%),
-    radial-gradient(circle at 88% 85%, rgba(43, 191, 179, 0.16), transparent 50%),
-    linear-gradient(160deg, #101728 0%, #0c111c 100%);
+    radial-gradient(circle at 12% 15%, rgba(110, 159, 177, 0.22), transparent 45%),
+    radial-gradient(circle at 88% 85%, rgba(138, 178, 192, 0.16), transparent 50%),
+    linear-gradient(160deg, #11181b 0%, #0d1214 100%);
 }
 
 .auth-visual-col {
@@ -979,7 +979,7 @@ textarea {
   display: flex;
   align-items: flex-end;
   overflow: hidden;
-  background-color: #0b1a3d;
+  background-color: #121e22;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center bottom;
@@ -989,7 +989,7 @@ textarea {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(6, 16, 40, 0.92) 0%, rgba(11, 30, 71, 0.55) 45%, rgba(15, 157, 146, 0.2) 100%);
+  background: linear-gradient(to top, rgba(11, 18, 21, 0.92) 0%, rgba(21, 34, 39, 0.55) 45%, rgba(93, 148, 168, 0.2) 100%);
 }
 
 .auth-visual-content {
@@ -999,7 +999,7 @@ textarea {
 }
 
 .auth-visual-heading {
-  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   font-size: 48px;
   font-weight: 800;
   line-height: 1.08;
@@ -1016,7 +1016,7 @@ textarea {
 }
 
 .auth-card-title {
-  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   font-size: 26px;
   font-weight: 700;
   color: var(--text);
@@ -1287,7 +1287,7 @@ textarea {
 }
 
 .section-title {
-  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   font-size: 17px;
   font-weight: 700;
   margin: 0;
@@ -1401,7 +1401,7 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -1417,7 +1417,7 @@ textarea {
 
 .hero-greeting {
   position: relative;
-  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   font-size: 24px;
   font-weight: 800;
   margin: 0 0 6px;
@@ -1491,13 +1491,13 @@ textarea {
   border: none;
   border-radius: 10px;
   padding: 10px 18px;
-  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   text-decoration: none;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
-  box-shadow: 0 2px 6px rgba(11, 30, 33, 0.16);
+  box-shadow: 0 2px 6px rgba(19, 29, 32, 0.16);
 }
 
 .quick-action-btn svg {
@@ -1510,14 +1510,14 @@ textarea {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(47, 111, 237, 0.16), transparent 60%);
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(77, 125, 142, 0.16), transparent 60%);
   opacity: 0;
   transition: opacity 0.25s ease;
 }
 
 .quick-action-btn:hover {
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 8px 18px rgba(11, 30, 33, 0.24);
+  box-shadow: 0 8px 18px rgba(19, 29, 32, 0.24);
 }
 
 .quick-action-btn:hover::before {
@@ -1591,7 +1591,7 @@ textarea {
 }
 
 .stat-value {
-  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   font-size: 26px;
   font-weight: 800;
   margin: 0;
@@ -1959,7 +1959,7 @@ textarea {
 
 .empty-state .btn {
   margin-top: 18px;
-  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
 }
 
@@ -1976,7 +1976,7 @@ textarea {
     box-shadow: 0 0 0 0 var(--accent-soft);
   }
   50% {
-    box-shadow: 0 0 0 8px rgba(47, 111, 237, 0);
+    box-shadow: 0 0 0 8px rgba(77, 125, 142, 0);
   }
 }
 
@@ -2009,7 +2009,7 @@ textarea {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 65px);
-  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
 }
 
 .chat-messages {
@@ -2313,7 +2313,7 @@ table.simple-table {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 40, 45, 0.4);
+  background: rgba(26, 38, 43, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2342,33 +2342,33 @@ table.simple-table {
 
 :root {
   /* white text on both ends of this gradient stays above 4.5:1 */
-  --brand-grad: linear-gradient(135deg, #2f6fed 0%, #0b8379 100%);
-  --brand-glow: 0 8px 22px rgba(31, 110, 200, 0.26);
-  --bg: #f3f9fa;
-  --surface-2: #e9f2f5;
-  --border: #d7e4e8;
-  --text: #12282d;
-  --text-muted: #566b70;
+  --brand-grad: linear-gradient(135deg, #4d7d8e 0%, #4c7b8d 100%);
+  --brand-glow: 0 8px 22px rgba(71, 116, 133, 0.26);
+  --bg: #f5f8f9;
+  --surface-2: #ecf1f2;
+  --border: #dbe3e4;
+  --text: #1c272b;
+  --text-muted: #5b6a6f;
 }
 
 :root[data-theme='dark'] {
   /* midnight blue rather than near-black, so cards read as raised and the page feels lit */
-  --bg: #0f1c31;
-  --surface: rgba(26, 46, 76, 0.74);
-  --surface-solid: #1a2e4c;
-  --surface-2: #223a5d;
-  --border: #35517a;
-  --text: #f3f8fd;
-  --text-muted: #b9c9de;
-  --accent: #8db6ff;
-  --accent-strong: #5b8cf0;
-  --accent-soft: rgba(141, 182, 255, 0.2);
-  --accent-2-soft: rgba(43, 191, 179, 0.2);
-  --glass-surface: rgba(26, 46, 76, 0.62);
-  --glass-surface-hover: rgba(34, 58, 93, 0.88);
+  --bg: #131d21;
+  --surface: rgba(33, 48, 54, 0.74);
+  --surface-solid: #213036;
+  --surface-2: #2a3c43;
+  --border: #3d545c;
+  --text: #f3f8f9;
+  --text-muted: #b7cbcd;
+  --accent: #8dbec2;
+  --accent-strong: #6196aa;
+  --accent-soft: rgba(141, 190, 194, 0.2);
+  --accent-2-soft: rgba(138, 178, 192, 0.2);
+  --glass-surface: rgba(33, 48, 54, 0.62);
+  --glass-surface-hover: rgba(42, 60, 67, 0.88);
   --glass-border: rgba(255, 255, 255, 0.12);
-  --skeleton-highlight: #36527c;
-  --brand-glow: 0 8px 22px rgba(14, 143, 133, 0.28);
+  --skeleton-highlight: #3e555d;
+  --brand-glow: 0 8px 22px rgba(83, 135, 154, 0.28);
 }
 
 /* Primary buttons */
@@ -2385,7 +2385,7 @@ table.simple-table {
 .btn-primary:hover:not(:disabled) {
   background: var(--brand-grad);
   filter: brightness(1.07);
-  box-shadow: 0 12px 28px rgba(31, 110, 200, 0.34);
+  box-shadow: 0 12px 28px rgba(71, 116, 133, 0.34);
   transform: translateY(-1px);
 }
 
@@ -2420,7 +2420,7 @@ table.simple-table {
   max-width: 420px;
   padding: 40px 36px;
   border-radius: 24px;
-  box-shadow: 0 2px 6px rgba(15, 40, 45, 0.05), 0 24px 60px rgba(15, 40, 45, 0.12);
+  box-shadow: 0 2px 6px rgba(26, 38, 43, 0.05), 0 24px 60px rgba(26, 38, 43, 0.12);
 }
 
 :root[data-theme='dark'] .auth-card {
@@ -2440,20 +2440,20 @@ table.simple-table {
 
 .auth-form-col {
   background:
-    radial-gradient(circle at 12% 15%, rgba(47, 111, 237, 0.2), transparent 45%),
-    radial-gradient(circle at 88% 85%, rgba(15, 157, 146, 0.2), transparent 50%),
-    linear-gradient(160deg, #f2f9fb 0%, #e1f0f4 100%);
+    radial-gradient(circle at 12% 15%, rgba(77, 125, 142, 0.2), transparent 45%),
+    radial-gradient(circle at 88% 85%, rgba(93, 148, 168, 0.2), transparent 50%),
+    linear-gradient(160deg, #f4f9f9 0%, #e6eff0 100%);
 }
 
 :root[data-theme='dark'] .auth-form-col {
   background:
-    radial-gradient(circle at 12% 15%, rgba(95, 140, 255, 0.2), transparent 45%),
-    radial-gradient(circle at 88% 85%, rgba(43, 191, 179, 0.16), transparent 50%),
-    linear-gradient(160deg, #132642 0%, #0d1a2e 100%);
+    radial-gradient(circle at 12% 15%, rgba(100, 153, 172, 0.2), transparent 45%),
+    radial-gradient(circle at 88% 85%, rgba(138, 178, 192, 0.16), transparent 50%),
+    linear-gradient(160deg, #1a282d 0%, #111b1f 100%);
 }
 
 .auth-visual-col::before {
-  background: linear-gradient(to top, rgba(4, 28, 40, 0.92) 0%, rgba(8, 52, 66, 0.52) 48%, rgba(15, 157, 146, 0.18) 100%);
+  background: linear-gradient(to top, rgba(17, 27, 31, 0.92) 0%, rgba(31, 50, 57, 0.52) 48%, rgba(93, 148, 168, 0.18) 100%);
 }
 
 .auth-visual-heading {
@@ -2550,8 +2550,7 @@ table.simple-table {
 }
 
 .btn-primary::after,
-.l-btn-primary::after,
-.hero-cta::after {
+.l-btn-primary::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -2561,8 +2560,7 @@ table.simple-table {
 }
 
 .btn-primary:hover:not(:disabled)::after,
-.l-btn-primary:hover::after,
-.hero-cta:hover::after {
+.l-btn-primary:hover::after {
   transform: translateX(120%);
   transition: transform 0.75s ease;
 }
@@ -2646,4 +2644,95 @@ table.simple-table {
   .route-progress {
     display: none;
   }
+}
+
+/* =========================================================================
+   Slate palette (final layer, so it wins over everything above):
+   Deep Slate #36565F, Ocean Steel #5F8190, Cloud Mist #E2F0F0, Pure White and
+   Jet Black #141414. White text on the slate-to-steel gradient stays above 5:1.
+   Fonts: Fraunces for headings, Manrope for everything else.
+   ========================================================================= */
+
+:root {
+  --font-display: 'Fraunces', 'Georgia', 'Times New Roman', serif;
+  --font-body: 'Manrope', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  --bg: #f1f7f7;
+  --surface: rgba(255, 255, 255, 0.74);
+  --surface-solid: #ffffff;
+  --surface-2: #e2f0f0;
+  --border: #d2e2e3;
+  --text: #141414;
+  --text-muted: #4f656c;
+  --accent: #36565f;
+  --accent-strong: #2b464e;
+  --accent-soft: rgba(54, 86, 95, 0.12);
+  --accent-2: #5f8190;
+  --accent-2-strong: #4f6f7d;
+  --accent-2-soft: rgba(95, 129, 144, 0.16);
+  --skeleton-highlight: #d7e6e7;
+  --glass-surface: rgba(255, 255, 255, 0.62);
+  --glass-surface-hover: rgba(255, 255, 255, 0.86);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --brand-grad: linear-gradient(135deg, #36565f 0%, #4f7482 100%);
+  --brand-glow: 0 8px 22px rgba(54, 86, 95, 0.28);
+}
+
+:root[data-theme='dark'] {
+  --bg: #121618;
+  --surface: rgba(27, 36, 40, 0.74);
+  --surface-solid: #1b2428;
+  --surface-2: #243138;
+  --border: #31434a;
+  --text: #e2f0f0;
+  --text-muted: #a5bbc2;
+  --accent: #9dbbc8;
+  --accent-strong: #6f93a2;
+  --accent-soft: rgba(157, 187, 200, 0.16);
+  --accent-2: #7fa3b3;
+  --accent-2-strong: #5f8190;
+  --accent-2-soft: rgba(127, 163, 179, 0.18);
+  --skeleton-highlight: #33454c;
+  --glass-surface: rgba(27, 36, 40, 0.62);
+  --glass-surface-hover: rgba(36, 49, 56, 0.88);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --brand-glow: 0 8px 22px rgba(0, 0, 0, 0.4);
+}
+
+body {
+  font-family: var(--font-body);
+}
+
+/* Headings in the display face */
+
+.page-title,
+.auth-visual-heading,
+.auth-card-title,
+.section-title,
+.hero-greeting,
+.stat-value {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.stat-value {
+  font-variant-numeric: lining-nums;
+}
+
+.auth-card-title,
+.page-title {
+  font-size: clamp(26px, 3vw, 34px);
+}
+
+/* The sign-in photo is blue; blend it into the slate palette (luminosity keeps its light and
+   shade, the slate colour supplies the hue) and darken the lower half behind the heading */
+
+.auth-visual-col {
+  background-color: #36565f;
+  background-blend-mode: luminosity;
+}
+
+.auth-visual-col::before {
+  background: linear-gradient(to top, rgba(20, 20, 20, 0.88) 0%, rgba(34, 54, 61, 0.5) 50%, rgba(54, 86, 95, 0.12) 100%);
 }
