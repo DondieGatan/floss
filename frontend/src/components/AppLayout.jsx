@@ -138,6 +138,9 @@ export default function AppLayout({ children }) {
           <img src={logoIcon} alt="" className="brand-mark" />
           Floss Clinic
         </Link>
+        <span className="app-mobile-avatar" aria-hidden="true">
+          {initials}
+        </span>
       </div>
 
       {mobileNavOpen && <div className="app-sidebar-backdrop" onClick={closeMobileNav} aria-hidden="true" />}
