@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api, downloadFile, ApiError } from '../api/client';
 import AppLayout from '../components/AppLayout';
 import ChatWindow from '../components/ChatWindow';
+import AssistantAvatar from '../components/AssistantAvatar';
 
 export default function ChatPage() {
   const { conversationId } = useParams();
@@ -44,11 +45,18 @@ export default function ChatPage() {
   return (
     <AppLayout>
       <div className="page">
-        <header className="page-header">
+        <header className="page-header chat-page-header">
           <h1 className="sr-only">Conversation with Floss Clinic</h1>
           <Link to="/knowledge-base" className="back-link">
             ← Knowledge Base
           </Link>
+          <div className="chat-identity" aria-hidden="true">
+            <AssistantAvatar size="md" />
+            <div>
+              <p className="chat-identity-name">Floss Assistant</p>
+              <p className="chat-identity-sub">Answers drawn from the clinic's records</p>
+            </div>
+          </div>
           <div className="page-header-actions">
             {exportError && (
               <span className="form-error" role="alert" style={{ margin: 0 }}>
