@@ -1193,16 +1193,6 @@ textarea {
   width: 100%;
 }
 
-.upload-btn {
-  display: inline-block;
-}
-
-.upload-hint {
-  color: var(--text-muted);
-  font-size: 12px;
-  margin: 6px 0 0;
-}
-
 /* Cards, grids */
 
 .card {
@@ -1817,70 +1807,7 @@ textarea {
   color: var(--warning);
 }
 
-/* Documents / Knowledge Base */
-
-.documents-toolbar {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-
-.document-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.document-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
-  transition: box-shadow 0.15s ease;
-}
-
-.document-card:hover {
-  box-shadow: var(--shadow);
-}
-
-.document-card-main {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.document-filename {
-  font-weight: 600;
-}
-
-.document-type-tag {
-  color: var(--text-muted);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  margin-right: 8px;
-}
-
-.document-meta,
-.document-error {
-  color: var(--text-muted);
-  font-size: 13px;
-  margin: 8px 0 0;
-}
-
-.document-error {
-  color: var(--danger);
-}
-
-.document-card-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
-}
+/* Empty states */
 
 .empty-state {
   text-align: center;
@@ -2360,10 +2287,6 @@ table.simple-table {
 .stat-card,
 .appointment-card,
 .doctor-card,
-.document-card {
-  border-radius: 18px;
-}
-
 /* Sign-in / sign-up */
 
 .auth-card {
@@ -3082,11 +3005,6 @@ body {
   border: 1px solid var(--border);
 }
 
-.documents-toolbar {
-  gap: 12px;
-  align-items: center;
-}
-
 /* Schedule: a dentist card per row, with an avatar and open/booked counts */
 
 .schedule-card-head {
@@ -3213,23 +3131,6 @@ body {
 }
 
 /* Knowledge base */
-
-.document-card {
-  border-radius: 20px;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.document-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-hover);
-}
-
-.document-type-tag {
-  border-radius: 999px;
-  padding: 3px 10px;
-  background: var(--accent-soft);
-  color: var(--accent);
-}
 
 /* Security: each step is a card */
 
@@ -3838,4 +3739,224 @@ body {
 
 .doctor-card-body .doctor-specialty + .doctor-card-cta {
   margin-top: 18px;
+}
+
+/* =========================================================================
+   Knowledge Base: a hero with the main "start a conversation" action, two
+   summary cards, a staff upload zone, and document rows led by a file-icon
+   tile. Colours come from the theme tokens.
+   ========================================================================= */
+
+.kb-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 8px;
+}
+
+.kb-hero-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.kb-hero-cta {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  padding: 14px 24px;
+  border-radius: 999px;
+  font-size: 15px;
+}
+
+.kb-hero-cta svg {
+  width: 20px;
+  height: 20px;
+}
+
+.kb-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 22px 0;
+}
+
+@media (max-width: 760px) {
+  .kb-hero {
+    flex-direction: column;
+  }
+
+  .kb-hero-cta {
+    align-self: stretch;
+    justify-content: center;
+  }
+}
+
+/* Staff upload zone */
+
+.upload-zone {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 18px 22px;
+  border: 1.5px dashed var(--border);
+  border-radius: 22px;
+  background: var(--surface);
+}
+
+.upload-zone-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.upload-zone-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.upload-zone-text {
+  flex: 1;
+  min-width: 200px;
+}
+
+.upload-zone-title {
+  margin: 0;
+  font-weight: 700;
+}
+
+.upload-hint {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.upload-btn {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.upload-zone-error {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+/* Document rows */
+
+.document-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.document-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px 16px 16px;
+  border-radius: 20px;
+  background: var(--surface-solid);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.document-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.document-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: var(--brand-grad);
+  color: #fff;
+  box-shadow: var(--brand-glow);
+}
+
+.document-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.document-card.status-failed .document-icon,
+.document-card.status-pending .document-icon,
+.document-card.status-processing .document-icon {
+  background: var(--surface-2);
+  color: var(--text-muted);
+  box-shadow: none;
+}
+
+.document-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.document-card-main {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.document-filename {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.document-type-tag {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.document-meta,
+.document-error {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.document-error {
+  color: var(--danger);
+}
+
+.document-card-actions {
+  flex: none;
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .document-card {
+    flex-wrap: wrap;
+  }
+
+  .document-body {
+    flex-basis: calc(100% - 64px);
+  }
+
+  .document-card-actions {
+    width: 100%;
+  }
 }
