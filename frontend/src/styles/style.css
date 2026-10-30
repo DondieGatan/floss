@@ -5151,3 +5151,264 @@ body {
     animation: none;
   }
 }
+
+/* =========================================================================
+   Chat page. A frosted header with a pill back link, a ringed assistant avatar
+   with a presence dot and pill actions; a soft brand glow behind the thread;
+   roomier bubbles with ringed avatars; a haloed empty state; and a composer
+   that lifts when focused. Colours come from the theme tokens.
+   ========================================================================= */
+
+/* Header */
+
+.chat-page-header {
+  min-height: 70px;
+  padding: 12px 24px;
+  background: var(--surface);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 0;
+  box-shadow: 0 1px 0 var(--border);
+}
+
+.chat-page-header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-2-soft) 30%, var(--accent-soft) 70%, transparent);
+  pointer-events: none;
+}
+
+.chat-page-header .back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-solid);
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.chat-page-header .back-link:hover {
+  background: var(--accent-soft);
+  transform: translateX(-2px);
+}
+
+.chat-identity {
+  gap: 14px;
+}
+
+.chat-identity .assistant-avatar-md {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  box-shadow: 0 0 0 3px var(--surface-solid), 0 0 0 5px var(--accent-2-soft), var(--brand-glow);
+}
+
+.chat-identity .assistant-avatar-md::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--success);
+  border: 2px solid var(--surface-solid);
+}
+
+.chat-identity-name {
+  font-size: 20px;
+  letter-spacing: -0.01em;
+}
+
+.chat-identity-sub {
+  margin-top: 2px;
+  font-size: 12.5px;
+}
+
+.chat-page-header .page-header-actions {
+  gap: 8px;
+}
+
+.chat-page-header .btn-ghost {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-solid);
+  font-weight: 600;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.chat-page-header .btn-ghost:hover:not(:disabled) {
+  background: var(--accent-soft);
+  border-color: var(--accent-2-soft);
+}
+
+.chat-page-header .page-header-actions .btn-ghost:last-child:hover:not(:disabled) {
+  background: var(--danger-soft);
+  border-color: transparent;
+  color: var(--danger);
+}
+
+/* Thread canvas */
+
+.page:has(> .page-body-chat) {
+  background:
+    radial-gradient(ellipse 60% 40% at 8% 0%, var(--accent-soft), transparent 70%),
+    radial-gradient(ellipse 50% 45% at 100% 100%, var(--accent-2-soft), transparent 70%);
+}
+
+.page-body-chat .chat-window {
+  height: calc(100vh - 71px);
+}
+
+.page-body-chat .chat-messages {
+  gap: 18px;
+  padding: 32px 24px 14px;
+  scrollbar-width: thin;
+}
+
+.page-body-chat .message-row {
+  gap: 10px;
+}
+
+.page-body-chat .message-row .assistant-avatar-sm {
+  width: 32px;
+  height: 32px;
+  box-shadow: 0 0 0 3px var(--surface-solid), var(--shadow);
+}
+
+.page-body-chat .message-bubble {
+  max-width: 78%;
+  padding: 14px 20px;
+  border-radius: 22px;
+}
+
+.page-body-chat .message-bubble-user {
+  border-bottom-right-radius: 6px;
+}
+
+.page-body-chat .message-bubble-assistant {
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 6px;
+}
+
+.page-body-chat .message-content,
+.page-body-chat .message-list {
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.page-body-chat .booking-action-card {
+  margin-left: 42px;
+  border-radius: 18px;
+  background: var(--surface-solid);
+  box-shadow: var(--shadow);
+}
+
+/* Empty state */
+
+.page-body-chat .chat-empty-state {
+  gap: 12px;
+  padding: 24px;
+}
+
+.page-body-chat .chat-empty-state .assistant-avatar-lg {
+  width: 84px;
+  height: 84px;
+  margin-bottom: 14px;
+  box-shadow:
+    0 0 0 10px var(--accent-soft),
+    0 0 0 22px var(--accent-2-soft),
+    var(--brand-glow);
+}
+
+.page-body-chat .chat-empty-title {
+  font-size: 32px;
+  letter-spacing: -0.02em;
+}
+
+.page-body-chat .chat-empty-subtitle {
+  max-width: 340px;
+  font-size: 15.5px;
+}
+
+/* Composer */
+
+.page-body-chat .chat-input-row {
+  margin-bottom: 24px;
+  padding: 8px 8px 8px 24px;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+
+.page-body-chat .chat-input-row:focus-within {
+  transform: translateY(-2px);
+}
+
+.page-body-chat .chat-input-row input {
+  font-size: 15px;
+}
+
+@media (max-width: 900px) {
+  .page-body-chat .chat-window {
+    height: calc(100vh - 71px - 62px);
+  }
+}
+
+/* On a phone the header is one slim row (back link and actions); the assistant's name and avatar
+   are already in the thread and the empty state */
+
+@media (max-width: 640px) {
+  .chat-page-header {
+    min-height: 0;
+    height: 56px;
+    gap: 6px;
+    padding: 0 12px;
+  }
+
+  .chat-page-header .chat-identity {
+    display: none;
+  }
+
+  .chat-page-header .page-header-actions {
+    margin-left: auto;
+    gap: 6px;
+  }
+
+  .chat-page-header .back-link,
+  .chat-page-header .btn {
+    padding: 6px 10px;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+
+  .page-body-chat .chat-window {
+    height: calc(100vh - 56px - 62px);
+  }
+
+  /* this page is already the assistant, and the launcher would sit on top of the Send button */
+  .app-shell:has(.page-body-chat) .floating-chat {
+    display: none;
+  }
+
+  .page-body-chat .message-bubble {
+    max-width: 88%;
+  }
+
+  .page-body-chat .chat-empty-title {
+    font-size: 26px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-body-chat .chat-input-row:focus-within,
+  .chat-page-header .back-link:hover {
+    transform: none;
+  }
+}
