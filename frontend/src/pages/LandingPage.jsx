@@ -21,6 +21,12 @@ const SERVICES = [
   { icon: '👶', photo: pediatricPhoto, title: 'Pediatric Dentistry', text: 'Gentle, age-appropriate dental care designed specifically for children.' },
 ];
 
+const SPECIALTIES = [
+  { icon: '🩺', title: 'Endodontics', text: 'Root canal therapy and pulp care.' },
+  { icon: '🦷', title: 'Periodontics', text: 'Gum disease treatment and gum health.' },
+  { icon: '⚕️', title: 'Oral Surgery', text: 'Extractions, wisdom teeth, and jaw surgery.' },
+];
+
 const STEPS = [
   {
     icon: <ToothIcon />,
@@ -117,6 +123,7 @@ function AssistantPreviewCard({ user }) {
 
 export default function LandingPage() {
   const [stepsRef, stepsVisible] = useReveal();
+  const [specialtiesRef, specialtiesVisible] = useReveal();
   const [ctaRef, ctaVisible] = useReveal();
   const [quickbookRef, quickbookVisible] = useReveal();
   const [aboutRef, aboutVisible] = useReveal();
@@ -243,8 +250,15 @@ export default function LandingPage() {
         <div className="about-band">
         <section ref={aboutRef} className={`landing-section about-grid reveal${aboutVisible ? ' reveal-visible' : ''}`} aria-labelledby="about-heading">
           <div className="about-art" aria-hidden="true">
-            <div className="about-circle-1">
-              <img src={aboutPhoto} alt="" className="about-circle-img" />
+            <div className="about-frame">
+              <img src={aboutPhoto} alt="" className="about-frame-img" />
+            </div>
+            <div className="about-float">
+              <span className="about-float-icon">✓</span>
+              <div>
+                <p className="about-float-title">Verified answers</p>
+                <p className="about-float-sub">Every reply cites its source</p>
+              </div>
             </div>
           </div>
           <div className="about-copy">
@@ -287,6 +301,9 @@ export default function LandingPage() {
               <h2 className="section-heading" id="services-heading">
                 A Full Range of Dental Services, <br /> Tailored to You
               </h2>
+              <p className="services-intro">
+                From routine check-ups to specialist treatment, our team covers every stage of care.
+              </p>
             </div>
             <a className="l-btn l-btn-ghost" href={bookingHref}>
               Explore All Services
@@ -302,6 +319,23 @@ export default function LandingPage() {
                 <div className="service-card-body">
                   <h3>{s.title}</h3>
                   <p>{s.text}</p>
+                  <a className="service-card-link" href={bookingHref}>
+                    Learn more →
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div
+            ref={specialtiesRef}
+            className={`specialty-grid reveal-stagger${specialtiesVisible ? ' reveal-visible' : ''}`}
+          >
+            {SPECIALTIES.map((sp) => (
+              <div className="specialty-card" key={sp.title}>
+                <span className="specialty-icon" aria-hidden="true">{sp.icon}</span>
+                <div>
+                  <h3>{sp.title}</h3>
+                  <p>{sp.text}</p>
                   <a className="service-card-link" href={bookingHref}>
                     Learn more →
                   </a>

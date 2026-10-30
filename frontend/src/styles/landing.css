@@ -427,25 +427,6 @@
   justify-content: center;
 }
 
-.about-circle-1 {
-  position: relative;
-  width: 380px;
-  height: 380px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  box-shadow: var(--l-shadow-soft);
-  background: linear-gradient(150deg, #e7f1f2, #d1e5e6);
-}
-
-.about-circle-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
 .about-copy p {
   color: var(--l-text-muted);
   font-size: 17px;
@@ -908,11 +889,6 @@
     height: 280px;
   }
 
-  .about-circle-1 {
-    width: 260px;
-    height: 260px;
-  }
-
   .benefits-art {
     height: 300px;
   }
@@ -989,10 +965,6 @@
 
 :root[data-theme='dark'] .about-band {
   background: linear-gradient(135deg, #151d20, #11171a);
-}
-
-:root[data-theme='dark'] .about-circle-1 {
-  background: linear-gradient(150deg, #1b2225, #242c2f);
 }
 
 :root[data-theme='dark'] .ticker-strip {
@@ -1245,10 +1217,6 @@ html {
 
 :root[data-theme='dark'] .about-band {
   background: linear-gradient(135deg, #1a282d, #152226);
-}
-
-:root[data-theme='dark'] .about-circle-1 {
-  background: linear-gradient(150deg, #213036, #2f454c);
 }
 
 :root[data-theme='dark'] .ticker-strip {
@@ -2202,5 +2170,264 @@ html {
 
   .step-card {
     padding: 26px 22px 28px;
+  }
+}
+
+/* =========================================================================
+   Services and About. About swaps the circle for a framed photo over a
+   gradient plate, with a floating "verified answers" card and the checklist
+   as soft rows. Services gain an intro line, taller photo cards, and a second
+   row of specialty cards so all six specialties in the ticker have a card.
+   Colours come from the --l-* tokens, so the dark theme follows.
+   ========================================================================= */
+
+/* About */
+
+.about-art {
+  position: relative;
+  height: auto;
+  min-height: 440px;
+  padding: 20px 28px 20px 8px;
+}
+
+.about-art::before {
+  content: '';
+  position: absolute;
+  inset: 36px 8px 0 40px;
+  border-radius: 200px 200px 40px 40px;
+  background: linear-gradient(160deg, #5f8190 0%, #36565f 100%);
+  opacity: 0.9;
+  transform: rotate(-3deg);
+}
+
+.about-art::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: -10px;
+  width: 110px;
+  height: 110px;
+  background-image: radial-gradient(var(--l-blue) 2px, transparent 2.5px);
+  background-size: 16px 16px;
+  opacity: 0.35;
+}
+
+.about-frame {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 4 / 5;
+  margin: 0 auto;
+  border-radius: 200px 200px 36px 36px;
+  overflow: hidden;
+  border: 8px solid var(--l-frame-edge);
+  box-shadow: 0 30px 70px rgba(15, 40, 45, 0.26);
+  background: var(--l-bg-soft);
+}
+
+.about-frame-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+}
+
+.about-float {
+  position: absolute;
+  z-index: 2;
+  right: -4px;
+  bottom: 56px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px 12px 12px;
+  border-radius: 18px;
+  background: var(--l-float-bg);
+  border: 1px solid var(--l-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 16px 36px rgba(15, 40, 45, 0.2);
+  animation: l-float 6s ease-in-out infinite alternate;
+}
+
+.about-float-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--l-grad);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.about-float-title {
+  margin: 0;
+  color: var(--l-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.about-float-sub {
+  margin: 2px 0 0;
+  color: var(--l-text-muted);
+  font-size: 12px;
+}
+
+.about-copy .check-list {
+  display: grid;
+  gap: 10px;
+  margin: 22px 0 28px;
+  padding: 0;
+  list-style: none;
+}
+
+.about-copy .check-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: var(--l-float-bg);
+  border: 1px solid var(--l-border);
+  font-weight: 600;
+  transition: transform 0.25s var(--l-ease), box-shadow 0.25s var(--l-ease);
+}
+
+.about-copy .check-list li:hover {
+  transform: translateX(4px);
+  box-shadow: var(--l-card-shadow);
+}
+
+@media (max-width: 860px) {
+  .about-art {
+    min-height: 0;
+    padding: 20px 16px 8px;
+  }
+
+  .about-art::before {
+    inset: 36px 24px 0 36px;
+  }
+
+  .about-float {
+    right: 4px;
+  }
+}
+
+/* Services */
+
+.services-intro {
+  margin: 12px 0 0;
+  max-width: 520px;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--l-text-muted);
+}
+
+.service-card-art {
+  position: relative;
+  height: 200px;
+}
+
+.service-card-art::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 40%;
+  background: linear-gradient(to top, rgba(20, 20, 20, 0.35), transparent);
+  pointer-events: none;
+}
+
+.service-card-badge {
+  z-index: 1;
+}
+
+.service-card-link {
+  display: inline-block;
+  margin-top: 6px;
+  font-weight: 700;
+  color: var(--l-blue-dark);
+}
+
+.specialty-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 26px;
+  margin-top: 26px;
+}
+
+.specialty-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 24px 26px;
+  border-radius: 22px;
+  background: var(--l-float-bg);
+  border: 1px solid var(--l-border);
+  box-shadow: var(--l-card-shadow);
+  transition: transform 0.3s var(--l-ease), box-shadow 0.3s var(--l-ease), border-color 0.3s ease;
+}
+
+.specialty-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--l-card-shadow-hover);
+  border-color: var(--l-blue-2);
+}
+
+.specialty-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: var(--l-bg-soft);
+  border: 1px solid var(--l-border);
+  box-shadow: var(--l-card-shadow);
+  font-size: 24px;
+}
+
+.specialty-card h3 {
+  margin: 2px 0 6px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.specialty-card p {
+  margin: 0 0 8px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--l-text-muted);
+}
+
+@media (max-width: 960px) {
+  .specialty-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+/* These sections set their own vertical padding with no side padding, so below the 1180px
+   container width their content ran to the screen edge; match the hero's 32px gutter */
+
+.about-grid,
+.services-section,
+.team-section,
+.benefits-grid {
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+@media (max-width: 640px) {
+  .about-grid,
+  .services-section,
+  .team-section,
+  .benefits-grid {
+    padding-left: 20px;
+    padding-right: 20px;
   }
 }
