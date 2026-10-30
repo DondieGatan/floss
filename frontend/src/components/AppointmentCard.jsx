@@ -6,12 +6,25 @@ function formatWhen(startIso, endIso) {
   return `${dateLabel} · ${timeLabel}`;
 }
 
+function dateChip(startIso) {
+  const start = new Date(startIso);
+  return {
+    month: start.toLocaleDateString(undefined, { month: 'short' }),
+    day: start.getDate(),
+  };
+}
+
 export default function AppointmentCard({ appointment, showPatient = false, onCancel, onReschedule }) {
   const canCancel = onCancel && appointment.status === 'scheduled';
   const canReschedule = onReschedule && appointment.status === 'scheduled';
+  const chip = dateChip(appointment.scheduledStart);
 
   return (
     <div className={`appointment-card status-${appointment.status}`}>
+      <div className="appointment-date" aria-hidden="true">
+        <span>{chip.month}</span>
+        <strong>{chip.day}</strong>
+      </div>
       <div className="appointment-main">
         <span className="appointment-doctor">
           {showPatient ? appointment.patientName : `Dr. ${appointment.doctorName?.replace(/^Dr\.?\s*/, '')}`}

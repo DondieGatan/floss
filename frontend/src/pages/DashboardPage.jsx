@@ -37,6 +37,13 @@ function mondayOf(date) {
   return d;
 }
 
+function formatNextUp(startIso) {
+  const start = new Date(startIso);
+  const day = start.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+  const time = start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  return `${day} at ${time}`;
+}
+
 function PatientDashboard() {
   const { user } = useAuth();
   const [appointments, setAppointments] = useState(null);
@@ -71,6 +78,18 @@ function PatientDashboard() {
         </p>
         <h1 className="hero-greeting">Welcome back, {firstName(user?.fullName)}</h1>
         <p className="hero-sub">Here's what's coming up with your care.</p>
+        <div className="quick-actions">
+          <Link className="quick-action-btn" to="/doctors">
+            <ToothIcon /> Find a dentist
+          </Link>
+        </div>
+        {upcoming.length > 0 && (
+          <div className="hero-next">
+            <p className="hero-next-label">Next appointment</p>
+            <p className="hero-next-when">{formatNextUp(upcoming[0].scheduledStart)}</p>
+            <p className="hero-next-with">with Dr. {upcoming[0].doctorName?.replace(/^Dr\.?\s*/, '')}</p>
+          </div>
+        )}
       </div>
 
       {appointments !== null && <AppointmentReminderBanner appointments={appointments} />}
