@@ -2461,3 +2461,189 @@ table.simple-table {
   font-weight: 700;
   letter-spacing: -0.028em;
 }
+
+/* =========================================================================
+   Motion layer: a page-load progress bar, a press ripple and a light sweep on
+   buttons, a staggered entrance for each page's sections, and a loading
+   spinner. Presentation only; reduced-motion users get none of the movement.
+   ========================================================================= */
+
+.route-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 3000;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.route-progress::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--brand-grad);
+  transform-origin: left;
+  animation: route-progress 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes route-progress {
+  0% {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  65% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border-radius: 50%;
+  border: 2.5px solid var(--accent-soft);
+  border-top-color: var(--accent-strong);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.page-loading-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* Buttons */
+
+.btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease, background 0.2s ease,
+    filter 0.2s ease, opacity 0.15s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.btn-primary::after,
+.l-btn-primary::after,
+.hero-cta::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 32%, rgba(255, 255, 255, 0.34) 50%, transparent 68%);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+
+.btn-primary:hover:not(:disabled)::after,
+.l-btn-primary:hover::after,
+.hero-cta:hover::after {
+  transform: translateX(120%);
+  transition: transform 0.75s ease;
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.24;
+  transform: scale(0);
+  pointer-events: none;
+  animation: ripple-out 0.6s ease-out forwards;
+}
+
+@keyframes ripple-out {
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* Sidebar links nudge toward the pointer and their icon pops */
+
+.app-nav-link {
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), background 0.2s ease, color 0.2s ease;
+}
+
+.app-nav-link:hover {
+  transform: translateX(3px);
+}
+
+.app-sidebar.collapsed .app-nav-link:hover {
+  transform: none;
+}
+
+.app-nav-icon {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.app-nav-link:hover .app-nav-icon {
+  transform: scale(1.14);
+}
+
+.floating-chat-fab {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+
+.floating-chat-fab:active {
+  transform: scale(0.92);
+}
+
+/* Each page's sections rise in one after another (backwards fill: nothing is left
+   transformed afterwards, so fixed-position modals inside a page still anchor to the screen) */
+
+.page-body:not(.page-body-chat) > * {
+  animation: section-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.page-body:not(.page-body-chat) > :nth-child(1) { animation-delay: 0.04s; }
+.page-body:not(.page-body-chat) > :nth-child(2) { animation-delay: 0.1s; }
+.page-body:not(.page-body-chat) > :nth-child(3) { animation-delay: 0.16s; }
+.page-body:not(.page-body-chat) > :nth-child(4) { animation-delay: 0.22s; }
+.page-body:not(.page-body-chat) > :nth-child(5) { animation-delay: 0.28s; }
+.page-body:not(.page-body-chat) > :nth-child(n + 6) { animation-delay: 0.34s; }
+
+@keyframes section-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-iteration-count: 1 !important;
+  }
+
+  .ripple,
+  .route-progress {
+    display: none;
+  }
+}
