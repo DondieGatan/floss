@@ -1931,3 +1931,276 @@ html {
   font-style: italic;
   font-weight: 500;
 }
+
+/* =========================================================================
+   Home page polish: a "how it works" section under the hero, a compact
+   four-column team grid, a closing call to action and a richer footer.
+   Colours come from the --l-* tokens, so the dark theme follows.
+   ========================================================================= */
+
+/* How it works */
+
+.steps-band {
+  position: relative;
+  padding: 24px 0 72px;
+}
+
+.steps-head {
+  max-width: 640px;
+  margin: 0 auto 44px;
+  text-align: center;
+}
+
+.steps-head .eyebrow {
+  justify-content: center;
+}
+
+.steps-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* a dashed line threads the three cards together */
+.steps-grid::before {
+  content: '';
+  position: absolute;
+  top: 52px;
+  left: 16%;
+  right: 16%;
+  border-top: 2px dashed var(--l-border);
+}
+
+.step-card {
+  position: relative;
+  padding: 30px 28px 32px;
+  border-radius: 24px;
+  background: var(--l-float-bg);
+  border: 1px solid var(--l-border);
+  box-shadow: var(--l-card-shadow);
+  text-align: center;
+  transition: transform 0.3s var(--l-ease), box-shadow 0.3s var(--l-ease);
+}
+
+.step-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--l-card-shadow-hover);
+}
+
+.step-num {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--l-border);
+}
+
+.step-icon {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 20px;
+  border-radius: 20px;
+  background: var(--l-grad);
+  color: #fff;
+  box-shadow: var(--l-glow);
+}
+
+.step-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.step-card h3 {
+  margin: 0 0 8px;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.step-card p {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--l-text-muted);
+}
+
+@media (max-width: 860px) {
+  .steps-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .steps-grid::before {
+    display: none;
+  }
+}
+
+/* Team: a compact four-column grid */
+
+.team-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.team-card {
+  border-radius: 22px;
+}
+
+.team-card-photo {
+  aspect-ratio: 1 / 1;
+}
+
+.team-card-body {
+  padding: 16px 18px 20px;
+}
+
+.team-card-body h3 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.team-card-specialty {
+  font-size: 13px;
+}
+
+.team-card-bio {
+  -webkit-line-clamp: 2;
+  font-size: 12.5px;
+}
+
+@media (max-width: 1080px) {
+  .team-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+  .team-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Closing call to action */
+
+.cta-band {
+  position: relative;
+  overflow: hidden;
+  padding: 88px 0;
+  background: linear-gradient(135deg, #36565f 0%, #141414 100%);
+  color: #fff;
+  text-align: center;
+}
+
+:root[data-theme='dark'] .cta-band {
+  background: linear-gradient(135deg, #2b444c 0%, #0f1315 100%);
+}
+
+.cta-band::before,
+.cta-band::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+.cta-band::before {
+  top: -140px;
+  left: -100px;
+  width: 380px;
+  height: 380px;
+  background: rgba(95, 129, 144, 0.5);
+}
+
+.cta-band::after {
+  right: -120px;
+  bottom: -160px;
+  width: 420px;
+  height: 420px;
+  background: rgba(226, 240, 240, 0.18);
+}
+
+.cta-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+}
+
+.cta-band .section-heading {
+  margin: 0 0 14px;
+  color: #fff;
+}
+
+.cta-sub {
+  margin: 0 0 30px;
+  font-size: 17px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.landing .l-btn-light {
+  background: #fff;
+  color: #2b464e;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.3);
+}
+
+.landing .l-btn-light:hover {
+  background: #e2f0f0;
+  transform: translateY(-2px);
+}
+
+/* Footer: slate-to-black with a softer top edge */
+
+.landing-footer {
+  position: relative;
+  padding: 64px 0 26px;
+  background: linear-gradient(160deg, #1d2d33 0%, #141414 100%);
+}
+
+.landing-footer .landing-brand {
+  font-size: 22px;
+  color: #fff;
+}
+
+.footer-brand-sub {
+  max-width: 320px;
+  line-height: 1.7;
+}
+
+.footer-col h4 {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.footer-col a {
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.footer-col a:hover {
+  transform: translateX(3px);
+}
+
+@media (max-width: 640px) {
+  .cta-band {
+    padding: 64px 0;
+  }
+
+  .step-card {
+    padding: 26px 22px 28px;
+  }
+}

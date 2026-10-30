@@ -6,6 +6,7 @@ import { api } from '../api/client';
 import AssistantAvatar from '../components/AssistantAvatar';
 import PublicHeader from '../components/PublicHeader';
 import PublicFooter from '../components/PublicFooter';
+import { ToothIcon, CalendarIcon, ChatIcon } from '../components/icons';
 import { resolveDoctorPhoto } from '../data/doctorPhotos';
 import heroPhoto from '../assets/Top_background.jpg';
 import aboutPhoto from '../assets/Third_Page.jpg';
@@ -18,6 +19,24 @@ const SERVICES = [
   { icon: '🪥', photo: generalPhoto, title: 'General Dentistry', text: 'Routine cleanings, restorative fillings, and preventive care to maintain a healthy smile year-round.' },
   { icon: '😁', photo: orthoPhoto, title: 'Orthodontics', text: 'Traditional braces and clear aligners for precise, lasting bite correction — for teens and adults.' },
   { icon: '👶', photo: pediatricPhoto, title: 'Pediatric Dentistry', text: 'Gentle, age-appropriate dental care designed specifically for children.' },
+];
+
+const STEPS = [
+  {
+    icon: <ToothIcon />,
+    title: 'Choose your dentist',
+    text: 'Browse our team by department and find the dentist who suits you best.',
+  },
+  {
+    icon: <CalendarIcon />,
+    title: 'Pick a time',
+    text: 'See real-time availability and book in a few clicks. Conflicts are checked automatically.',
+  },
+  {
+    icon: <ChatIcon />,
+    title: 'Get answers and reminders',
+    text: 'Ask the assistant anything about the clinic, and we remind you before your visit.',
+  },
 ];
 
 const TICKER_ITEMS = [
@@ -97,6 +116,8 @@ function AssistantPreviewCard({ user }) {
 }
 
 export default function LandingPage() {
+  const [stepsRef, stepsVisible] = useReveal();
+  const [ctaRef, ctaVisible] = useReveal();
   const [quickbookRef, quickbookVisible] = useReveal();
   const [aboutRef, aboutVisible] = useReveal();
   const [servicesRef, servicesVisible] = useReveal();
@@ -182,6 +203,27 @@ export default function LandingPage() {
             </div>
           </div>
         </header>
+
+        <section className="steps-band" aria-labelledby="steps-heading">
+          <div ref={stepsRef} className={`landing-section reveal${stepsVisible ? ' reveal-visible' : ''}`}>
+            <div className="steps-head">
+              <p className="eyebrow">How It Works</p>
+              <h2 className="section-heading" id="steps-heading">
+                Care in three simple steps
+              </h2>
+            </div>
+            <ol className="steps-grid">
+              {STEPS.map((step, i) => (
+                <li className="step-card" key={step.title}>
+                  <span className="step-num" aria-hidden="true">{i + 1}</span>
+                  <div className="step-icon" aria-hidden="true">{step.icon}</div>
+                  <h3>{step.title}</h3>
+                  <p>{step.text}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
 
         <div className="quickbook-band">
           <div ref={quickbookRef} className={`landing-section quickbook-section reveal${quickbookVisible ? ' reveal-visible' : ''}`}>
@@ -366,6 +408,23 @@ export default function LandingPage() {
           </div>
         </section>
         </div>
+
+        <section className="cta-band" aria-labelledby="cta-heading">
+          <div ref={ctaRef} className={`landing-section cta-inner reveal${ctaVisible ? ' reveal-visible' : ''}`}>
+            <h2 className="section-heading" id="cta-heading">
+              Ready for a healthier smile?
+            </h2>
+            <p className="cta-sub">
+              Book online, ask the assistant anything, and we will take care of the rest.
+            </p>
+            <a className="l-btn l-btn-light l-btn-large" href={bookingHref}>
+              Book Your Visit
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M5 12h13.5M13 6l6.5 6-6.5 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </a>
+          </div>
+        </section>
       </main>
 
       <PublicFooter />
