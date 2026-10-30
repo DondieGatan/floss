@@ -2285,8 +2285,10 @@ table.simple-table {
 /* Cards: a little more air and a softer shadow */
 
 .stat-card,
-.appointment-card,
-.doctor-card,
+.appointment-card {
+  border-radius: 18px;
+}
+
 /* Sign-in / sign-up */
 
 .auth-card {
@@ -3959,4 +3961,190 @@ body {
   .document-card-actions {
     width: 100%;
   }
+}
+
+/* =========================================================================
+   Staff pages: department cards with an icon tile, directory rows with a
+   proper avatar and actions, and Team & Roles rows with an avatar and a
+   role-coloured badge. Colours come from the theme tokens.
+   ========================================================================= */
+
+/* Directory: departments */
+
+.department-card {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 22px;
+}
+
+.department-card-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 14px;
+  border-radius: 14px;
+  background: var(--brand-grad);
+  color: #fff;
+  box-shadow: var(--brand-glow);
+}
+
+.department-card-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.department-card-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.department-card-desc {
+  margin: 6px 0 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+.department-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+/* Directory: dentist rows */
+
+.directory-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.directory-row-who {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.directory-row-avatar {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--surface-solid);
+  box-shadow: 0 0 0 2px var(--accent-2-soft);
+}
+
+.directory-row-initials {
+  display: grid;
+  place-items: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.directory-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.directory-row-name {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.directory-row-meta {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.directory-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Team & Roles */
+
+.team-row {
+  gap: 14px;
+}
+
+.team-row-avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.team-row .role-badge {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+
+.team-row .role-badge-owner {
+  background: var(--brand-grad);
+  color: #fff;
+}
+
+.team-row .role-badge-admin {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.team-row .role-badge-staff {
+  background: var(--accent-2-soft);
+  color: var(--accent-2-strong);
+}
+
+:root[data-theme='dark'] .team-row .role-badge-staff {
+  color: var(--accent-2);
+}
+
+/* The availability editor's inline controls match the pill inputs elsewhere */
+
+.directory-row select,
+.directory-row input[type='time'] {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-solid);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+}
+
+.team-row select {
+  padding: 6px 28px 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background-color: var(--surface-solid);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
 }
