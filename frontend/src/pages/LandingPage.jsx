@@ -211,7 +211,7 @@ export default function LandingPage() {
           </div>
         </header>
 
-        <section className="steps-band" aria-labelledby="steps-heading">
+        <section className="steps-band" id="how-it-works" aria-labelledby="steps-heading">
           <div ref={stepsRef} className={`landing-section reveal${stepsVisible ? ' reveal-visible' : ''}`}>
             <div className="steps-head">
               <p className="eyebrow">How It Works</p>
@@ -248,7 +248,7 @@ export default function LandingPage() {
         </div>
 
         <div className="about-band">
-        <section ref={aboutRef} className={`landing-section about-grid reveal${aboutVisible ? ' reveal-visible' : ''}`} aria-labelledby="about-heading">
+        <section ref={aboutRef} className={`landing-section about-grid reveal${aboutVisible ? ' reveal-visible' : ''}`} id="about" aria-labelledby="about-heading">
           <div className="about-art" aria-hidden="true">
             <div className="about-frame">
               <img src={aboutPhoto} alt="" className="about-frame-img" />
