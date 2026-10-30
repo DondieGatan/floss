@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import AppLayout from '../components/AppLayout';
+import { resolveDoctorPhoto } from '../data/doctorPhotos';
 
 // Local calendar date as YYYY-MM-DD — not toISOString().slice(0, 10), which
 // converts to UTC first and silently rolls back to the previous day for any
@@ -12,6 +13,17 @@ function todayIso() {
   const month = String(now.getMonth() + 1).padStart(2, '0');
   const day = String(now.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+function initials(name) {
+  return (name || '')
+    .replace(/^Dr\.?\s*/, '')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase();
 }
 
 function formatTime(iso) {
@@ -87,18 +99,36 @@ export default function SchedulePage() {
           <div className="list-col">
             {doctors.map((doc) => {
               const entries = entriesByDoctor[doc.id] || [];
+              const openCount = entries.filter((e) => e.type === 'available').length;
+              const bookedCount = entries.length - openCount;
+              const photo = resolveDoctorPhoto(doc);
               return (
-                <div key={doc.id} className="card">
-                  <p style={{ fontWeight: 700, margin: 0 }}>{doc.fullName}</p>
-                  <p className="page-subtitle" style={{ margin: '2px 0 12px' }}>
-                    {doc.specialty}
-                  </p>
+                <div key={doc.id} className="card schedule-card">
+                  <div className="schedule-card-head">
+                    {photo ? (
+                      <img src={photo} alt="" className="doctor-avatar doctor-avatar-photo" />
+                    ) : (
+                      <div className="doctor-avatar" aria-hidden="true">
+                        {initials(doc.fullName)}
+                      </div>
+                    )}
+                    <div className="schedule-card-who">
+                      <p className="schedule-card-name">{doc.fullName}</p>
+                      <p className="schedule-card-specialty">{doc.specialty}</p>
+                    </div>
+                    {entries.length > 0 && (
+                      <div className="schedule-card-counts">
+                        <span className="schedule-count schedule-count-open">{openCount} open</span>
+                        <span className="schedule-count schedule-count-booked">{bookedCount} booked</span>
+                      </div>
+                    )}
+                  </div>
                   {entries.length === 0 ? (
                     <span className="page-subtitle" style={{ margin: 0 }}>
                       Not available on this date.
                     </span>
                   ) : (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    <div className="schedule-slots">
                       {entries.map((entry, i) =>
                         entry.type === 'available' ? (
                           <span key={i} className="status-badge status-badge-available">

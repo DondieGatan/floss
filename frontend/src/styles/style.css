@@ -3114,3 +3114,219 @@ body {
 .modal-card {
   border-radius: 24px;
 }
+
+/* =========================================================================
+   Page polish for the remaining signed-in pages: Schedule, Treatment Rooms,
+   Directory, Knowledge Base, Security and the shared card and form pieces.
+   All colours come from the theme tokens, so both themes follow.
+   ========================================================================= */
+
+/* Cards and forms */
+
+.card {
+  border-radius: 22px;
+  padding: 20px 22px;
+}
+
+.field > span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.field input,
+.field select,
+.field textarea {
+  background: var(--surface-solid);
+  border: 1px solid var(--border);
+}
+
+.documents-toolbar {
+  gap: 12px;
+  align-items: center;
+}
+
+/* Schedule: a dentist card per row, with an avatar and open/booked counts */
+
+.schedule-card-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.schedule-card-who {
+  flex: 1;
+  min-width: 0;
+}
+
+.schedule-card-name {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.schedule-card-specialty {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.schedule-card-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.schedule-count {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.schedule-count-open {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.schedule-count-booked {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.schedule-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border);
+}
+
+/* Treatment rooms: each room is a card, chairs are tiles */
+
+.ward-block {
+  padding: 18px 20px 20px;
+  border-radius: 22px;
+  background: var(--surface);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow);
+}
+
+.ward-block .section-header {
+  margin-bottom: 14px;
+}
+
+.ward-block .section-title .page-subtitle {
+  display: inline-block !important;
+  margin: 0 0 0 4px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.bed-grid {
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 10px;
+}
+
+.bed-tile {
+  border-radius: 16px;
+  padding: 14px 8px;
+  border-width: 1.5px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bed-tile:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+.bed-tile-available {
+  border-color: var(--success-soft);
+}
+
+.bed-tile-occupied {
+  border-color: var(--danger-soft);
+}
+
+.bed-tile-number {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+/* Directory */
+
+.grid .card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.grid .card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Knowledge base */
+
+.document-card {
+  border-radius: 20px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.document-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.document-type-tag {
+  border-radius: 999px;
+  padding: 3px 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* Security: each step is a card */
+
+.security-page .section {
+  margin-bottom: 20px;
+  padding: 24px 26px;
+  border-radius: 24px;
+  background: var(--surface);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow);
+}
+
+.security-page .section-header {
+  margin-bottom: 8px;
+}
+
+.recovery-codes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  margin: 16px 0 4px;
+}
+
+.recovery-code {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  text-align: center;
+  letter-spacing: 0.06em;
+}
+
+.secret-key-box {
+  margin: 14px 0;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: var(--surface-2);
+  border: 1.5px dashed var(--border);
+}
