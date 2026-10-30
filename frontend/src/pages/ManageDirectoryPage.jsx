@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api, ApiError } from '../api/client';
 import AppLayout from '../components/AppLayout';
 import { resolveDoctorPhoto } from '../data/doctorPhotos';
+import { ClinicIcon } from '../components/icons';
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -129,15 +130,18 @@ function DepartmentCard({ department, onUpdated, onDeleted }) {
   }
 
   return (
-    <div className="card">
-      <p style={{ fontWeight: 700, margin: 0 }}>{department.name}</p>
-      {department.description && <p className="page-subtitle" style={{ margin: '6px 0 0' }}>{department.description}</p>}
+    <div className="card department-card">
+      <div className="department-card-icon" aria-hidden="true">
+        <ClinicIcon />
+      </div>
+      <p className="department-card-name">{department.name}</p>
+      {department.description && <p className="department-card-desc">{department.description}</p>}
       {error && (
         <div className="form-error" role="alert" style={{ marginTop: 8 }}>
           {error}
         </div>
       )}
-      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+      <div className="department-card-actions">
         <button className="btn btn-small btn-secondary" type="button" onClick={() => setEditing(true)}>
           Edit
         </button>
@@ -399,24 +403,24 @@ function DoctorCard({ doctor, departments, expanded, onToggleExpand, onUpdated, 
   const photo = resolveDoctorPhoto(doctor);
 
   return (
-    <div className="card card-hover">
-      <div className="appointment-card" style={{ border: 'none', padding: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+    <div className="card directory-row">
+      <div className="directory-row-head">
+        <div className="directory-row-who">
           {photo ? (
-            <img src={photo} alt="" className="doctor-avatar doctor-avatar-photo" style={{ width: 44, height: 44 }} />
+            <img src={photo} alt="" className="directory-row-avatar" />
           ) : (
-            <div className="doctor-avatar" style={{ width: 44, height: 44 }}>
+            <div className="directory-row-avatar directory-row-initials" aria-hidden="true">
               {initials(doctor.fullName)}
             </div>
           )}
-          <div className="appointment-main">
-            <span className="appointment-doctor">{doctor.fullName}</span>
-            <span className="appointment-time">
+          <div className="directory-row-info">
+            <span className="directory-row-name">{doctor.fullName}</span>
+            <span className="directory-row-meta">
               {doctor.specialty} · {doctor.departmentName}
             </span>
           </div>
         </div>
-        <div className="appointment-actions">
+        <div className="directory-row-actions">
           <button className="btn btn-small btn-secondary" type="button" onClick={() => setEditing(true)}>
             Edit
           </button>

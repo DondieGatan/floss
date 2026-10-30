@@ -8,6 +8,16 @@ const ALL_ROLES = ['staff', 'admin', 'owner'];
 // Kept in sync with App.jsx's own copy — staff/admin/owner require 2FA.
 const TWO_FACTOR_REQUIRED_ROLES = new Set(['staff', 'admin', 'owner']);
 
+function initialsOf(name) {
+  return (name || '')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase();
+}
+
 export default function ManageUsersPage() {
   const { user: me } = useAuth();
   const [users, setUsers] = useState(null);
@@ -107,13 +117,16 @@ export default function ManageUsersPage() {
               const isSelf = u.id === me?.id;
               const locked = !isOwner && SENSITIVE_ROLES.has(u.role);
               return (
-                <div key={u.id} className="appointment-card">
+                <div key={u.id} className="appointment-card team-row">
+                  <div className="team-row-avatar" aria-hidden="true">
+                    {initialsOf(u.fullName)}
+                  </div>
                   <div className="appointment-main">
                     <span className="appointment-doctor">{u.fullName}</span>
                     <span className="appointment-time">{u.email}</span>
                   </div>
                   <div className="appointment-actions">
-                    <span className="role-badge">{u.role}</span>
+                    <span className={`role-badge role-badge-${u.role}`}>{u.role}</span>
                     {isSelf ? (
                       <span className="page-subtitle" style={{ margin: 0 }}>
                         (you)
