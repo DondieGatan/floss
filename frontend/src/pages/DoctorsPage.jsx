@@ -47,6 +47,11 @@ export default function DoctorsPage() {
               </option>
             ))}
           </select>
+          {doctors !== null && (
+            <span className="dentists-count" aria-live="polite">
+              {doctors.length} {doctors.length === 1 ? 'dentist' : 'dentists'}
+            </span>
+          )}
         </div>
 
         {doctors === null ? (
@@ -65,20 +70,26 @@ export default function DoctorsPage() {
             {doctors.map((doc) => {
               const photo = resolveDoctorPhoto(doc);
               return (
-              <div key={doc.id} className="doctor-card card-hover">
-                {photo ? (
-                  <img src={photo} alt="" className="doctor-avatar doctor-avatar-photo" />
-                ) : (
-                  <div className="doctor-avatar">{initials(doc.fullName)}</div>
-                )}
-                <p className="doctor-name">{doc.fullName}</p>
-                <p className="doctor-specialty">{doc.specialty}</p>
-                <p className="doctor-dept">{doc.departmentName}</p>
-                {doc.bio && <p className="doctor-bio">{doc.bio}</p>}
-                <Link className="btn btn-primary btn-small" to={`/doctors/${doc.id}/book`} style={{ marginTop: 10, alignSelf: 'flex-start' }}>
-                  Book appointment
-                </Link>
-              </div>
+                <div key={doc.id} className="doctor-card">
+                  <div className="doctor-card-photo">
+                    {photo ? (
+                      <img src={photo} alt="" />
+                    ) : (
+                      <div className="doctor-card-initials" aria-hidden="true">
+                        {initials(doc.fullName)}
+                      </div>
+                    )}
+                    {doc.departmentName && <span className="doctor-card-dept">{doc.departmentName}</span>}
+                  </div>
+                  <div className="doctor-card-body">
+                    <p className="doctor-name">{doc.fullName}</p>
+                    <p className="doctor-specialty">{doc.specialty}</p>
+                    {doc.bio && <p className="doctor-bio">{doc.bio}</p>}
+                    <Link className="btn btn-primary doctor-card-cta" to={`/doctors/${doc.id}/book`}>
+                      Book appointment
+                    </Link>
+                  </div>
+                </div>
               );
             })}
           </div>
