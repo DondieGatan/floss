@@ -2736,3 +2736,379 @@ body {
 .auth-visual-col::before {
   background: linear-gradient(to top, rgba(20, 20, 20, 0.88) 0%, rgba(34, 54, 61, 0.5) 50%, rgba(54, 86, 95, 0.12) 100%);
 }
+
+/* =========================================================================
+   Dashboard polish: the signed-in app's pages. A richer welcome banner with a
+   "next appointment" panel, appointment cards led by a date chip, softer
+   stat cards, pill filters, chip-style time slots, framed doctor photos and
+   a more finished sidebar. Colours all come from the tokens, so both themes
+   follow. Presentation only.
+   ========================================================================= */
+
+/* Sidebar */
+
+.app-sidebar-profile {
+  margin: 4px 10px 10px;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.app-sidebar-avatar {
+  background: var(--brand-grad);
+  color: #fff;
+  box-shadow: var(--brand-glow);
+}
+
+.app-nav-link {
+  border-radius: 12px;
+}
+
+.app-nav-link.active {
+  background: var(--brand-grad);
+  color: #fff;
+  box-shadow: var(--brand-glow);
+}
+
+/* Page headers */
+
+.page-header {
+  position: relative;
+}
+
+.page-title {
+  font-size: clamp(28px, 3.2vw, 38px);
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.page-title::after {
+  content: '';
+  display: block;
+  width: 44px;
+  height: 4px;
+  margin-top: 12px;
+  border-radius: 4px;
+  background: var(--brand-grad);
+}
+
+.page-subtitle,
+.page-header p {
+  color: var(--text-muted);
+}
+
+/* Welcome banner */
+
+.hero-card {
+  background:
+    radial-gradient(circle at 88% 18%, rgba(226, 240, 240, 0.22), transparent 38%),
+    radial-gradient(circle at 6% 110%, rgba(20, 20, 20, 0.28), transparent 46%),
+    var(--brand-grad);
+  border-radius: 26px;
+  padding: 34px 38px;
+  box-shadow: 0 22px 50px rgba(54, 86, 95, 0.32);
+}
+
+.hero-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1.4px, transparent 1.8px);
+  background-size: 22px 22px;
+  -webkit-mask-image: linear-gradient(115deg, transparent 38%, #000 100%);
+  mask-image: linear-gradient(115deg, transparent 38%, #000 100%);
+  pointer-events: none;
+}
+
+.hero-greeting {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.4vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.hero-card .hero-sub {
+  font-size: 15px;
+  opacity: 0.88;
+}
+
+.hero-card .quick-actions {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-next {
+  position: absolute;
+  z-index: 1;
+  right: 32px;
+  bottom: 28px;
+  padding: 14px 20px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  text-align: left;
+}
+
+.hero-next p {
+  margin: 0;
+}
+
+.hero-next-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.hero-next-when {
+  margin-top: 4px !important;
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.hero-next-with {
+  margin-top: 2px !important;
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+@media (max-width: 760px) {
+  .hero-next {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    margin-top: 20px;
+  }
+}
+
+/* Stat cards */
+
+.stat-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  padding: 18px 20px;
+  transition: transform 0.25s var(--ease, ease), box-shadow 0.25s ease;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  background: var(--brand-grad);
+  opacity: 0.85;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+}
+
+.stat-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+}
+
+.stat-value {
+  font-size: 34px;
+  line-height: 1;
+}
+
+.stat-label {
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+/* Section titles get a small accent tick */
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 22px;
+}
+
+.section-title::before {
+  content: '';
+  width: 6px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--brand-grad);
+}
+
+/* Appointment cards: a date chip leads each row */
+
+.appointment-card {
+  align-items: center;
+  gap: 16px;
+  border-left: 0;
+  border-radius: 20px;
+  padding: 14px 18px 14px 14px;
+}
+
+.appointment-card:hover {
+  transform: translateY(-2px);
+}
+
+.appointment-date {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 60px;
+  border-radius: 16px;
+  background: var(--brand-grad);
+  color: #fff;
+  box-shadow: var(--brand-glow);
+  line-height: 1;
+}
+
+.appointment-date span {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.88;
+}
+
+.appointment-date strong {
+  margin-top: -6px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.appointment-card.status-cancelled .appointment-date,
+.appointment-card.status-no_show .appointment-date {
+  background: var(--surface-2);
+  color: var(--text-muted);
+  box-shadow: none;
+}
+
+.appointment-card.status-completed .appointment-date {
+  background: var(--accent-2-soft);
+  color: var(--accent);
+  box-shadow: none;
+}
+
+.appointment-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.appointment-doctor {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* Status badges: dotted pills */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border-radius: 999px;
+}
+
+.status-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Filters */
+
+.filter-row select,
+.filter-row input {
+  border-radius: 999px;
+  padding: 10px 18px;
+  background: var(--surface-solid);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+/* Doctors and booking */
+
+.doctor-card {
+  border-radius: 22px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.doctor-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+.doctor-card img,
+.doctor-avatar {
+  box-shadow: 0 0 0 3px var(--surface-solid), 0 0 0 5px var(--accent-2-soft);
+}
+
+.slot-grid {
+  gap: 10px;
+}
+
+.slot-btn {
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-weight: 600;
+  transition: transform 0.18s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.slot-btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+
+.slot-btn.selected {
+  background: var(--brand-grad);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: var(--brand-glow);
+}
+
+/* Empty states and chart */
+
+.empty-state {
+  border: 1.5px dashed var(--border);
+  border-radius: 22px;
+  background: var(--surface);
+}
+
+.empty-state-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.weekly-chart-bar {
+  background: var(--brand-grad);
+  border-radius: 10px 10px 4px 4px;
+}
+
+/* Dialogs */
+
+.modal-backdrop {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.modal-card {
+  border-radius: 24px;
+}
