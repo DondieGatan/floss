@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import AppLayout from '../components/AppLayout';
 import AppointmentCard from '../components/AppointmentCard';
+import { CalendarIcon, CheckCircleIcon, ClipboardIcon } from '../components/icons';
 
 export default function MyAppointmentsPage() {
   const [appointments, setAppointments] = useState(null);
@@ -18,6 +19,19 @@ export default function MyAppointmentsPage() {
   const history = (appointments || [])
     .filter((a) => a.status !== 'cancelled' && (a.status !== 'scheduled' || new Date(a.scheduledStart) < new Date()))
     .sort((a, b) => new Date(b.scheduledStart) - new Date(a.scheduledStart));
+
+  const completedCount = history.filter((a) => a.status === 'completed').length;
+  const missedCount = history.filter((a) => a.status === 'no_show').length;
+  const lastVisit = history.find((a) => a.status === 'completed');
+
+  // Month by month, newest first, so a long history reads as a timeline.
+  const groups = [];
+  history.forEach((a) => {
+    const label = new Date(a.scheduledStart).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    const current = groups[groups.length - 1];
+    if (current && current.label === label) current.items.push(a);
+    else groups.push({ label, items: [a] });
+  });
 
   return (
     <AppLayout>
@@ -36,11 +50,45 @@ export default function MyAppointmentsPage() {
             <p>No past visits yet.</p>
           </div>
         ) : (
-          <div className="list-col stagger-in">
-            {history.map((a) => (
-              <AppointmentCard key={a.id} appointment={a} />
+          <>
+            <div className="stat-row history-stats">
+              <div className="stat-card">
+                <div className="stat-icon stat-icon-success" aria-hidden="true"><CheckCircleIcon /></div>
+                <div className="stat-body">
+                  <p className="stat-value">{completedCount}</p>
+                  <p className="stat-label">Completed visits</p>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon stat-icon-warning" aria-hidden="true"><ClipboardIcon /></div>
+                <div className="stat-body">
+                  <p className="stat-value">{missedCount}</p>
+                  <p className="stat-label">Missed</p>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon" aria-hidden="true"><CalendarIcon /></div>
+                <div className="stat-body">
+                  <p className="stat-value stat-value-text">
+                    {lastVisit
+                      ? new Date(lastVisit.scheduledStart).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                      : '–'}
+                  </p>
+                  <p className="stat-label">Last visit</p>
+                </div>
+              </div>
+            </div>
+            {groups.map((group) => (
+              <div key={group.label} className="history-group">
+                <h2 className="history-month">{group.label}</h2>
+                <div className="list-col stagger-in">
+                  {group.items.map((a) => (
+                    <AppointmentCard key={a.id} appointment={a} />
+                  ))}
+                </div>
+              </div>
             ))}
-          </div>
+          </>
         )}
       </div>
     </AppLayout>
