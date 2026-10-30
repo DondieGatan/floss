@@ -1700,20 +1700,6 @@ textarea {
   box-shadow: 0 0 0 2px var(--accent-soft);
 }
 
-.book-doctor-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 4px;
-}
-
-.doctor-avatar-large {
-  width: 64px;
-  height: 64px;
-  margin-bottom: 0;
-  flex-shrink: 0;
-}
-
 .doctor-name {
   font-weight: 700;
   font-size: 15px;
@@ -3514,4 +3500,255 @@ body {
 
 .floating-chat-body .chat-empty-title {
   font-size: 21px;
+}
+
+/* =========================================================================
+   Booking page: a dentist profile card beside a stepped panel (date, time in
+   parts of the day, reason), a summary line above the confirm button, and a
+   receipt on the success screen. Colours come from the theme tokens.
+   ========================================================================= */
+
+.booking-layout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  margin-top: 14px;
+}
+
+/* Dentist profile */
+
+.booking-profile {
+  position: sticky;
+  top: 24px;
+  padding: 28px 24px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.booking-profile::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 96px;
+  background: var(--brand-grad);
+  opacity: 0.92;
+}
+
+.booking-profile > * {
+  position: relative;
+}
+
+.booking-profile-photo {
+  display: block;
+  width: 112px;
+  height: 112px;
+  margin: 18px auto 14px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 5px solid var(--surface-solid);
+  box-shadow: var(--shadow-hover);
+}
+
+.booking-profile-initials {
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 38px;
+  font-weight: 600;
+}
+
+.booking-profile-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.booking-profile-specialty {
+  margin: 4px 0 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.booking-profile-dept {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.booking-profile-bio {
+  margin: 16px 0 0;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  text-align: left;
+}
+
+/* Stepped panel */
+
+.booking-panel {
+  padding: 30px 32px 34px;
+}
+
+.booking-panel .page-title {
+  font-size: clamp(26px, 3vw, 34px);
+}
+
+.booking-step {
+  display: flex;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.booking-step-num {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: var(--brand-grad);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: var(--brand-glow);
+}
+
+.booking-step-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.booking-step-body.field {
+  max-width: 240px;
+}
+
+.booking-step-title {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.slot-group + .slot-group {
+  margin-top: 18px;
+}
+
+.slot-group-label {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.booking-summary {
+  margin: 18px 0 14px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.booking-panel .btn-block {
+  padding: 14px 20px;
+  font-size: 15px;
+}
+
+/* Success: a ringed check and a receipt */
+
+.booking-success {
+  max-width: 520px;
+  margin: 24px auto 0;
+  padding: 44px 32px 36px;
+}
+
+.success-check {
+  width: 76px;
+  height: 76px;
+  font-size: 34px;
+  background: var(--brand-grad);
+  color: #fff;
+  box-shadow: 0 0 0 8px var(--success-soft), var(--brand-glow);
+}
+
+.booking-receipt {
+  margin: 24px 0 26px;
+  padding: 6px 20px;
+  border-radius: 18px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  text-align: left;
+}
+
+.booking-receipt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+}
+
+.booking-receipt-row + .booking-receipt-row {
+  border-top: 1px dashed var(--border);
+}
+
+.booking-receipt-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.booking-receipt-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.booking-receipt-photo {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+@media (max-width: 860px) {
+  .booking-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-profile {
+    position: relative;
+    top: auto;
+  }
+
+  .booking-panel {
+    padding: 24px 20px 28px;
+  }
+}
+
+.booking-success .page-title::after {
+  margin-left: auto;
+  margin-right: auto;
 }
