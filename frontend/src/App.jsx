@@ -18,6 +18,8 @@ import SchedulePage from './pages/SchedulePage';
 import AdmissionsPage from './pages/AdmissionsPage';
 import ManageUsersPage from './pages/ManageUsersPage';
 import SecurityPage from './pages/SecurityPage';
+import RouteProgress from './components/RouteProgress';
+import useButtonRipple from './hooks/useButtonRipple';
 
 // staff/admin/owner carry broad access to the clinic's directory,
 // schedules, and every patient's records — a compromised one of those
@@ -28,10 +30,19 @@ import SecurityPage from './pages/SecurityPage';
 // direct API access that bypasses this UI.
 const TWO_FACTOR_REQUIRED_ROLES = ['staff', 'admin', 'owner'];
 
+function PageLoading() {
+  return (
+    <div className="page-loading page-loading-screen" role="status">
+      <span className="spinner" aria-hidden="true" />
+      Loading…
+    </div>
+  );
+}
+
 function RequireAuth({ children, roles }) {
   const { user, loading } = useAuth();
   const location = useLocation();
-  if (loading) return <div className="page-loading">Loading…</div>;
+  if (loading) return <PageLoading />;
   if (!user) return <Navigate to="/login" replace />;
   if (roles && !roles.includes(user.role)) return <Navigate to="/dashboard" replace />;
 
@@ -44,7 +55,7 @@ function RequireAuth({ children, roles }) {
 
 function RedirectIfAuthed({ children }) {
   const { user, loading } = useAuth();
-  if (loading) return <div className="page-loading">Loading…</div>;
+  if (loading) return <PageLoading />;
   if (user) return <Navigate to="/dashboard" replace />;
   return children;
 }
@@ -57,10 +68,12 @@ const STAFF_ROLES = ['staff', 'admin', 'owner'];
 const ADMIN_ROLES = ['admin', 'owner'];
 
 export default function App() {
+  useButtonRipple();
   return (
     <BrowserRouter>
       <ThemeProvider>
       <AuthProvider>
+        <RouteProgress />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<RedirectIfAuthed><LoginPage /></RedirectIfAuthed>} />
