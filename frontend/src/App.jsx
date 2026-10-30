@@ -18,6 +18,8 @@ import SchedulePage from './pages/SchedulePage';
 import AdmissionsPage from './pages/AdmissionsPage';
 import ManageUsersPage from './pages/ManageUsersPage';
 import SecurityPage from './pages/SecurityPage';
+import NotFoundPage from './pages/NotFoundPage';
+import ErrorBoundary from './components/ErrorBoundary';
 import RouteProgress from './components/RouteProgress';
 import useButtonRipple from './hooks/useButtonRipple';
 
@@ -70,6 +72,7 @@ const ADMIN_ROLES = ['admin', 'owner'];
 export default function App() {
   useButtonRipple();
   return (
+    <ErrorBoundary>
     <BrowserRouter>
       <ThemeProvider>
       <AuthProvider>
@@ -99,10 +102,11 @@ export default function App() {
           {/* Legacy Footnote URL kept working for anyone with an old bookmark. */}
           <Route path="/documents" element={<Navigate to="/knowledge-base" replace />} />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
+    </ErrorBoundary>
   );
 }
