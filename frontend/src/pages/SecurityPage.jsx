@@ -132,7 +132,7 @@ export default function SecurityPage() {
 
   return (
     <AppLayout>
-      <div className="page-body">
+      <div className="page-body security-page">
         <h1 className="page-title">Security</h1>
         <p className="page-subtitle">Add a second layer of protection to your account.</p>
 
