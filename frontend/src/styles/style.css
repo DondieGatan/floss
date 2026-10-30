@@ -1670,16 +1670,6 @@ textarea {
 
 /* Doctor directory */
 
-.doctor-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 .doctor-avatar {
   width: 56px;
   height: 56px;
@@ -1698,32 +1688,6 @@ textarea {
   object-fit: cover;
   border: 2px solid var(--surface);
   box-shadow: 0 0 0 2px var(--accent-soft);
-}
-
-.doctor-name {
-  font-weight: 700;
-  font-size: 15px;
-  margin: 0;
-}
-
-.doctor-specialty {
-  color: var(--accent-strong);
-  font-size: 13px;
-  font-weight: 600;
-  margin: 0;
-}
-
-.doctor-dept {
-  color: var(--text-muted);
-  font-size: 12px;
-  margin: 0;
-}
-
-.doctor-bio {
-  color: var(--text-muted);
-  font-size: 13px;
-  line-height: 1.4;
-  margin: 4px 0 0;
 }
 
 .filter-row {
@@ -3029,17 +2993,6 @@ body {
 
 /* Doctors and booking */
 
-.doctor-card {
-  border-radius: 22px;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.doctor-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-hover);
-}
-
-.doctor-card img,
 .doctor-avatar {
   box-shadow: 0 0 0 3px var(--surface-solid), 0 0 0 5px var(--accent-2-soft);
 }
@@ -3751,4 +3704,138 @@ body {
 .booking-success .page-title::after {
   margin-left: auto;
   margin-right: auto;
+}
+
+/* =========================================================================
+   Dentists page: portrait cards. The photo leads each card with the
+   department as a frosted chip on it, then the name in the display font, the
+   specialty, a short bio and a full-width booking button. Colours come from
+   the theme tokens.
+   ========================================================================= */
+
+.dentists-count {
+  margin-left: auto;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.doctor-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 24px;
+  background: var(--surface-solid);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  transition: transform 0.28s var(--ease, ease), box-shadow 0.28s ease, border-color 0.28s ease;
+}
+
+.doctor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--accent-2-soft);
+}
+
+.doctor-card-photo {
+  position: relative;
+  aspect-ratio: 5 / 4;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+
+.doctor-card-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 22%;
+  transition: transform 0.7s var(--ease, ease);
+}
+
+.doctor-card:hover .doctor-card-photo img {
+  transform: scale(1.05);
+}
+
+.doctor-card-photo::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 45%;
+  background: linear-gradient(to top, rgba(20, 20, 20, 0.5), transparent);
+  pointer-events: none;
+}
+
+.doctor-card-initials {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background: var(--brand-grad);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 56px;
+  font-weight: 600;
+}
+
+.doctor-card-dept {
+  position: absolute;
+  z-index: 1;
+  left: 14px;
+  bottom: 14px;
+  padding: 5px 13px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #2b464e;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.doctor-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 18px 22px 22px;
+}
+
+.doctor-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.doctor-specialty {
+  margin: 4px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.doctor-bio {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 12px 0 18px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.doctor-card-cta {
+  margin-top: auto;
+  width: 100%;
+  padding: 12px 18px;
+  text-align: center;
+}
+
+.doctor-card-body .doctor-specialty + .doctor-card-cta {
+  margin-top: 18px;
 }
