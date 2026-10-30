@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import AuthVisual from '../components/AuthVisual';
+import PasswordField from '../components/PasswordField';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth, ApiError } from '../context/AuthContext';
 import { useSlowRequestNotice } from '../hooks/useSlowRequestNotice';
 import { api } from '../api/client';
-import heroPhoto from '../assets/Login_Page_picture.jpg';
 import logoIcon from '../assets/logo-icon.png';
 
 export default function RegisterPage() {
@@ -43,21 +44,12 @@ export default function RegisterPage() {
 
   return (
     <div className="auth-split">
-      <div className="auth-visual-col" aria-hidden="true" style={{ backgroundImage: `url(${heroPhoto})` }}>
-        <div className="auth-visual-content">
-          <h2 className="auth-visual-heading">
-            Welcome to
-            <br />
-            Floss Clinic.
-          </h2>
-          <p className="auth-visual-sub">
-            Create an account to schedule appointments, connect with our dental team, and get reliable
-            answers whenever you need them.
-          </p>
-        </div>
-      </div>
+      <AuthVisual heading={<>Welcome to <em>Floss Clinic.</em></>} sub="Create an account to schedule appointments, connect with our dental team, and get reliable answers whenever you need them." />
 
       <div className="auth-form-col">
+        <Link className="auth-back" to="/">
+          ← Back to home
+        </Link>
         <form className="auth-card" onSubmit={handleSubmit} autoComplete="off">
           <h1 className="brand">
             <img src={logoIcon} alt="" className="brand-mark" />
@@ -92,20 +84,14 @@ export default function RegisterPage() {
               required
             />
           </label>
-          <label className="field">
-            <span>Password</span>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              minLength={6}
-              // "new-password" (not "off") is what actually stops browsers
-              // from suggesting a previously-saved password here — this is
-              // a new account being created, not a login.
-              autoComplete="new-password"
-              required
-            />
-          </label>
+          <PasswordField
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            minLength={6}
+            // "new-password" (not "off") is what actually stops browsers from suggesting a
+            // previously-saved password here — this is a new account, not a login.
+            autoComplete="new-password"
+          />
 
           <button className="btn btn-primary" type="submit" disabled={submitting}>
             {submitting ? 'Creating account…' : 'Create Account'}

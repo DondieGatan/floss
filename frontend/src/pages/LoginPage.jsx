@@ -1,8 +1,9 @@
 import { useState } from 'react';
+import AuthVisual from '../components/AuthVisual';
+import PasswordField from '../components/PasswordField';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, ApiError } from '../context/AuthContext';
 import { useSlowRequestNotice } from '../hooks/useSlowRequestNotice';
-import heroPhoto from '../assets/Login_Page_picture.jpg';
 import logoIcon from '../assets/logo-icon.png';
 
 export default function LoginPage() {
@@ -75,21 +76,12 @@ export default function LoginPage() {
 
   return (
     <div className="auth-split">
-      <div className="auth-visual-col" aria-hidden="true" style={{ backgroundImage: `url(${heroPhoto})` }}>
-        <div className="auth-visual-content">
-          <h2 className="auth-visual-heading">
-            Welcome
-            <br />
-            Back.
-          </h2>
-          <p className="auth-visual-sub">
-            Sign in to manage your appointments, connect with your care team, and get clear answers
-            whenever you need them.
-          </p>
-        </div>
-      </div>
+      <AuthVisual heading={<>Welcome <em>back.</em></>} sub="Sign in to manage your appointments, connect with your care team, and get clear answers whenever you need them." />
 
       <div className="auth-form-col">
+        <Link className="auth-back" to="/">
+          ← Back to home
+        </Link>
         {twoFactorToken ? (
           <form className="auth-card" onSubmit={handleCodeSubmit}>
             <h1 className="brand">
@@ -184,10 +176,11 @@ export default function LoginPage() {
               <span>Email</span>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </label>
-            <label className="field">
-              <span>Password</span>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-            </label>
+            <PasswordField
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+            />
             <p className="auth-forgot">
               <Link to="/forgot-password">Forgot password?</Link>
             </p>
