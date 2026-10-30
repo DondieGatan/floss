@@ -4423,3 +4423,220 @@ body {
     padding: 40px 26px 30px;
   }
 }
+
+/* =========================================================================
+   Status pages: "page not found" and "something went wrong". A centred glass
+   card over soft slate blobs, with a large gradient code (4-tooth-4 for the
+   404), a floating tooth, and clear next steps. Colours come from the theme
+   tokens, so both themes follow.
+   ========================================================================= */
+
+.status-page {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 96px 24px 48px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(95, 129, 144, 0.3), transparent 44%),
+    radial-gradient(circle at 88% 82%, rgba(54, 86, 95, 0.22), transparent 48%),
+    linear-gradient(160deg, #f1f7f7 0%, #e2f0f0 100%);
+  font-family: var(--font-body);
+  color: var(--text);
+}
+
+:root[data-theme='dark'] .status-page {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(95, 129, 144, 0.22), transparent 44%),
+    radial-gradient(circle at 88% 82%, rgba(54, 86, 95, 0.28), transparent 48%),
+    linear-gradient(160deg, #141a1d 0%, #0e1315 100%);
+}
+
+.status-page::before {
+  content: '';
+  position: absolute;
+  top: 56px;
+  right: 6%;
+  width: 150px;
+  height: 150px;
+  background-image: radial-gradient(var(--accent-2) 2px, transparent 2.5px);
+  background-size: 16px 16px;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.status-brand {
+  position: absolute;
+  top: 28px;
+  left: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 18px 7px 8px;
+  border-radius: 999px;
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.status-brand:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.status-brand-mark {
+  width: 34px;
+  height: 34px;
+  padding: 4px;
+  border-radius: 50%;
+  background: #fff;
+  object-fit: contain;
+}
+
+.status-card {
+  position: relative;
+  width: 100%;
+  max-width: 620px;
+  padding: 56px 48px 48px;
+  border-radius: 36px;
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 2px 6px rgba(20, 20, 20, 0.05), 0 28px 70px rgba(54, 86, 95, 0.18);
+  text-align: center;
+  overflow: hidden;
+  animation: card-rise 0.5s ease both;
+}
+
+.status-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 5px;
+  background: var(--brand-grad);
+}
+
+.status-eyebrow {
+  display: inline-block;
+  margin: 0 0 8px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.status-code {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.04em;
+  margin: 8px 0 4px;
+  font-family: var(--font-body);
+  font-size: clamp(88px, 18vw, 150px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  background: var(--brand-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+:root[data-theme='dark'] .status-code {
+  background: linear-gradient(135deg, #e2f0f0 0%, #8fb2c1 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.status-tooth {
+  display: inline-grid;
+  place-items: center;
+  width: 0.78em;
+  height: 0.78em;
+  color: var(--accent-2);
+  -webkit-text-fill-color: initial;
+  animation: status-float 4.5s ease-in-out infinite alternate;
+}
+
+.status-tooth svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: 1.2;
+}
+
+@keyframes status-float {
+  from {
+    transform: translateY(6px) rotate(-6deg);
+  }
+  to {
+    transform: translateY(-8px) rotate(5deg);
+  }
+}
+
+.status-title {
+  margin: 10px 0 12px;
+  font-family: var(--font-display);
+  font-size: clamp(26px, 4vw, 36px);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.status-text {
+  max-width: 440px;
+  margin: 0 auto 30px;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.status-actions .btn {
+  padding: 13px 26px;
+  border-radius: 999px;
+  font-size: 15px;
+  text-decoration: none;
+}
+
+@media (max-width: 560px) {
+  .status-page {
+    padding: 88px 16px 32px;
+  }
+
+  .status-brand {
+    top: 18px;
+    left: 18px;
+  }
+
+  .status-card {
+    padding: 44px 24px 36px;
+    border-radius: 28px;
+  }
+
+  .status-actions .btn {
+    flex: 1 1 100%;
+  }
+}
