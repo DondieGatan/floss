@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-const SELECTOR = '.btn, .l-btn, .hero-cta';
+const SELECTOR = '.btn, .l-btn';
 
 // One delegated listener gives every button a press ripple, so no button needs its own handler.
 export default function useButtonRipple() {

@@ -2550,8 +2550,7 @@ table.simple-table {
 }
 
 .btn-primary::after,
-.l-btn-primary::after,
-.hero-cta::after {
+.l-btn-primary::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -2561,8 +2560,7 @@ table.simple-table {
 }
 
 .btn-primary:hover:not(:disabled)::after,
-.l-btn-primary:hover::after,
-.hero-cta:hover::after {
+.l-btn-primary:hover::after {
   transform: translateX(120%);
   transition: transform 0.75s ease;
 }
