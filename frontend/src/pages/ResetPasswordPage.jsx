@@ -1,8 +1,8 @@
 import { useState } from 'react';
+import AuthVisual from '../components/AuthVisual';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api, ApiError } from '../api/client';
 import { useSlowRequestNotice } from '../hooks/useSlowRequestNotice';
-import heroPhoto from '../assets/Login_Page_picture.jpg';
 import logoIcon from '../assets/logo-icon.png';
 
 export default function ResetPasswordPage() {
@@ -39,17 +39,12 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="auth-split">
-      <div className="auth-visual-col" aria-hidden="true" style={{ backgroundImage: `url(${heroPhoto})` }}>
-        <div className="auth-visual-content">
-          <h2 className="auth-visual-heading">
-            Choose a<br />
-            New Password.
-          </h2>
-          <p className="auth-visual-sub">Choose a new password to regain access to your account.</p>
-        </div>
-      </div>
+      <AuthVisual heading={<>Choose a <em>new password.</em></>} sub="Choose a new password to regain access to your account." />
 
       <div className="auth-form-col">
+        <Link className="auth-back" to="/">
+          ← Back to home
+        </Link>
         <div className="auth-card">
           <h1 className="brand">
             <img src={logoIcon} alt="" className="brand-mark" />

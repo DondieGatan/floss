@@ -4148,3 +4148,278 @@ body {
   font-size: 13px;
   font-weight: 600;
 }
+
+/* =========================================================================
+   Sign-in, create-account and password-reset pages. The photo panel gains a
+   brand mark, a serif heading with an italic accent word and three benefit
+   chips; the form column gets a back link; the card becomes a roomier glass
+   panel with a gradient edge; password fields get a show/hide toggle.
+   Colours come from the theme tokens.
+   ========================================================================= */
+
+/* Photo panel */
+
+.auth-visual-col {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+}
+
+.auth-visual-brand {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  width: fit-content;
+  margin: 40px 0 0 56px;
+  padding: 8px 18px 8px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.auth-visual-brand-mark {
+  width: 36px;
+  height: 36px;
+  padding: 4px;
+  border-radius: 50%;
+  background: #fff;
+  object-fit: contain;
+}
+
+.auth-visual-content {
+  padding: 0 56px 64px;
+}
+
+.auth-visual-heading {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 4.4vw, 58px);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+}
+
+.auth-visual-heading em {
+  font-style: italic;
+  font-weight: 500;
+  color: #c5dde4;
+}
+
+.auth-visual-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 26px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.auth-visual-points li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px 7px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.auth-visual-points li::before {
+  content: '\2713';
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  color: #2b464e;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* Form column */
+
+.auth-form-col {
+  position: relative;
+  padding-top: 84px;
+}
+
+.auth-form-col::before {
+  content: '';
+  position: absolute;
+  top: 28px;
+  right: 28px;
+  width: 120px;
+  height: 120px;
+  background-image: radial-gradient(var(--accent-2) 2px, transparent 2.5px);
+  background-size: 16px 16px;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.auth-back {
+  position: absolute;
+  top: 28px;
+  left: 32px;
+  z-index: 2;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-back:hover {
+  color: var(--text);
+  transform: translateX(-3px);
+  box-shadow: var(--shadow);
+}
+
+/* The card */
+
+.auth-card {
+  position: relative;
+  max-width: 440px;
+  padding: 44px 40px 36px;
+  border-radius: 30px;
+  overflow: hidden;
+}
+
+.auth-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 5px;
+  background: var(--brand-grad);
+}
+
+.auth-card .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.auth-card-title {
+  margin: 22px 0 6px;
+  font-size: clamp(28px, 3vw, 36px);
+  line-height: 1.1;
+}
+
+.auth-card .brand-sub {
+  margin: 0 0 22px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.auth-card .field input {
+  padding: 13px 16px;
+  border-radius: 14px;
+  background: var(--surface-solid);
+  border: 1px solid var(--border);
+}
+
+.auth-card .btn-primary {
+  margin-top: 14px;
+  padding: 15px 20px;
+  font-size: 15px;
+}
+
+.auth-switch {
+  margin: 22px 0 0;
+  padding-top: 20px;
+  border-top: 1px dashed var(--border);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.auth-switch a,
+.auth-switch .link-button {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.auth-forgot {
+  margin: -4px 0 4px;
+  text-align: right;
+}
+
+/* Password show/hide */
+
+.password-wrap {
+  position: relative;
+}
+
+.password-wrap input {
+  width: 100%;
+  padding-right: 48px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.password-toggle:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.password-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+@media (max-width: 900px) {
+  .auth-form-col::before {
+    display: none;
+  }
+
+  .auth-back {
+    top: 18px;
+    left: 18px;
+  }
+
+  .auth-card {
+    margin-top: 40px;
+    padding: 40px 26px 30px;
+  }
+}
