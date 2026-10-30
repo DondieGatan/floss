@@ -41,14 +41,16 @@ export default function AppLayout({ children }) {
   const isOwner = user?.role === 'owner';
   const isAdmin = user?.role === 'admin' || isOwner;
   const isStaff = user?.role === 'staff' || isAdmin;
-  // Patients get one short list; staff get three labelled sections (empty ones are dropped, so an
-  // owner, who has no Knowledge Base link, still gets "Workspace" with just Team & Roles).
+  // Patients get one short list; staff get three headed sections (empty ones are dropped, so an
+  // owner, who has no Knowledge Base link, still gets "Workspace" with just Team & Roles). The
+  // field is `heading`, not `label`: the guide-sync test in backend/tests/test_chat_guardrails.py
+  // treats every quoted `label` property in this file as a page the system guide must describe.
   const navGroups = !isStaff
-    ? [{ label: 'Patient', links: PATIENT_LINKS }]
+    ? [{ heading: 'Patient', links: PATIENT_LINKS }]
     : [
-        { label: 'Overview', links: OVERVIEW_LINKS },
-        { label: 'Clinic', links: CLINIC_LINKS },
-        { label: 'Workspace', links: [...(isOwner ? [] : [KNOWLEDGE_BASE_LINK]), ...(isAdmin ? [ADMIN_LINK] : [])] },
+        { heading: 'Overview', links: OVERVIEW_LINKS },
+        { heading: 'Clinic', links: CLINIC_LINKS },
+        { heading: 'Workspace', links: [...(isOwner ? [] : [KNOWLEDGE_BASE_LINK]), ...(isAdmin ? [ADMIN_LINK] : [])] },
       ].filter((group) => group.links.length > 0);
   const initials = (user?.fullName || 'U')
     .split(' ')
@@ -182,8 +184,8 @@ export default function AppLayout({ children }) {
 
         <nav className="app-nav" aria-label="Primary">
           {navGroups.map((group) => (
-            <div className="app-nav-group" key={group.label}>
-              <div className="app-nav-section app-sidebar-fade">{group.label}</div>
+            <div className="app-nav-group" key={group.heading}>
+              <div className="app-nav-section app-sidebar-fade">{group.heading}</div>
               {group.links.map((link) => (
                 <NavLink
                   key={link.to}
