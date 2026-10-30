@@ -131,6 +131,10 @@ export default function LandingPage() {
             style={{ backgroundImage: `url(${heroPhoto})` }}
           >
             <div className="hero-content">
+              <p className="hero-pill">
+                <span className="hero-pill-dot" aria-hidden="true" />
+                Online booking · Answers you can verify
+              </p>
               <h1 className="hero-title">
                 Your <span className="accent">Trusted Partner</span> in Dental Care
               </h1>
@@ -148,6 +152,11 @@ export default function LandingPage() {
                   </span>
                 </a>
               </div>
+              <ul className="hero-chips" aria-label="What you get">
+                <li>Real-time availability</li>
+                <li>No double-booking</li>
+                <li>Answers that cite their sources</li>
+              </ul>
             </div>
           </div>
         </header>

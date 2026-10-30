@@ -18,7 +18,7 @@
     radial-gradient(circle at 90% 10%, rgba(15, 157, 146, 0.06), transparent 42%),
     var(--l-bg);
   color: var(--l-text);
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
   overflow-x: clip;
   scroll-behavior: smooth;
 }
@@ -1150,4 +1150,374 @@
 
 :root[data-theme='dark'] .team-band {
   background: linear-gradient(135deg, #101d24, #0d151d);
+}
+
+
+/* =========================================================================
+   Visual polish layer (appended last so it refines the rules above).
+   Brand gradient, glass sticky nav, a lighter hero with trust chips, softer
+   cards, and a dark theme tinted deep teal with stronger text contrast.
+   Everything here is presentation only.
+   ========================================================================= */
+
+.landing {
+  --l-grad: linear-gradient(135deg, #2f6fed 0%, #0b8379 100%);
+  --l-glow: 0 12px 28px rgba(31, 120, 210, 0.28);
+  --l-radius: 22px;
+  --l-card-shadow: 0 1px 2px rgba(15, 40, 45, 0.04), 0 12px 32px rgba(15, 40, 45, 0.07);
+  --l-card-shadow-hover: 0 4px 12px rgba(15, 40, 45, 0.06), 0 22px 44px rgba(15, 40, 45, 0.12);
+}
+
+html {
+  scroll-padding-top: 88px;
+}
+
+/* Nav: sticky glass instead of a separate solid navy strip */
+
+.landing-nav {
+  position: sticky;
+  top: 0;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: saturate(170%) blur(16px);
+  -webkit-backdrop-filter: saturate(170%) blur(16px);
+  border-bottom: 1px solid var(--l-border);
+}
+
+.landing-nav-inner {
+  padding: 14px 40px;
+}
+
+.landing-nav .landing-brand {
+  color: var(--l-navy);
+}
+
+.landing-brand-mark {
+  background: #fff;
+  border: 1px solid var(--l-border);
+  box-shadow: 0 2px 8px rgba(15, 40, 45, 0.08);
+}
+
+.landing-nav .l-btn-ghost {
+  color: var(--l-blue-dark);
+  border-color: var(--l-border);
+}
+
+.landing-nav .l-btn-ghost:hover {
+  background: var(--l-bg-soft);
+  border-color: var(--l-blue);
+  color: var(--l-blue-dark);
+}
+
+/* Buttons */
+
+.landing .l-btn-primary {
+  background: var(--l-grad);
+  box-shadow: var(--l-glow);
+}
+
+.l-btn-primary:hover {
+  background: var(--l-grad);
+  filter: brightness(1.06);
+  box-shadow: 0 16px 34px rgba(31, 120, 210, 0.38);
+}
+
+.hero-cta-arrow,
+.hero-cta:hover .hero-cta-arrow {
+  background: var(--l-grad);
+}
+
+/* Hero: lighter, brand-tinted overlay so the photograph glows; gradient headline */
+
+.hero-photo::before {
+  background:
+    linear-gradient(100deg, rgba(4, 30, 44, 0.84) 0%, rgba(4, 30, 44, 0.56) 36%, rgba(4, 30, 44, 0.1) 68%, rgba(4, 30, 44, 0.28) 100%),
+    linear-gradient(0deg, rgba(4, 30, 44, 0.38) 0%, transparent 38%);
+}
+
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 22px;
+  padding: 7px 16px 7px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  animation: l-fade-up 0.5s ease both;
+}
+
+.hero-pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6df0d6;
+  box-shadow: 0 0 0 4px rgba(109, 240, 214, 0.25);
+}
+
+.hero-title {
+  font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+  font-size: clamp(40px, 5.2vw, 66px);
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+}
+
+.hero-title .accent {
+  background: linear-gradient(90deg, #9ad7ff 0%, #78f0d6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  list-style: none;
+  margin: 30px 0 0;
+  padding: 0;
+  animation: l-fade-up 0.5s ease 0.2s both;
+}
+
+.hero-chips li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px 8px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.hero-chips li::before {
+  content: '\2713';
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--l-grad);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* Section headers */
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+}
+
+.eyebrow::before {
+  content: '';
+  width: 28px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--l-grad);
+}
+
+.benefits-band .eyebrow::before {
+  display: none;
+}
+
+.section-heading {
+  font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+
+.check-mark {
+  background: var(--l-grad);
+}
+
+/* Cards */
+
+.service-card,
+.team-card {
+  border-radius: var(--l-radius);
+  box-shadow: var(--l-card-shadow);
+}
+
+.service-card:hover {
+  box-shadow: var(--l-card-shadow-hover);
+  border-color: rgba(47, 111, 237, 0.28);
+}
+
+.service-card-art {
+  height: 172px;
+}
+
+.service-card-img {
+  transition: transform 0.7s var(--l-ease);
+}
+
+.service-card:hover .service-card-img {
+  transform: scale(1.06);
+}
+
+.service-card:hover .service-card-art {
+  transform: none;
+}
+
+.team-card {
+  transition: transform 0.3s var(--l-ease), box-shadow 0.3s var(--l-ease), border-color 0.3s ease;
+}
+
+.team-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--l-card-shadow-hover);
+  border-color: rgba(18, 168, 160, 0.35);
+}
+
+.service-card-body p,
+.team-card-bio {
+  font-size: 14px;
+}
+
+/* The "why choose us" band picks up the teal-ink tint too */
+
+.benefits-band {
+  background: linear-gradient(135deg, #0a2433, #0f3a4c);
+}
+
+/* ---- Dark theme: deep teal-ink, brighter copy ---- */
+
+:root[data-theme='dark'] .landing {
+  --l-bg: #0a1319;
+  --l-bg-soft: #13232c;
+  --l-text: #eef6f7;
+  --l-text-muted: #aabdc3;
+  --l-border: #25363f;
+  --l-blue: #7aa2ff;
+  --l-blue-dark: #5b86ee;
+  --l-grad: linear-gradient(135deg, #2f6fed 0%, #0b8379 100%);
+  --l-glow: 0 12px 28px rgba(43, 191, 179, 0.22);
+  --l-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 14px 34px rgba(0, 0, 0, 0.42);
+  --l-card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.45), 0 24px 48px rgba(0, 0, 0, 0.5);
+
+  background:
+    radial-gradient(circle at 8% 0%, rgba(95, 140, 255, 0.13), transparent 40%),
+    radial-gradient(circle at 92% 8%, rgba(43, 191, 179, 0.12), transparent 42%),
+    var(--l-bg);
+}
+
+:root[data-theme='dark'] .landing-nav {
+  background: rgba(10, 19, 25, 0.74);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme='dark'] .landing-nav .landing-brand {
+  color: #fff;
+}
+
+:root[data-theme='dark'] .landing-nav .l-btn-ghost {
+  color: #e4f0f2;
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+:root[data-theme='dark'] .landing-nav .l-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #fff;
+  color: #fff;
+}
+
+:root[data-theme='dark'] .quickbook-band {
+  background: linear-gradient(120deg, #0d1e28, #0a161e);
+}
+
+:root[data-theme='dark'] .quickbook-band::before {
+  background: rgba(95, 140, 255, 0.2);
+}
+
+:root[data-theme='dark'] .quickbook-band::after {
+  background: rgba(43, 191, 179, 0.2);
+}
+
+:root[data-theme='dark'] .assistant-preview-card {
+  background: rgba(19, 35, 44, 0.7);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme='dark'] .assistant-preview-bubble-bot {
+  background: rgba(31, 52, 63, 0.9);
+}
+
+:root[data-theme='dark'] .about-band {
+  background: linear-gradient(135deg, #0d1d26, #0a151c);
+}
+
+:root[data-theme='dark'] .about-circle-1 {
+  background: linear-gradient(150deg, #13232c, #1b3340);
+}
+
+:root[data-theme='dark'] .ticker-strip {
+  background: linear-gradient(120deg, #0d1d26, #0a151c);
+  border-top-color: rgba(43, 191, 179, 0.2);
+  border-bottom-color: rgba(43, 191, 179, 0.2);
+}
+
+:root[data-theme='dark'] .services-band {
+  background: linear-gradient(180deg, #0a1319, #081017);
+}
+
+:root[data-theme='dark'] .service-card,
+:root[data-theme='dark'] .team-card {
+  background: rgba(19, 35, 44, 0.72);
+}
+
+:root[data-theme='dark'] .service-card-art,
+:root[data-theme='dark'] .team-card-photo {
+  background: linear-gradient(150deg, #13232c, #1b3340);
+}
+
+:root[data-theme='dark'] .team-band {
+  background: linear-gradient(135deg, #0b1f24, #09161b);
+}
+
+:root[data-theme='dark'] .benefits-band {
+  background: linear-gradient(135deg, #081a25, #0c2e3d);
+}
+
+/* ---- Small screens ---- */
+
+@media (max-width: 640px) {
+  .landing-nav-inner {
+    padding: 12px 18px;
+  }
+
+  .hero-photo {
+    min-height: 560px;
+  }
+
+  .hero-content {
+    padding: 36px 22px;
+  }
+
+  .hero-pill {
+    font-size: 12px;
+  }
+
+  .hero-chips li {
+    font-size: 12.5px;
+  }
 }
