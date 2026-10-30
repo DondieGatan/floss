@@ -4640,3 +4640,262 @@ body {
     flex: 1 1 100%;
   }
 }
+
+/* =========================================================================
+   Sidebar. A soft brand glow and a gentle shadow instead of a hard border, a
+   serif brand, a profile card with a ringed avatar and presence dot, nav links
+   with an icon tile and an active gradient pill, staff links in labelled
+   sections, and the footer controls grouped in one rounded panel. The
+   collapsed (icon-only) and mobile-drawer states keep working: labels fade out,
+   section labels become hairlines. Colours come from the theme tokens.
+   ========================================================================= */
+
+.app-sidebar {
+  background: var(--surface-solid);
+  border-right: 0;
+  box-shadow: 1px 0 0 var(--border), 18px 0 44px rgba(20, 20, 20, 0.05);
+}
+
+:root[data-theme='dark'] .app-sidebar {
+  box-shadow: 1px 0 0 var(--border), 18px 0 44px rgba(0, 0, 0, 0.3);
+}
+
+.app-sidebar::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 220px;
+  background:
+    radial-gradient(circle at 0% 0%, var(--accent-soft), transparent 70%),
+    radial-gradient(circle at 100% 20%, var(--accent-2-soft), transparent 70%);
+  pointer-events: none;
+}
+
+.app-sidebar > *:not(.app-sidebar-collapse-toggle) {
+  position: relative;
+}
+
+/* Brand */
+
+.app-sidebar-brand {
+  padding: 4px 8px 14px;
+}
+
+.app-sidebar-brand .brand {
+  gap: 10px;
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.app-sidebar-brand .brand-mark {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+/* Profile */
+
+.app-sidebar-profile {
+  gap: 12px;
+  margin: 0 0 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface-2);
+}
+
+.app-sidebar-avatar {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  box-shadow: 0 0 0 3px var(--surface-solid), 0 0 0 5px var(--accent-2-soft), var(--brand-glow);
+}
+
+.app-sidebar-avatar::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--success);
+  border: 2px solid var(--surface-solid);
+}
+
+.app-sidebar.collapsed .app-sidebar-profile {
+  padding: 8px 4px;
+  background: transparent;
+  border-color: transparent;
+}
+
+/* Navigation */
+
+.app-nav {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  gap: 0;
+  scrollbar-width: thin;
+}
+
+.app-nav-group + .app-nav-group {
+  margin-top: 6px;
+}
+
+.app-nav-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 12px 4px;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+}
+
+.app-nav-section::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border), transparent);
+}
+
+.app-nav-group:first-child .app-nav-section {
+  margin-top: 2px;
+}
+
+.app-sidebar.collapsed .app-nav-section {
+  height: 1px;
+  margin: 10px 16px;
+  padding: 0;
+  font-size: 0;
+  background: var(--border);
+}
+
+.app-sidebar.collapsed .app-nav-section::after {
+  display: none;
+}
+
+.app-nav-link {
+  gap: 12px;
+  margin: 1px 0;
+  padding: 4px 14px 4px 4px;
+  font-size: 14.5px;
+}
+
+.app-nav-link:hover {
+  background: var(--accent-soft);
+}
+
+.app-nav-icon {
+  width: 32px;
+  height: 32px;
+  padding: 7px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  background: var(--surface-2);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.app-nav-link:hover .app-nav-icon {
+  background: var(--surface-solid);
+  color: var(--accent);
+  transform: scale(1.06);
+}
+
+.app-nav-link.active {
+  background: var(--brand-grad);
+  box-shadow: var(--brand-glow);
+}
+
+.app-nav-link.active .app-nav-icon {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  transform: none;
+}
+
+.app-nav-link.active::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.app-sidebar.collapsed .app-nav-link {
+  padding: 4px;
+}
+
+.app-sidebar.collapsed .app-nav-link.active::after {
+  display: none;
+}
+
+/* Footer: one rounded panel for security, theme and logout */
+
+.app-sidebar-footer {
+  gap: 2px;
+  margin-top: 8px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: var(--surface-2);
+}
+
+.app-sidebar-footer .app-nav-link {
+  margin: 0;
+}
+
+.theme-toggle {
+  gap: 12px;
+  padding: 4px 14px 4px 4px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.theme-toggle:hover {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.theme-toggle:hover .app-nav-icon {
+  background: var(--surface-solid);
+  color: var(--accent);
+}
+
+.btn.app-sidebar-logout {
+  gap: 12px;
+  margin-top: 4px;
+  padding: 4px 14px 4px 4px;
+  border-radius: 999px;
+  background: var(--surface-solid);
+  font-size: 14.5px;
+}
+
+.btn.app-sidebar-logout .app-nav-icon {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.app-sidebar.collapsed .theme-toggle,
+.app-sidebar.collapsed .btn.app-sidebar-logout {
+  padding: 4px;
+}
+
+.app-sidebar.collapsed .app-sidebar-footer {
+  padding: 6px;
+}
+
+/* Collapse handle */
+
+.app-sidebar-collapse-toggle {
+  background: var(--brand-grad);
+  box-shadow: var(--shadow);
+}

@@ -17,8 +17,9 @@ const PATIENT_LINKS = [
   { to: '/appointments', icon: <CalendarIcon />, label: 'History' },
 ];
 
-const MANAGEMENT_LINKS = [
-  { to: '/dashboard', icon: <HouseIcon />, label: 'Dashboard' },
+const OVERVIEW_LINKS = [{ to: '/dashboard', icon: <HouseIcon />, label: 'Dashboard' }];
+
+const CLINIC_LINKS = [
   { to: '/manage/directory', icon: <PeopleIcon />, label: 'Directory' },
   { to: '/manage/appointments', icon: <ClipboardIcon />, label: 'All Appointments' },
   { to: '/manage/schedule', icon: <CalendarIcon />, label: 'Schedule' },
@@ -40,13 +41,15 @@ export default function AppLayout({ children }) {
   const isOwner = user?.role === 'owner';
   const isAdmin = user?.role === 'admin' || isOwner;
   const isStaff = user?.role === 'staff' || isAdmin;
-  const navLinks = !isStaff
-    ? PATIENT_LINKS
-    : isOwner
-    ? [...MANAGEMENT_LINKS, ADMIN_LINK]
-    : isAdmin
-    ? [...MANAGEMENT_LINKS, KNOWLEDGE_BASE_LINK, ADMIN_LINK]
-    : [...MANAGEMENT_LINKS, KNOWLEDGE_BASE_LINK];
+  // Patients get one short list; staff get three labelled sections (empty ones are dropped, so an
+  // owner, who has no Knowledge Base link, still gets "Workspace" with just Team & Roles).
+  const navGroups = !isStaff
+    ? [{ label: 'Patient', links: PATIENT_LINKS }]
+    : [
+        { label: 'Overview', links: OVERVIEW_LINKS },
+        { label: 'Clinic', links: CLINIC_LINKS },
+        { label: 'Workspace', links: [...(isOwner ? [] : [KNOWLEDGE_BASE_LINK]), ...(isAdmin ? [ADMIN_LINK] : [])] },
+      ].filter((group) => group.links.length > 0);
   const initials = (user?.fullName || 'U')
     .split(' ')
     .filter(Boolean)
@@ -178,18 +181,22 @@ export default function AppLayout({ children }) {
         </div>
 
         <nav className="app-nav" aria-label="Primary">
-          <div className="app-nav-section app-sidebar-fade">{isStaff ? 'Staff' : 'Patient'}</div>
-          {navLinks.map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              onClick={closeMobileNav}
-              title={collapsed ? link.label : undefined}
-              className={({ isActive }) => `app-nav-link${isActive ? ' active' : ''}`}
-            >
-              <span className="app-nav-icon" aria-hidden="true">{link.icon}</span>
-              <span className="app-sidebar-fade">{link.label}</span>
-            </NavLink>
+          {navGroups.map((group) => (
+            <div className="app-nav-group" key={group.label}>
+              <div className="app-nav-section app-sidebar-fade">{group.label}</div>
+              {group.links.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  onClick={closeMobileNav}
+                  title={collapsed ? link.label : undefined}
+                  className={({ isActive }) => `app-nav-link${isActive ? ' active' : ''}`}
+                >
+                  <span className="app-nav-icon" aria-hidden="true">{link.icon}</span>
+                  <span className="app-sidebar-fade">{link.label}</span>
+                </NavLink>
+              ))}
+            </div>
           ))}
         </nav>
 
