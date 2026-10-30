@@ -3090,6 +3090,8 @@ body {
 }
 
 .empty-state-icon {
+  display: inline-grid;
+  place-items: center;
   width: 64px;
   height: 64px;
   border-radius: 20px;
