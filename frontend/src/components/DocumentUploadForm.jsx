@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { api, ApiError } from '../api/client';
+import { UploadIcon } from './icons';
 
 export default function DocumentUploadForm({ onUploaded }) {
   const fileInputRef = useRef(null);
@@ -26,7 +27,14 @@ export default function DocumentUploadForm({ onUploaded }) {
   }
 
   return (
-    <div className="upload-form">
+    <div className="upload-form upload-zone">
+      <div className="upload-zone-icon" aria-hidden="true">
+        <UploadIcon />
+      </div>
+      <div className="upload-zone-text">
+        <p className="upload-zone-title">Add to the knowledge base</p>
+        <p className="upload-hint">PDF or TXT, up to 20MB.</p>
+      </div>
       <label className="btn btn-primary upload-btn">
         {uploading ? 'Uploading…' : '+ Upload document'}
         <input
@@ -38,9 +46,8 @@ export default function DocumentUploadForm({ onUploaded }) {
           hidden
         />
       </label>
-      <p className="upload-hint">PDF or TXT, up to 20MB.</p>
       {error && (
-        <div className="form-error" role="alert">
+        <div className="form-error upload-zone-error" role="alert">
           {error}
         </div>
       )}

@@ -5,6 +5,7 @@ import { api } from '../api/client';
 import AppLayout from '../components/AppLayout';
 import DocumentUploadForm from '../components/DocumentUploadForm';
 import DocumentCard from '../components/DocumentCard';
+import { ChatIcon, FileIcon, CheckCircleIcon } from '../components/icons';
 
 export default function DocumentsPage() {
   const { user } = useAuth();
@@ -38,25 +39,38 @@ export default function DocumentsPage() {
   return (
     <AppLayout>
       <div className="page-body">
-        <h1 className="page-title">Ask Floss Clinic</h1>
-        <p className="page-subtitle">
-          Chat with the clinic's knowledge base — policies, hours, the dentist directory, and general dental
-          questions. Answers drawn from our own materials are cited; Floss Clinic will never offer medical
-          advice or diagnose your symptoms.
-        </p>
-
-        <div className="documents-toolbar">
-          {isStaff ? (
-            <DocumentUploadForm onUploaded={handleUploaded} />
-          ) : (
-            <span className="page-subtitle" style={{ margin: 0 }}>
-              {documents.length} document{documents.length === 1 ? '' : 's'} available
-            </span>
-          )}
-          <button className="btn btn-secondary" onClick={handleChatAllDocuments} disabled={readyCount === 0}>
-            💬 Start a conversation
+        <div className="kb-hero">
+          <div className="kb-hero-copy">
+            <h1 className="page-title">Ask Floss Clinic</h1>
+            <p className="page-subtitle">
+              Chat with the clinic's knowledge base — policies, hours, the dentist directory, and general dental
+              questions. Answers drawn from our own materials are cited; Floss Clinic will never offer medical
+              advice or diagnose your symptoms.
+            </p>
+          </div>
+          <button className="btn btn-primary kb-hero-cta" onClick={handleChatAllDocuments} disabled={readyCount === 0}>
+            <ChatIcon /> Start a conversation
           </button>
         </div>
+
+        <div className="stat-row kb-stats">
+          <div className="stat-card">
+            <div className="stat-icon" aria-hidden="true"><FileIcon /></div>
+            <div className="stat-body">
+              <p className="stat-value">{loading ? '–' : documents.length}</p>
+              <p className="stat-label">{documents.length === 1 ? 'Document' : 'Documents'}</p>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon stat-icon-success" aria-hidden="true"><CheckCircleIcon /></div>
+            <div className="stat-body">
+              <p className="stat-value">{loading ? '–' : readyCount}</p>
+              <p className="stat-label">Ready to answer</p>
+            </div>
+          </div>
+        </div>
+
+        {isStaff && <DocumentUploadForm onUploaded={handleUploaded} />}
 
         {loading ? (
           <div role="status" aria-live="polite">
