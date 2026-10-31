@@ -2526,10 +2526,9 @@ html {
 }
 
 /* =========================================================================
-   Footer. A faint dot grid and a bright top edge over the slate gradient, a
-   giant outlined "Floss" wordmark rising from the bottom, link columns with a
-   small accent bar under each heading and links that slide on hover, and a
-   round-arrow back-to-top button. The wordmark is decoration only.
+   Footer. A faint dot grid and a bright top edge over the slate gradient, link
+   columns with a small accent bar under each heading and links that slide on
+   hover, and a round-arrow back-to-top button.
    ========================================================================= */
 
 .landing-footer {
@@ -2538,25 +2537,6 @@ html {
     radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1.5px) 0 0 / 22px 22px,
     linear-gradient(160deg, #2b4a55 0%, #141414 78%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
-}
-
-.landing-footer .landing-section::after {
-  content: 'Floss' / '';
-  position: absolute;
-  left: 50%;
-  bottom: -0.36em;
-  z-index: -1;
-  transform: translateX(-50%);
-  font-family: var(--font-display);
-  font-size: clamp(130px, 24vw, 320px);
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.04em;
-  color: transparent;
-  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.14);
-  white-space: nowrap;
-  pointer-events: none;
-  user-select: none;
 }
 
 .footer-top {
@@ -2604,7 +2584,7 @@ html {
 
 .footer-bottom {
   padding-top: 24px;
-  padding-bottom: clamp(70px, 13vw, 190px);
+  padding-bottom: 8px;
 }
 
 .footer-top-link {
@@ -2627,6 +2607,17 @@ html {
   transform: translateY(-2px);
 }
 
+/* On a tablet the brand and the link columns stack, so the columns share the full width */
+
+@media (min-width: 641px) and (max-width: 900px) {
+  .footer-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    width: 100%;
+    gap: 36px 32px;
+  }
+}
+
 @media (max-width: 640px) {
   .landing-footer {
     padding-top: 60px;
@@ -2634,10 +2625,6 @@ html {
 
   .footer-links {
     gap: 36px 44px;
-  }
-
-  .footer-bottom {
-    padding-bottom: 90px;
   }
 }
 

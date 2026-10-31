@@ -5508,3 +5508,31 @@ body {
     transform: none;
   }
 }
+
+/* =========================================================================
+   Narrow-screen fixes. The dashboard's background glow reaches 24px past the page on each side,
+   which made phones scroll sideways, so the page clips it horizontally (vertically it still
+   bleeds). On the very narrowest phones the chat header's back link and two buttons shrink a
+   little more so they still fit one row.
+   ========================================================================= */
+
+.dashboard-page {
+  overflow-x: clip;
+}
+
+@media (max-width: 380px) {
+  .chat-page-header {
+    gap: 4px;
+    padding: 0 8px;
+  }
+
+  .chat-page-header .back-link,
+  .chat-page-header .btn {
+    padding: 6px 8px;
+    font-size: 11.5px;
+  }
+
+  .chat-page-header .page-header-actions {
+    gap: 4px;
+  }
+}
