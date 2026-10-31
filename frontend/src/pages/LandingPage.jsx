@@ -7,6 +7,14 @@ import AssistantAvatar from '../components/AssistantAvatar';
 import PublicHeader from '../components/PublicHeader';
 import PublicFooter from '../components/PublicFooter';
 import { ToothIcon, CalendarIcon, ChatIcon } from '../components/icons';
+import {
+  ToothbrushIcon,
+  BracesIcon,
+  SmileIcon,
+  RootCanalIcon,
+  GumIcon,
+  ScalpelIcon,
+} from '../components/ServiceIcons';
 import { resolveDoctorPhoto } from '../data/doctorPhotos';
 import heroPhoto from '../assets/Top_background.jpg';
 import aboutPhoto from '../assets/Third_Page.jpg';
@@ -16,15 +24,15 @@ import pediatricPhoto from '../assets/Pediatric_Dentistry.jpg';
 import benefitsPhoto from '../assets/Second_Page.jpg';
 
 const SERVICES = [
-  { icon: '🪥', photo: generalPhoto, title: 'General Dentistry', text: 'Routine cleanings, restorative fillings, and preventive care to maintain a healthy smile year-round.' },
-  { icon: '😁', photo: orthoPhoto, title: 'Orthodontics', text: 'Traditional braces and clear aligners for precise, lasting bite correction — for teens and adults.' },
-  { icon: '👶', photo: pediatricPhoto, title: 'Pediatric Dentistry', text: 'Gentle, age-appropriate dental care designed specifically for children.' },
+  { icon: <ToothbrushIcon />, photo: generalPhoto, title: 'General Dentistry', text: 'Routine cleanings, restorative fillings, and preventive care to maintain a healthy smile year-round.' },
+  { icon: <BracesIcon />, photo: orthoPhoto, title: 'Orthodontics', text: 'Traditional braces and clear aligners for precise, lasting bite correction — for teens and adults.' },
+  { icon: <SmileIcon />, photo: pediatricPhoto, title: 'Pediatric Dentistry', text: 'Gentle, age-appropriate dental care designed specifically for children.' },
 ];
 
 const SPECIALTIES = [
-  { icon: '🩺', title: 'Endodontics', text: 'Root canal therapy and pulp care.' },
-  { icon: '🦷', title: 'Periodontics', text: 'Gum disease treatment and gum health.' },
-  { icon: '⚕️', title: 'Oral Surgery', text: 'Extractions, wisdom teeth, and jaw surgery.' },
+  { icon: <RootCanalIcon />, title: 'Endodontics', text: 'Root canal therapy and pulp care.' },
+  { icon: <GumIcon />, title: 'Periodontics', text: 'Gum disease treatment and gum health.' },
+  { icon: <ScalpelIcon />, title: 'Oral Surgery', text: 'Extractions, wisdom teeth, and jaw surgery.' },
 ];
 
 const STEPS = [
@@ -46,12 +54,12 @@ const STEPS = [
 ];
 
 const TICKER_ITEMS = [
-  { icon: '🪥', label: 'General Dentistry' },
-  { icon: '😁', label: 'Orthodontics' },
-  { icon: '🩺', label: 'Endodontics' },
-  { icon: '🦷', label: 'Periodontics' },
-  { icon: '⚕️', label: 'Oral Surgery' },
-  { icon: '👶', label: 'Pediatric Dentistry' },
+  { icon: <ToothbrushIcon />, label: 'General Dentistry' },
+  { icon: <BracesIcon />, label: 'Orthodontics' },
+  { icon: <RootCanalIcon />, label: 'Endodontics' },
+  { icon: <GumIcon />, label: 'Periodontics' },
+  { icon: <ScalpelIcon />, label: 'Oral Surgery' },
+  { icon: <SmileIcon />, label: 'Pediatric Dentistry' },
 ];
 
 function initials(name) {
