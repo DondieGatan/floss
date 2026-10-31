@@ -2524,3 +2524,127 @@ html {
     margin-top: -28px;
   }
 }
+
+/* =========================================================================
+   Footer. A faint dot grid and a bright top edge over the slate gradient, a
+   giant outlined "Floss" wordmark rising from the bottom, link columns with a
+   small accent bar under each heading and links that slide on hover, and a
+   round-arrow back-to-top button. The wordmark is decoration only.
+   ========================================================================= */
+
+.landing-footer {
+  padding: 84px 0 30px;
+  background:
+    radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1.5px) 0 0 / 22px 22px,
+    linear-gradient(160deg, #2b4a55 0%, #141414 78%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.landing-footer .landing-section::after {
+  content: 'Floss' / '';
+  position: absolute;
+  left: 50%;
+  bottom: -0.36em;
+  z-index: -1;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: clamp(130px, 24vw, 320px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.14);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+.footer-top {
+  gap: 48px;
+  padding-bottom: 44px;
+  border-bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22) 20%, rgba(255, 255, 255, 0.22) 80%, transparent) 0 100% / 100% 1px no-repeat;
+}
+
+.footer-brand-sub {
+  max-width: 360px;
+  font-size: 14.5px;
+}
+
+.footer-links {
+  gap: 64px;
+}
+
+.footer-col h4 {
+  position: relative;
+  margin-bottom: 22px;
+  padding-bottom: 12px;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.footer-col h4::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 26px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #8dbec2, rgba(141, 190, 194, 0));
+}
+
+.footer-col a {
+  margin-bottom: 13px;
+  transition: color 0.2s ease, background-size 0.3s ease, transform 0.25s var(--l-ease);
+}
+
+.footer-col a:hover {
+  transform: translateX(5px);
+}
+
+.footer-bottom {
+  padding-top: 24px;
+  padding-bottom: clamp(70px, 13vw, 190px);
+}
+
+.footer-top-link {
+  gap: 10px;
+  padding: 5px 6px 5px 16px;
+}
+
+.footer-top-link span {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  transition: background 0.2s ease, transform 0.25s var(--l-ease);
+}
+
+.footer-top-link:hover span {
+  background: rgba(255, 255, 255, 0.26);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 640px) {
+  .landing-footer {
+    padding-top: 60px;
+  }
+
+  .footer-links {
+    gap: 36px 44px;
+  }
+
+  .footer-bottom {
+    padding-bottom: 90px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-col a:hover,
+  .footer-top-link:hover,
+  .footer-top-link:hover span {
+    transform: none;
+  }
+}
